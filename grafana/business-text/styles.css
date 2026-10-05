@@ -1,0 +1,23 @@
+/* Business Text panel → "Styles"
+ * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)
+ * and block elements (U+2580–259F); mixed fonts break the grid. */
+.tf {
+  font-family: "JetBrains Mono", "Cascadia Mono", "Fira Code", "DejaVu Sans Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.25;
+  margin: 0;
+  padding: 8px 10px;
+  white-space: pre;
+  color: #c9ced6;
+  background: #0f1218;
+}
+.tf .tf-edge { color: #e8a06a; font-weight: 700; }
+.tf .tf-dim { color: #5c6370; }
+.tf .tf-ok { color: #86d28a; }
+.tf .tf-warn { color: #e8a06a; }
+.tf .tf-crit { color: #e06c75; }
+
+/* Matrix variant: add class "tf tf-matrix" to the <pre> instead */
+.tf-matrix { color: #00c017; background: #000; }
+.tf-matrix .tf-edge, .tf-matrix .tf-ok { color: #00ff41; }
+.tf-matrix .tf-dim { color: #006a0c; }

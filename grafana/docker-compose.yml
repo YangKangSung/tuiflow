@@ -1,0 +1,29 @@
+# Local Grafana for developing tuiflow panels against synthetic data.
+#
+#   cd grafana && docker compose up
+#   → http://localhost:3000/d/tuiflow-demo/?theme=matrix
+#
+# Anonymous admin + no login form: local development only.
+services:
+  grafana:
+    image: grafana/grafana:12.2.0 # bump freely; Business Text 6.x needs Grafana 11+
+    ports:
+      - "3000:3000"
+    environment:
+      GF_INSTALL_PLUGINS: marcusolsson-dynamictext-panel
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      # Business Text sanitises HTML unless this is off; <pre>/<span class> survive
+      # either way, but iframes (ttyd, textual-serve) need it off.
+      GF_PANELS_DISABLE_SANITIZE_HTML: "true"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_FEATURE_TOGGLES_ENABLE: extraThemes,grafanaconThemes
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning:ro
+      # Served at /public/tuiflow.js so Business Text can `import()` it.
+      - ../src/tuiflow.js:/usr/share/grafana/public/tuiflow.js:ro
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:

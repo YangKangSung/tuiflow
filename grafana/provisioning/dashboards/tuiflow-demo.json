@@ -1,0 +1,193 @@
+{
+  "uid": "tuiflow-demo",
+  "title": "tuiflow · TUI-style panels (TestData)",
+  "description": "Retro terminal look rendered as text inside Business Text panels. Data is synthetic.",
+  "tags": [
+    "tuiflow",
+    "demo"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "open with matrix theme",
+      "type": "link",
+      "url": "/d/tuiflow-demo/?theme=matrix",
+      "targetBlank": false,
+      "icon": "external link"
+    },
+    {
+      "title": "kiosk + matrix",
+      "type": "link",
+      "url": "/d/tuiflow-demo/?theme=matrix&kiosk",
+      "targetBlank": true,
+      "icon": "external link"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "api-gateway · flow",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "refId": "A",
+          "scenarioId": "random_walk",
+          "alias": "rps",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "refId": "B",
+          "scenarioId": "random_walk",
+          "alias": "p95_ms",
+          "startValue": 80,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        },
+        {
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "refId": "C",
+          "scenarioId": "random_walk",
+          "alias": "err_pct",
+          "startValue": 0.4,
+          "spread": 0.3,
+          "noise": 0.1,
+          "min": 0,
+          "max": 5
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">┌ api-gateway ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐\n┆ rps    {{tfBar (tfLast (lookup data 0) \"rps\") 600 14}} {{tfPadL (tfFixed (tfLast (lookup data 0) \"rps\") 0) 5}} {{tfStatus (tfLast (lookup data 0) \"rps\") 450 550}}             ┆\n┆ p95    {{tfBar (tfLast (lookup data 1) \"p95_ms\") 250 14}} {{tfPadL (tfFixed (tfLast (lookup data 1) \"p95_ms\") 0) 3}}ms {{tfStatus (tfLast (lookup data 1) \"p95_ms\") 150 200}}             ┆\n┆ err    {{tfBar (tfLast (lookup data 2) \"err_pct\") 5 14}} {{tfPadL (tfFixed (tfLast (lookup data 2) \"err_pct\") 2) 4}}% {{tfStatus (tfLast (lookup data 2) \"err_pct\") 1 3}}             ┆\n┆                                                ┆\n┆ rps    {{tfSpark (lookup data 0) \"rps\" 30}}          ┆\n┆ p95    {{tfSpark (lookup data 1) \"p95_ms\" 30}}          ┆\n┆ err    {{tfSpark (lookup data 2) \"err_pct\" 30}}          ┆\n└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘\n         <span class=\"tf-edge\"></span> <span class=\"tf-dim\">[orders-svc]   packet speed follows rps · range {{tfPadL (tfFixed (tfAvg (lookup data 0) \"rps\") 0) 4}} avg / {{tfPadL (tfFixed (tfMax (lookup data 0) \"rps\") 0) 4}} max</span>\n</pre>\n",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Loads the tuiflow core from Grafana's static folder (mounted there by\n// grafana/docker-compose.yml) and registers Handlebars helpers that the\n// Content template (content.hbs) uses.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\nreturn import(\"/public/tuiflow.js\").then(() => {\n  const tf = window.tuiflow;\n  const hb = context.handlebars;\n\n  // {{tfBar value max width}} → \"█████▎░░░░\"\n  hb.registerHelper(\"tfBar\", (value, max, width) => tf.bar(Number(value) / Number(max), Number(width)));\n\n  // {{tfSpark rows \"field\" width}} → \"▁▂▃▅▇\" (long series are resampled to `width`)\n  hb.registerHelper(\"tfSpark\", (rows, field, width) =>\n    tf.sparkline((rows || []).map((r) => Number(r[field])), { width: Number(width) || undefined })\n  );\n\n  // {{tfLast rows \"field\"}} → last value of a column\n  hb.registerHelper(\"tfLast\", (rows, field) => (rows && rows.length ? rows[rows.length - 1][field] : \"\"));\n\n  // {{tfMax rows \"field\"}} / {{tfAvg rows \"field\"}}\n  hb.registerHelper(\"tfMax\", (rows, field) => Math.max(...(rows || []).map((r) => Number(r[field])).filter(Number.isFinite)));\n  hb.registerHelper(\"tfAvg\", (rows, field) => {\n    const v = (rows || []).map((r) => Number(r[field])).filter(Number.isFinite);\n    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : NaN;\n  });\n\n  // {{tfFixed value decimals}} / {{tfPadL value width}} / {{tfPadR value width}}\n  hb.registerHelper(\"tfFixed\", (value, decimals) => Number(value).toFixed(Number(decimals) || 0));\n  hb.registerHelper(\"tfPadL\", (value, width) => tf.padLeft(value, Number(width)));\n  hb.registerHelper(\"tfPadR\", (value, width) => tf.padRight(value, Number(width)));\n\n  // {{tfStatus value warn crit}} → \"[ok]\" | \"[warn]\" | \"[crit]\" with a colour class\n  hb.registerHelper(\"tfStatus\", (value, warn, crit) => {\n    const v = Number(value);\n    const cls = v >= Number(crit) ? \"tf-crit\" : v >= Number(warn) ? \"tf-warn\" : \"tf-ok\";\n    const label = cls === \"tf-crit\" ? \"[crit]\" : cls === \"tf-warn\" ? \"[warn]\" : \"[ok]  \";\n    return new hb.SafeString('<span class=\"' + cls + '\">' + label + \"</span>\");\n  });\n\n  // {{tfPhase status width}} → kubernetes pod phase, coloured, padded\n  hb.registerHelper(\"tfPhase\", (status, width) => {\n    const s = String(status || \"\");\n    const cls = /Running|Succeeded/.test(s) ? \"tf-ok\" : /Pending|ContainerCreating|Terminating/.test(s) ? \"tf-warn\" : \"tf-crit\";\n    return new hb.SafeString('<span class=\"' + cls + '\">' + tf.escapeHtml(tf.padRight(s, Number(width) || s.length)) + \"</span>\");\n  });\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Animates the packet on the dashed edge under the box. Runs once per render\n// with `this` persisted between renders; the returned function is called by\n// the panel as cleanup before the next render, so timers never leak.\n\nconst tf = window.tuiflow;\nconst edge = context.element.querySelector(\".tf-edge\");\nif (!tf || !edge) {\n  return;\n}\n\n// Speed follows the latest rps value; fall back to 1.\n// In \"All data\" mode context.data is an array of frames (each an array of\n// rows); in \"All rows\" mode it is the rows array itself.\nconst frames = Array.isArray(context.data) ? context.data : [];\nconst rows = Array.isArray(frames[0]) ? frames[0] : frames;\nconst last = rows.length ? Number(rows[rows.length - 1].rps) : NaN;\nconst speed = Number.isFinite(last) ? 0.5 + last / 600 : 1;\n\nreturn tf.animate((tick) => {\n  edge.textContent = tf.edge(16, tick, { speed });\n}, 8);\n",
+        "styles": "/* Business Text panel → \"Styles\"\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  color: #c9ced6;\n  background: #0f1218;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { color: #5c6370; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n\n/* Matrix variant: add class \"tf tf-matrix\" to the <pre> instead */\n.tf-matrix { color: #00c017; background: #000; }\n.tf-matrix .tf-edge, .tf-matrix .tf-ok { color: #00ff41; }\n.tf-matrix .tf-dim { color: #006a0c; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      }
+    },
+    {
+      "id": 2,
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "pods · namespace shop",
+      "gridPos": {
+        "x": 10,
+        "y": 0,
+        "w": 14,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "refId": "A",
+          "scenarioId": "csv_content",
+          "csvContent": "pod,ready,restarts,cpu_m,mem_mi,status\ningress-nginx-controller-6b8f-x2k1,1/1,0,120,210,Running\ningress-nginx-controller-6b8f-p9zq,1/1,0,98,205,Running\napi-gateway-7d9f8c-4hv2x,1/1,0,310,540,Running\napi-gateway-7d9f8c-m8ql7,1/1,1,290,512,Running\norders-svc-5c6b7d-abc12,1/1,0,180,420,Running\norders-svc-5c6b7d-def34,1/1,0,175,415,Running\norders-svc-5c6b7d-ghi56,1/1,0,190,430,Running\norders-svc-5c6b7d-jkl78,0/1,0,0,0,Pending\npayments-svc-69fd4-q2wer,1/1,3,220,980,Running\npayments-svc-69fd4-t5yui,0/1,7,15,1010,CrashLoopBackOff\npostgres-0,1/1,0,410,1800,Running"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "allRows",
+        "content": "<pre class=\"tf\">POD                                 READY RST  CPU(m)         MEM(Mi)         PHASE\n{{#each data}}\n{{tfPadR pod 35}} {{tfPadR ready 5}} {{tfPadL restarts 3}}  {{tfBar cpu_m 500 8}} {{tfPadL cpu_m 4}}  {{tfBar mem_mi 2048 8}} {{tfPadL mem_mi 5}}  {{tfPhase status 16}}\n{{/each}}\n<span class=\"tf-dim\">{{data.length}} pods · source: TestData csv_content (replace with kube-state-metrics / Infinity)</span>\n</pre>\n",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Loads the tuiflow core from Grafana's static folder (mounted there by\n// grafana/docker-compose.yml) and registers Handlebars helpers that the\n// Content template (content.hbs) uses.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\nreturn import(\"/public/tuiflow.js\").then(() => {\n  const tf = window.tuiflow;\n  const hb = context.handlebars;\n\n  // {{tfBar value max width}} → \"█████▎░░░░\"\n  hb.registerHelper(\"tfBar\", (value, max, width) => tf.bar(Number(value) / Number(max), Number(width)));\n\n  // {{tfSpark rows \"field\" width}} → \"▁▂▃▅▇\" (long series are resampled to `width`)\n  hb.registerHelper(\"tfSpark\", (rows, field, width) =>\n    tf.sparkline((rows || []).map((r) => Number(r[field])), { width: Number(width) || undefined })\n  );\n\n  // {{tfLast rows \"field\"}} → last value of a column\n  hb.registerHelper(\"tfLast\", (rows, field) => (rows && rows.length ? rows[rows.length - 1][field] : \"\"));\n\n  // {{tfMax rows \"field\"}} / {{tfAvg rows \"field\"}}\n  hb.registerHelper(\"tfMax\", (rows, field) => Math.max(...(rows || []).map((r) => Number(r[field])).filter(Number.isFinite)));\n  hb.registerHelper(\"tfAvg\", (rows, field) => {\n    const v = (rows || []).map((r) => Number(r[field])).filter(Number.isFinite);\n    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : NaN;\n  });\n\n  // {{tfFixed value decimals}} / {{tfPadL value width}} / {{tfPadR value width}}\n  hb.registerHelper(\"tfFixed\", (value, decimals) => Number(value).toFixed(Number(decimals) || 0));\n  hb.registerHelper(\"tfPadL\", (value, width) => tf.padLeft(value, Number(width)));\n  hb.registerHelper(\"tfPadR\", (value, width) => tf.padRight(value, Number(width)));\n\n  // {{tfStatus value warn crit}} → \"[ok]\" | \"[warn]\" | \"[crit]\" with a colour class\n  hb.registerHelper(\"tfStatus\", (value, warn, crit) => {\n    const v = Number(value);\n    const cls = v >= Number(crit) ? \"tf-crit\" : v >= Number(warn) ? \"tf-warn\" : \"tf-ok\";\n    const label = cls === \"tf-crit\" ? \"[crit]\" : cls === \"tf-warn\" ? \"[warn]\" : \"[ok]  \";\n    return new hb.SafeString('<span class=\"' + cls + '\">' + label + \"</span>\");\n  });\n\n  // {{tfPhase status width}} → kubernetes pod phase, coloured, padded\n  hb.registerHelper(\"tfPhase\", (status, width) => {\n    const s = String(status || \"\");\n    const cls = /Running|Succeeded/.test(s) ? \"tf-ok\" : /Pending|ContainerCreating|Terminating/.test(s) ? \"tf-warn\" : \"tf-crit\";\n    return new hb.SafeString('<span class=\"' + cls + '\">' + tf.escapeHtml(tf.padRight(s, Number(width) || s.length)) + \"</span>\");\n  });\n});\n",
+        "afterRender": "",
+        "styles": "/* Business Text panel → \"Styles\"\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  color: #c9ced6;\n  background: #0f1218;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { color: #5c6370; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n\n/* Matrix variant: add class \"tf tf-matrix\" to the <pre> instead */\n.tf-matrix { color: #00c017; background: #000; }\n.tf-matrix .tf-edge, .tf-matrix .tf-ok { color: #00ff41; }\n.tf-matrix .tf-dim { color: #006a0c; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      }
+    },
+    {
+      "id": 3,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 4
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**tuiflow** — every panel above is plain text: box drawing, `█▓░` bars, `▁▂▃▅▇` sparklines and a `.o@` packet travelling on a dashed edge, rendered by a Business Text panel.\n\n- Full terminal look: reopen this dashboard with [`?theme=matrix`](/d/tuiflow-demo/?theme=matrix) (hidden built-in Grafana theme: monospace font, no rounded corners).\n- Sources: `grafana/business-text/*.{js,hbs,css}` → `node grafana/build-dashboard.js` regenerates this JSON. Core library: `/public/tuiflow.js`.\n- Swap TestData for Prometheus: keep the aliases `rps`, `p95_ms`, `err_pct` as legend formats and the template keeps working."
+      }
+    }
+  ]
+}

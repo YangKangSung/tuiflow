@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>tuiflow · k8s cluster flow (simulated)</title>
+<style>
+  /* Self-hosted so the demo works offline (air-gapped presentation PCs).
+     Every glyph we draw (box drawing, block elements, ╌ ┆ ▶) must come from
+     the SAME font, otherwise cell widths differ and the grid falls apart. */
+  @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
+  :root {
+    --bg: #0f1218; --fg: #c9ced6; --dim: #5c6370; --border: #3a4150;
+    --orange: #e8a06a; --blue: #8fb3ff; --green: #86d28a; --red: #e06c75; --gray: #9aa0a6;
+    --bar: #e8a06a; --packet: #e8a06a; --status-bg: #171b23;
+  }
+  [data-theme="matrix"] {
+    --bg: #000000; --fg: #00c017; --dim: #006a0c; --border: #008910;
+    --orange: #00ff41; --blue: #7cff8e; --green: #00ff41; --red: #b6ff00; --gray: #008910;
+    --bar: #00ff41; --packet: #00ff41; --status-bg: #040804;
+  }
+  [data-theme="amber"] {
+    --bg: #0a0700; --fg: #ffb000; --dim: #7a5400; --border: #a86f00;
+    --orange: #ffd27a; --blue: #ffc34d; --green: #ffe08a; --red: #ff8c42; --gray: #a86f00;
+    --bar: #ffd27a; --packet: #ffd27a; --status-bg: #130d00;
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); }
+  body { font-family: "JetBrains Mono", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; display: flex; flex-direction: column; }
+  .toolbar { display: flex; gap: 10px; align-items: center; padding: 6px 10px; font-size: 12px; color: var(--dim); border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  .toolbar select, .toolbar button, .toolbar label { font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--border); padding: 2px 6px; cursor: pointer; }
+  .toolbar label { display: inline-flex; gap: 4px; align-items: center; }
+  .toolbar .spacer { flex: 1; }
+  .toolbar kbd { color: var(--dim); }
+  .screen-wrap { position: relative; flex: 1 1 auto; display: flex; overflow: auto; }
+  /* margin:auto centres without clipping the left edge when the grid is wider than the viewport */
+  pre#screen { margin: auto; white-space: pre; line-height: 1.25; font-size: 13px; font-family: "JetBrains Mono", monospace; }
+  .c-border { color: var(--border); }
+  .c-dim { color: var(--dim); }
+  .c-orange { color: var(--orange); }
+  .c-blue { color: var(--blue); }
+  .c-green { color: var(--green); }
+  .c-red { color: var(--red); }
+  .c-gray { color: var(--gray); }
+  .c-bar { color: var(--bar); }
+  .c-packet { color: var(--packet); font-weight: 700; }
+  .c-ok { color: var(--green); }
+  .c-warn { color: var(--red); }
+  .c-status { color: var(--dim); background: var(--status-bg); }
+  .c-title { color: var(--fg); font-weight: 700; }
+  /* CRT overlay: scanlines + vignette + phosphor glow + subtle flicker */
+  body.crt pre#screen { text-shadow: 0 0 2px currentColor, 0 0 6px rgba(255,255,255,0.08); animation: flicker 4s infinite; }
+  body.crt .screen-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0 1px, transparent 1px 3px); }
+  body.crt .screen-wrap::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%); z-index: 1; }
+  @keyframes flicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 48% { opacity: 0.93; } 49% { opacity: 1; } 83% { opacity: 1; } 84% { opacity: 0.96; } 85% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { body.crt pre#screen { animation: none; } }
+  #measure { position: absolute; visibility: hidden; white-space: pre; font-size: 100px; }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>tuiflow demo</span>
+    <select id="theme" title="theme (T)">
+      <option value="video">video palette</option>
+      <option value="matrix">matrix (green)</option>
+      <option value="amber">amber</option>
+    </select>
+    <label><input type="checkbox" id="crt" /> CRT <kbd>(C)</kbd></label>
+    <select id="fps" title="frames per second">
+      <option value="4">4 fps</option>
+      <option value="8" selected>8 fps</option>
+      <option value="16">16 fps</option>
+    </select>
+    <button id="pause" title="space">pause</button>
+    <button id="copy" title="copy current frame as plain text">copy as text</button>
+    <button id="full" title="F">fullscreen</button>
+    <span class="spacer"></span>
+    <span>data: simulated random walk · 100×36 cells · <a href="https://github.com/YangKangSung/tuiflow" style="color: var(--dim)">tuiflow</a></span>
+  </div>
+  <div class="screen-wrap"><pre id="screen"></pre></div>
+  <span id="measure">0000000000</span>
+
+  <script src="../src/tuiflow.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    const tf = window.tuiflow;
+    const COLS = 100, ROWS = 36, BOX_W = 26;
+    const screen = new tf.Screen(COLS, ROWS);
+    const el = document.getElementById("screen");
+
+    // ---- simulated cluster state ------------------------------------------
+    const walk = (v, step, min, max) => Math.min(max, Math.max(min, v + (Math.random() - 0.5) * step));
+    const hist = (n, base) => Array.from({ length: n }, (_, i) => base + Math.sin(i / 2) * base * 0.3);
+    const state = {
+      tick: 0,
+      ingress: { rps: 812, err: 1.2, pods: [2, 2] },
+      gateway: { p95: 48, err: 0.2, cpu: hist(12, 55) },
+      orders: { p95: 92, pods: [4, 4], cpu: hist(12, 40) },
+      payments: { p95: 130, err: 0.6, pods: [3, 3] },
+      postgres: { conns: 31, p99: 7.5, disk: 0.62 },
+      nodes: [
+        { name: "worker-1", cpu: 0.44, mem: 0.62, pods: 23 },
+        { name: "worker-2", cpu: 0.58, mem: 0.71, pods: 31 },
+        { name: "worker-3", cpu: 0.37, mem: 0.85, pods: 18 },
+      ],
+      events: [],
+    };
+    const EVENTS = [
+      ["orders-svc", "Scaled deployment 4 → 5 (HPA cpu 78%)", "c-blue"],
+      ["payments", "pod payments-7d9f8-q2 OOMKilled → restarting", "c-warn"],
+      ["gateway", "rollout rev 42 complete · 0 regressions", "c-ok"],
+      ["worker-3", "node pressure: memory (85%)", "c-warn"],
+      ["gateway", "readiness probe failed /healthz (1x, recovered)", "c-gray"],
+      ["postgres", "autovacuum finished on orders (3.1s)", "c-gray"],
+      ["ingress", "cert-manager renewed shop.example.com", "c-ok"],
+      ["orders-svc", "canary 10% → 50% traffic shift", "c-blue"],
+    ];
+    const stamp = () => new Date().toTimeString().slice(0, 8);
+
+    function step() {
+      const s = state;
+      s.tick++;
+      s.ingress.rps = walk(s.ingress.rps, 90, 120, 1400);
+      s.ingress.err = walk(s.ingress.err, 0.3, 0, 6);
+      s.gateway.p95 = walk(s.gateway.p95, 8, 12, 240);
+      s.gateway.err = walk(s.gateway.err, 0.1, 0, 3);
+      s.orders.p95 = walk(s.orders.p95, 10, 20, 400);
+      s.payments.p95 = walk(s.payments.p95, 12, 40, 600);
+      s.payments.err = walk(s.payments.err, 0.15, 0, 4);
+      s.postgres.conns = Math.round(walk(s.postgres.conns, 6, 4, 100));
+      s.postgres.p99 = walk(s.postgres.p99, 1.2, 1, 60);
+      s.postgres.disk = walk(s.postgres.disk, 0.004, 0.3, 0.95);
+      if (s.tick % 2 === 0) {
+        s.gateway.cpu.push(walk(s.gateway.cpu[s.gateway.cpu.length - 1], 18, 5, 100)); s.gateway.cpu.shift();
+        s.orders.cpu.push(walk(s.orders.cpu[s.orders.cpu.length - 1], 18, 5, 100)); s.orders.cpu.shift();
+        s.nodes.forEach((n) => { n.cpu = walk(n.cpu, 0.06, 0.05, 0.98); n.mem = walk(n.mem, 0.01, 0.2, 0.97); });
+      }
+      if (s.tick % 24 === 0) {
+        const e = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+        s.events.unshift({ t: stamp(), who: e[0], msg: e[1], cls: e[2] });
+        s.events.length = Math.min(s.events.length, 7);
+        if (Math.random() < 0.3) s.payments.pods[0] = s.payments.pods[0] === 3 ? 2 : 3;
+        if (Math.random() < 0.3) s.orders.pods = s.orders.pods[1] === 4 ? [5, 5] : [4, 4];
+      }
+    }
+
+    // ---- drawing helpers ----------------------------------------------------
+    function segments(x, y, parts) {
+      let cx = x;
+      parts.forEach(([text, cls]) => { screen.put(cx, y, text, cls); cx += text.length; });
+    }
+    function pods(ready, desired) {
+      const ok = ready >= desired;
+      return [[ok ? "[ok]" : "[warn]", ok ? "c-ok" : "c-warn"], [" " + ready + "/" + desired + " ready", ""]];
+    }
+    function drawBox(x, y, title, titleCls, rows) {
+      const frame = tf.box(rows.map(() => ""), { width: BOX_W, style: "dashed" });
+      screen.putLines(x, y, frame, "c-border");
+      screen.put(x + 2, y, title, titleCls);
+      rows.forEach((parts, i) => segments(x + 2, y + 1 + i, parts));
+    }
+    const barOf = (v, max, cls) => [tf.bar(v / max, 10), cls || "c-bar"];
+    const val = (s, w) => [tf.padLeft(s, w), "c-title"];
+
+    function draw() {
+      const s = state;
+      screen.clear();
+      // header
+      segments(1, 0, [["TUIFLOW", "c-title"], [" · K8S CLUSTER FLOW", "c-dim"], ["   ingress", "c-orange"], [" → ", "c-dim"], ["gateway", "c-blue"], [" → ", "c-dim"], ["services", "c-green"], [" → ", "c-dim"], ["data", "c-gray"]]);
+      screen.put(COLS - 19, 0, "simulated · " + tf.padLeft(s.tick, 6), "c-dim");
+      segments(1, 1, [["■", "c-orange"], [" edge: ingress", "c-dim"], ["   ■", "c-blue"], [" control plane", "c-dim"], ["   ■", "c-green"], [" workload", "c-dim"], ["   ■", "c-gray"], [" data", "c-dim"]]);
+
+      // row 1 boxes
+      const Y1 = 3;
+      drawBox(1, Y1, "ingress-nginx", "c-orange", [
+        [["rps  ", "c-dim"], barOf(s.ingress.rps, 1400), val(Math.round(s.ingress.rps), 6)],
+        [["4xx  ", "c-dim"], barOf(s.ingress.err, 6, s.ingress.err > 3 ? "c-warn" : "c-bar"), val(s.ingress.err.toFixed(1) + "%", 6)],
+        [["pods ", "c-dim"]].concat(pods(s.ingress.pods[0], s.ingress.pods[1])),
+      ]);
+      drawBox(37, Y1, "api-gateway", "c-blue", [
+        [["p95  ", "c-dim"], barOf(s.gateway.p95, 240), val(Math.round(s.gateway.p95) + "ms", 6)],
+        [["err  ", "c-dim"], barOf(s.gateway.err, 3, s.gateway.err > 1.5 ? "c-warn" : "c-bar"), val(s.gateway.err.toFixed(2) + "%", 6)],
+        [["cpu  ", "c-dim"], [tf.sparkline(s.gateway.cpu, { min: 0, max: 100 }), "c-green"], val(Math.round(s.gateway.cpu[11]) + "%", 5)],
+      ]);
+      drawBox(73, Y1, "orders-svc", "c-green", [
+        [["p95  ", "c-dim"], barOf(s.orders.p95, 400), val(Math.round(s.orders.p95) + "ms", 6)],
+        [["pods ", "c-dim"]].concat(pods(s.orders.pods[0], s.orders.pods[1])),
+        [["cpu  ", "c-dim"], [tf.sparkline(s.orders.cpu, { min: 0, max: 100 }), "c-green"], val(Math.round(s.orders.cpu[11]) + "%", 5)],
+      ]);
+      // horizontal edges, speed follows traffic
+      const spd = 0.5 + s.ingress.rps / 900;
+      screen.put(28, Y1 + 1, tf.edge(8, s.tick, { speed: spd }), "c-packet");
+      screen.put(64, Y1 + 1, tf.edge(8, s.tick + 3, { speed: spd * 0.8 }), "c-packet");
+      // vertical edges down to row 2
+      screen.putColumn(50, Y1 + 5, tf.vedge(4, s.tick, { speed: 0.6 }), "c-packet");
+      screen.putColumn(86, Y1 + 5, tf.vedge(4, s.tick + 2, { speed: 0.6 }), "c-packet");
+
+      // row 2 boxes
+      const Y2 = Y1 + 10;
+      drawBox(37, Y2, "payments-svc", "c-green", [
+        [["p95  ", "c-dim"], barOf(s.payments.p95, 600), val(Math.round(s.payments.p95) + "ms", 6)],
+        [["err  ", "c-dim"], barOf(s.payments.err, 4, s.payments.err > 2 ? "c-warn" : "c-bar"), val(s.payments.err.toFixed(2) + "%", 6)],
+        [["pods ", "c-dim"]].concat(pods(s.payments.pods[0], s.payments.pods[1])),
+      ]);
+      drawBox(73, Y2, "postgres", "c-gray", [
+        [["conn ", "c-dim"], barOf(s.postgres.conns, 100), val(s.postgres.conns + "/100", 7)],
+        [["p99  ", "c-dim"], barOf(s.postgres.p99, 60), val(s.postgres.p99.toFixed(1) + "ms", 7)],
+        [["disk ", "c-dim"], barOf(s.postgres.disk, 1, s.postgres.disk > 0.85 ? "c-warn" : "c-bar"), val(Math.round(s.postgres.disk * 100) + "%", 7)],
+      ]);
+      screen.put(64, Y2 + 1, tf.edge(8, s.tick + 5, { speed: 0.7 }), "c-packet");
+      // left column (x 1..35): how the picture is made — every element is a string
+      const how = tf.box([
+        "box   tf.box(lines, {style})",
+        "bar   tf.bar(ratio, width)",
+        "edge  tf.edge(len, tick)",
+      ], { title: "how it's drawn", width: 34, style: "single" });
+      screen.putLines(1, Y2, how, "c-border");
+      screen.put(3, Y2, "how it's drawn", "c-gray");
+      ["box   tf.box(lines, {style})", "bar   tf.bar(ratio, width)", "edge  tf.edge(len, tick)"].forEach((l, i) => {
+        segments(3, Y2 + 1 + i, [[l.slice(0, 6), "c-dim"], [l.slice(6), ""]]);
+      });
+
+      // session log
+      const Y3 = Y2 + 7;
+      segments(1, Y3, [["┄ session log ", "c-border"], ["┄".repeat(COLS - 16), "c-border"]]);
+      s.events.forEach((e, i) => {
+        segments(1, Y3 + 1 + i, [[e.t, "c-dim"], ["  ", ""], [tf.padRight(e.who, 12), e.cls], [e.msg, ""]]);
+      });
+      if (!s.events.length) screen.put(1, Y3 + 1, "waiting for events…", "c-dim");
+
+      // node capacity strip (tf.meter)
+      const Y4 = Y3 + 9;
+      segments(1, Y4, [["┄ nodes ", "c-border"], ["┄".repeat(COLS - 10), "c-border"]]);
+      s.nodes.forEach((n, i) => {
+        segments(1, Y4 + 1 + i, [
+          [tf.padRight(n.name, 10), "c-gray"],
+          ["cpu ", "c-dim"], [tf.meter(n.cpu, 12), n.cpu > 0.85 ? "c-warn" : "c-bar"],
+          ["   mem ", "c-dim"], [tf.meter(n.mem, 12), n.mem > 0.9 ? "c-warn" : "c-blue"],
+          ["   pods ", "c-dim"], [tf.padLeft(n.pods, 3) + "/110", ""],
+          ["   ", ""], [tf.sparkline(s.gateway.cpu.map((v, k) => v * (0.5 + i * 0.25) + k), { width: 12 }), "c-green"],
+        ]);
+      });
+
+      // status bar
+      screen.put(0, ROWS - 1, tf.statusBar([
+        { label: "cluster", value: "demo" },
+        { label: "ns", value: "shop" },
+        { label: "theme", value: document.documentElement.dataset.theme || "video" },
+        { label: "fps", value: fps },
+        { label: "render", value: "tuiflow " + tf.VERSION },
+        paused ? "[paused]" : "[live]",
+      ], COLS), "c-status");
+      screen.render(el);
+    }
+
+    // ---- controls -----------------------------------------------------------
+    let fps = 8, paused = false, stop = null;
+    function start() {
+      if (stop) stop();
+      stop = tf.animate(() => { if (!paused) { step(); } draw(); }, fps);
+    }
+    const themeSel = document.getElementById("theme");
+    const crtBox = document.getElementById("crt");
+    const fpsSel = document.getElementById("fps");
+    const pauseBtn = document.getElementById("pause");
+    function setTheme(t) { document.documentElement.dataset.theme = t; themeSel.value = t; }
+    themeSel.addEventListener("change", () => setTheme(themeSel.value));
+    crtBox.addEventListener("change", () => document.body.classList.toggle("crt", crtBox.checked));
+    fpsSel.addEventListener("change", () => { fps = Number(fpsSel.value); start(); });
+    pauseBtn.addEventListener("click", () => { paused = !paused; pauseBtn.textContent = paused ? "resume" : "pause"; });
+    document.getElementById("copy").addEventListener("click", () => navigator.clipboard.writeText(screen.toText()));
+    document.getElementById("full").addEventListener("click", () => document.documentElement.requestFullscreen());
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+      if (e.key === " ") { e.preventDefault(); pauseBtn.click(); }
+      if (e.key === "f" || e.key === "F") document.documentElement.requestFullscreen();
+      if (e.key === "c" || e.key === "C") { crtBox.checked = !crtBox.checked; crtBox.dispatchEvent(new Event("change")); }
+      if (e.key === "t" || e.key === "T") { const all = ["video", "matrix", "amber"]; setTheme(all[(all.indexOf(themeSel.value) + 1) % all.length]); }
+    });
+
+    // Fit the 100×36 grid to the viewport by measuring the real cell width.
+    function fit() {
+      const m = document.getElementById("measure");
+      const ratio = m.getBoundingClientRect().width / 10 / 100; // cell width / font-size
+      const wrap = document.querySelector(".screen-wrap").getBoundingClientRect();
+      const fs = Math.floor(Math.min((wrap.width - 24) / (COLS * ratio), (wrap.height - 24) / (ROWS * 1.25)));
+      el.style.fontSize = Math.max(8, fs) + "px";
+    }
+    window.addEventListener("resize", fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    fit();
+    setTheme("video");
+    start();
+  })();
+  </script>
+</body>
+</html>

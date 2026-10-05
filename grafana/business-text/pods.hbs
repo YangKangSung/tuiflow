@@ -1,0 +1,6 @@
+<pre class="tf">POD                                 READY RST  CPU(m)         MEM(Mi)         PHASE
+{{#each data}}
+{{tfPadR pod 35}} {{tfPadR ready 5}} {{tfPadL restarts 3}}  {{tfBar cpu_m 500 8}} {{tfPadL cpu_m 4}}  {{tfBar mem_mi 2048 8}} {{tfPadL mem_mi 5}}  {{tfPhase status 16}}
+{{/each}}
+<span class="tf-dim">{{data.length}} pods · source: TestData csv_content (replace with kube-state-metrics / Infinity)</span>
+</pre>
