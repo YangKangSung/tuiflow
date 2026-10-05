@@ -1,26 +1,42 @@
 # Local Grafana for developing tuiflow panels against synthetic data.
 #
-#   cd grafana && docker compose up
+#   bash grafana/fetch-plugins.sh      # once: downloads Business Text into grafana/plugins/
+#   cd grafana && docker compose up -d
 #   → http://localhost:3000/d/tuiflow-demo/?theme=matrix
 #
-# Anonymous admin + no login form: local development only.
+# Plugins are bind-mounted instead of GF_INSTALL_PLUGINS so the container never
+# needs outbound TLS (corporate MITM proxies break it) and the stack also runs
+# on an offline machine. Anonymous admin + no login form: local dev only.
 services:
   grafana:
     image: grafana/grafana:12.2.0 # bump freely; Business Text 6.x needs Grafana 11+
+    restart: unless-stopped # comes back when the WSL VM / dockerd restarts
     ports:
       - "3000:3000"
     environment:
-      GF_INSTALL_PLUGINS: marcusolsson-dynamictext-panel
+      # Anonymous = Viewer (Grafana 12 ignores other roles) so kiosk URLs need no
+      # login; edit panels as admin/admin.
       GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      # Plugins come from ./plugins; never phone home (TLS-inspecting proxies and
+      # offline hosts both break grafana.com calls). Signature keys: use the
+      # embedded ones instead of fetching.
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED: "true"
       # Business Text sanitises HTML unless this is off; <pre>/<span class> survive
       # either way, but iframes (ttyd, textual-serve) need it off.
       GF_PANELS_DISABLE_SANITIZE_HTML: "true"
       GF_SECURITY_ALLOW_EMBEDDING: "true"
       GF_FEATURE_TOGGLES_ENABLE: extraThemes,grafanaconThemes
+      # Stay quiet offline: no update/plugin-catalog calls to grafana.com.
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
     volumes:
       - ./provisioning:/etc/grafana/provisioning:ro
+      - ./plugins:/var/lib/grafana/plugins
       # Served at /public/tuiflow.js so Business Text can `import()` it.
       - ../src/tuiflow.js:/usr/share/grafana/public/tuiflow.js:ro
       - grafana-data:/var/lib/grafana

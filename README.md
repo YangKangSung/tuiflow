@@ -13,7 +13,7 @@
 |---|---|
 | [`src/tuiflow.js`](src/tuiflow.js) | 코어. 의존성 0, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `Screen`(셀 그리드 → text/HTML) `animate` |
 | [`demo/index.html`](demo/index.html) | 단독 데모(가짜 K8s 클러스터, 100×36 셀). 팔레트 3종(video/matrix/amber), CRT 오버레이, 전체화면, 프레임을 텍스트로 복사. 글꼴 동봉이라 오프라인 PC에서도 동작 |
-| [`grafana/`](grafana/) | Business Text 패널 소스(`before.js`/`content.hbs`/`pods.hbs`/`after.js`/`styles.css`) + TestData 기반 대시보드 JSON + `docker compose up` 한 줄 환경 |
+| [`grafana/`](grafana/) | Business Text 패널 소스(`before.js`/`content.hbs`/`pods.hbs`/`after.js`/`styles.css`) + TestData 기반 대시보드 JSON + WSL Docker 기동 스크립트. 사내 TLS 프록시·오프라인에서도 돌도록 플러그인은 호스트에서 받아 마운트 |
 | [`docs/research.md`](docs/research.md) | Grafana에서 TUI 룩을 내는 방법 전수 조사 (숨은 `matrix` 테마, Canvas 애니메이션 연결선, 플러그인, 터미널 도구, 라이브러리) |
 | [`docs/look-spec.md`](docs/look-spec.md) | 룩 정의서 — 글리프 어휘, 팔레트, 레이아웃·애니메이션 규칙, 타깃별 매핑 |
 | [`test/`](test/) | 코어 단위 테스트 + Business Text 템플릿을 플러그인과 같은 방식으로 렌더해 폭/헬퍼/정리 함수 검증 |
@@ -25,9 +25,10 @@
 npm run serve            # python -m http.server 8787
 # → http://localhost:8787/demo/index.html   키: Space 일시정지 · T 테마 · C CRT · F 전체화면
 
-# 2) Grafana (Docker)
-cd grafana && docker compose up
-# → http://localhost:3000/d/tuiflow-demo/?theme=matrix
+# 2) Grafana — Windows + WSL Docker Engine (Docker Desktop 불필요)
+.\grafana\fetch-plugins.ps1    # 최초 1회
+.\grafana\up.ps1               # → http://localhost:3000/d/tuiflow-demo/?theme=matrix  (admin/admin)
+#    Linux/macOS: bash grafana/fetch-plugins.sh && (cd grafana && docker compose up -d)
 
 # 3) 테스트 / 대시보드 JSON 재생성
 npm install && npm test

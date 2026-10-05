@@ -4,7 +4,9 @@
 
 ```
 grafana/
-├─ docker-compose.yml            Grafana 12 + Business Text 플러그인 + 프로비저닝
+├─ docker-compose.yml            Grafana 12 + 프로비저닝 + ./plugins, ../src/tuiflow.js 마운트
+├─ up.ps1                        Windows: WSL Docker Engine으로 기동/정지 (+ WSL keep-alive)
+├─ fetch-plugins.ps1 / .sh       Business Text 플러그인을 호스트에서 ./plugins 로 다운로드
 ├─ build-dashboard.js            business-text/* → provisioning/dashboards/tuiflow-demo.json
 ├─ business-text/
 │  ├─ before.js                  "JavaScript code before content rendering": tuiflow import + Handlebars 헬퍼
@@ -19,14 +21,32 @@ grafana/
 
 ## 실행
 
-```bash
-cd grafana
-docker compose up
-# http://localhost:3000/d/tuiflow-demo/?theme=matrix      ← 터미널 룩 전체 UI
-# http://localhost:3000/d/tuiflow-demo/?theme=matrix&kiosk ← 벽걸이용
+### Windows + WSL Docker Engine (Docker Desktop 없음) — 이 저장소의 기본 개발 환경
+
+```powershell
+.\grafana\fetch-plugins.ps1   # 최초 1회: Business Text 플러그인을 grafana/plugins/ 에 내려받음
+.\grafana\up.ps1              # dockerd 기동 → compose up -d → WSL keep-alive → 헬스 대기
+# http://localhost:3000/d/tuiflow-demo/?theme=matrix       ← 터미널 룩 전체 UI (편집: admin / admin)
+# http://localhost:3000/d/tuiflow-demo/?theme=matrix&kiosk ← 벽걸이용 (익명 Viewer)
+.\grafana\up.ps1 -Down        # 정지
 ```
 
-Docker 없이 기존 Grafana에 붙이려면:
+전제: WSL 배포판(`Ubuntu-24.04`)에 Docker Engine 설치 — `curl -fsSL https://get.docker.com | sudo sh`.
+다른 배포판이면 `-Distro` 인자로 지정.
+
+### Linux / macOS
+
+```bash
+bash grafana/fetch-plugins.sh
+cd grafana && docker compose up -d
+```
+
+### 이 환경에서 실제로 부딪힌 두 가지
+
+1. **사내 TLS 검사 프록시** — 컨테이너(alpine, 기본 CA 번들)는 `grafana.com`을 `x509: certificate signed by unknown authority`로 거부해 `GF_INSTALL_PLUGINS`가 실패하고 Grafana가 바로 종료된다. 그래서 플러그인은 호스트(프록시 CA를 신뢰함)에서 내려받아 `./plugins`를 바인드 마운트하고, `GF_PLUGINS_PREINSTALL_DISABLED`·`GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED`·업데이트 체크 끔으로 컨테이너의 외부 호출을 없앴다. 부수 효과로 오프라인 PC에서도 그대로 돈다(`grafana/plugins/`만 같이 복사).
+2. **WSL VM 유휴 종료** — 마지막 `wsl.exe` 세션이 끝나고 약 1분 뒤 VM이 내려가면서 dockerd와 컨테이너가 SIGTERM을 받는다(증상: 조금 전까지 되던 `:3000`이 `ERR_CONNECTION_REFUSED`). `up.ps1`이 숨김 `wsl --exec sleep infinity` 세션을 띄워 VM을 붙잡고, compose에 `restart: unless-stopped`를 둬 dockerd가 다시 뜨면 컨테이너도 따라온다.
+
+### Docker 없이 기존 Grafana에 붙이려면
 
 1. `marcusolsson-dynamictext-panel` 설치 (Business Text 6.x, Grafana 11+).
 2. `src/tuiflow.js`를 Grafana의 `public/` 폴더에 복사 → `/public/tuiflow.js`로 서빙됨 (`before.js`가 `import()` 함).

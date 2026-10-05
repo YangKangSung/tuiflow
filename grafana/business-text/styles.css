@@ -8,16 +8,16 @@
   margin: 0;
   padding: 8px 10px;
   white-space: pre;
-  color: #c9ced6;
-  background: #0f1218;
+  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;
+     only semantic accents below get fixed colours. */
+  color: inherit;
+  background: transparent;
 }
 .tf .tf-edge { color: #e8a06a; font-weight: 700; }
-.tf .tf-dim { color: #5c6370; }
+.tf .tf-dim { opacity: 0.55; }
 .tf .tf-ok { color: #86d28a; }
 .tf .tf-warn { color: #e8a06a; }
 .tf .tf-crit { color: #e06c75; }
 
-/* Matrix variant: add class "tf tf-matrix" to the <pre> instead */
-.tf-matrix { color: #00c017; background: #000; }
-.tf-matrix .tf-edge, .tf-matrix .tf-ok { color: #00ff41; }
-.tf-matrix .tf-dim { color: #006a0c; }
+/* Opt-in "video palette" regardless of Grafana theme: class="tf tf-video" */
+.tf-video { color: #c9ced6; background: #0f1218; }
