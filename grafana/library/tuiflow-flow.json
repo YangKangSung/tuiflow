@@ -1,0 +1,89 @@
+{
+  "uid": "tuiflow-flow",
+  "name": "TUI Flow (api-gateway box)",
+  "kind": 1,
+  "model": {
+    "type": "marcusolsson-dynamictext-panel",
+    "title": "TUI Flow",
+    "description": "Hand-made box with bars, sparklines and an animated packet edge; template expects fields rps, p95_ms, err_pct.",
+    "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "testdata"
+    },
+    "targets": [
+      {
+        "refId": "A",
+        "datasource": {
+          "type": "grafana-testdata-datasource",
+          "uid": "testdata"
+        },
+        "scenarioId": "random_walk",
+        "alias": "rps",
+        "startValue": 300,
+        "spread": 30,
+        "noise": 10,
+        "min": 50,
+        "max": 600
+      },
+      {
+        "refId": "B",
+        "datasource": {
+          "type": "grafana-testdata-datasource",
+          "uid": "testdata"
+        },
+        "scenarioId": "random_walk",
+        "alias": "p95_ms",
+        "startValue": 80,
+        "spread": 15,
+        "noise": 5,
+        "min": 10,
+        "max": 250
+      },
+      {
+        "refId": "C",
+        "datasource": {
+          "type": "grafana-testdata-datasource",
+          "uid": "testdata"
+        },
+        "scenarioId": "random_walk",
+        "alias": "err_pct",
+        "startValue": 0.4,
+        "spread": 0.3,
+        "noise": 0.1,
+        "min": 0,
+        "max": 5
+      }
+    ],
+    "gridPos": {
+      "h": 10,
+      "w": 12,
+      "x": 0,
+      "y": 0
+    },
+    "fieldConfig": {
+      "defaults": {},
+      "overrides": []
+    },
+    "options": {
+      "renderMode": "data",
+      "content": "<pre class=\"tf\">┌ api-gateway ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐\n┆ rps    {{tfBar (tfLast (lookup data 0) \"rps\") 600 14}} {{tfPadL (tfFixed (tfLast (lookup data 0) \"rps\") 0) 5}} {{tfStatus (tfLast (lookup data 0) \"rps\") 450 550}}             ┆\n┆ p95    {{tfBar (tfLast (lookup data 1) \"p95_ms\") 250 14}} {{tfPadL (tfFixed (tfLast (lookup data 1) \"p95_ms\") 0) 3}}ms {{tfStatus (tfLast (lookup data 1) \"p95_ms\") 150 200}}             ┆\n┆ err    {{tfBar (tfLast (lookup data 2) \"err_pct\") 5 14}} {{tfPadL (tfFixed (tfLast (lookup data 2) \"err_pct\") 2) 4}}% {{tfStatus (tfLast (lookup data 2) \"err_pct\") 1 3}}             ┆\n┆                                                ┆\n┆ rps    {{tfSpark (lookup data 0) \"rps\" 30}}          ┆\n┆ p95    {{tfSpark (lookup data 1) \"p95_ms\" 30}}          ┆\n┆ err    {{tfSpark (lookup data 2) \"err_pct\" 30}}          ┆\n└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘\n         <span class=\"tf-edge\"></span> <span class=\"tf-dim\">[orders-svc]   packet speed follows rps · range {{tfPadL (tfFixed (tfAvg (lookup data 0) \"rps\") 0) 4}} avg / {{tfPadL (tfFixed (tfMax (lookup data 0) \"rps\") 0) 4}} max</span>\n</pre>\n",
+      "defaultContent": "The query didn't return any results.",
+      "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Loads the tuiflow core from Grafana's static folder (mounted there by\n// grafana/docker-compose.yml) and registers Handlebars helpers.\n//\n// Two families of helpers:\n//   1. field helpers   — {{tfBar value max width}} etc. for hand-made templates\n//   2. generic panels  — {{{tfTimeseries}}} {{{tfStat}}} {{{tfBarGauge}}}\n//                        {{{tfGauge}}} {{{tfTable}}} render *whatever query is\n//                        attached* from context.panelData.series, honouring\n//                        Grafana field config (unit, decimals, min/max,\n//                        thresholds, display name). Attach any query, done.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.2.0 is replaced by the build scripts with package.json's version so\n// browsers refetch the module after an upgrade instead of using a cached copy.\nreturn import(\"/public/tuiflow.js?v=0.2.0\").then(() => {\n  const tf = window.tuiflow;\n  const hb = context.handlebars;\n  const safe = (s) => new hb.SafeString(s);\n  const num = (v, d) => (v === undefined || v === null || v === \"\" ? d : Number(v));\n\n  // ------------------------------------------------------------------ field helpers\n\n  // {{tfBar value max width}} → \"█████▎░░░░\"\n  hb.registerHelper(\"tfBar\", (value, max, width) => tf.bar(Number(value) / Number(max), Number(width)));\n\n  // {{tfSpark rows \"field\" width}} → \"▁▂▃▅▇\" (long series are resampled to `width`)\n  hb.registerHelper(\"tfSpark\", (rows, field, width) =>\n    tf.sparkline((rows || []).map((r) => Number(r[field])), { width: Number(width) || undefined })\n  );\n\n  // {{tfLast rows \"field\"}} → last value of a column\n  hb.registerHelper(\"tfLast\", (rows, field) => (rows && rows.length ? rows[rows.length - 1][field] : \"\"));\n\n  // {{tfMax rows \"field\"}} / {{tfAvg rows \"field\"}}\n  hb.registerHelper(\"tfMax\", (rows, field) => Math.max(...(rows || []).map((r) => Number(r[field])).filter(Number.isFinite)));\n  hb.registerHelper(\"tfAvg\", (rows, field) => {\n    const v = (rows || []).map((r) => Number(r[field])).filter(Number.isFinite);\n    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : NaN;\n  });\n\n  // {{tfFixed value decimals}} / {{tfPadL value width}} / {{tfPadR value width}}\n  hb.registerHelper(\"tfFixed\", (value, decimals) => Number(value).toFixed(Number(decimals) || 0));\n  hb.registerHelper(\"tfPadL\", (value, width) => tf.padLeft(value, Number(width)));\n  hb.registerHelper(\"tfPadR\", (value, width) => tf.padRight(value, Number(width)));\n\n  // {{tfStatus value warn crit}} → \"[ok]\" | \"[warn]\" | \"[crit]\" with a colour class\n  hb.registerHelper(\"tfStatus\", (value, warn, crit) => {\n    const v = Number(value);\n    const cls = v >= Number(crit) ? \"tf-crit\" : v >= Number(warn) ? \"tf-warn\" : \"tf-ok\";\n    const label = cls === \"tf-crit\" ? \"[crit]\" : cls === \"tf-warn\" ? \"[warn]\" : \"[ok]  \";\n    return safe('<span class=\"' + cls + '\">' + label + \"</span>\");\n  });\n\n  // {{tfPhase status width}} → kubernetes pod phase, coloured, padded\n  hb.registerHelper(\"tfPhase\", (status, width) => {\n    const s = String(status || \"\");\n    const cls = /Running|Succeeded/.test(s) ? \"tf-ok\" : /Pending|ContainerCreating|Terminating/.test(s) ? \"tf-warn\" : \"tf-crit\";\n    return safe('<span class=\"' + cls + '\">' + tf.escapeHtml(tf.padRight(s, Number(width) || s.length)) + \"</span>\");\n  });\n\n  // ------------------------------------------------------------------ generic panels\n\n  // Grafana DataFrame access, tolerant of the old Vector API (values.toArray()).\n  const frames = () => (context.panelData && context.panelData.series) || [];\n  const valuesOf = (f) => (f.values && typeof f.values.toArray === \"function\" ? f.values.toArray() : f.values || []);\n  const displayOf = (f, v) => {\n    if (f.display) {\n      const d = f.display(v);\n      return { text: (d.prefix || \"\") + d.text + (d.suffix || \"\"), color: d.color || \"\" };\n    }\n    return { text: tf.formatNumber(Number(v)), color: \"\" };\n  };\n  const nameOf = (frame, f) => {\n    const cfg = f.config || {};\n    if (cfg.displayNameFromDS) return cfg.displayNameFromDS;\n    if (cfg.displayName) return cfg.displayName;\n    if (f.state && f.state.displayName) return f.state.displayName;\n    const labels = f.labels ? Object.values(f.labels) : [];\n    if (labels.length && (f.name === \"Value\" || frames().length > 1)) return labels.join(\" \");\n    return frame.name || f.name;\n  };\n  // Every numeric field across all frames becomes one series.\n  const numericSeries = () => {\n    const out = [];\n    frames().forEach((frame) => {\n      const timeField = frame.fields.find((f) => f.type === \"time\");\n      frame.fields.forEach((f) => {\n        if (f.type !== \"number\") return;\n        const values = valuesOf(f).map(Number);\n        out.push({\n          name: nameOf(frame, f),\n          field: f,\n          values,\n          times: timeField ? valuesOf(timeField) : null,\n          last: [].concat(values).reverse().find(Number.isFinite),\n        });\n      });\n    });\n    return out;\n  };\n  const colorSpan = (text, color, cls) =>\n    '<span' + (cls ? ' class=\"' + cls + '\"' : \"\") + (color ? ' style=\"color:' + color + '\"' : \"\") + \">\" + tf.escapeHtml(text) + \"</span>\";\n  const nameWidth = (series, cap) => Math.min(cap || 24, Math.max(4, ...series.map((s) => s.name.length)));\n  const rangeOf = (series) => {\n    const cfgMin = series.map((s) => (s.field.config || {}).min).find((v) => v !== undefined && v !== null);\n    const cfgMax = series.map((s) => (s.field.config || {}).max).find((v) => v !== undefined && v !== null);\n    const lasts = series.map((s) => s.last).filter(Number.isFinite);\n    const min = cfgMin !== undefined ? Number(cfgMin) : Math.min(0, ...lasts);\n    let max = cfgMax !== undefined ? Number(cfgMax) : Math.max(...lasts);\n    if (!Number.isFinite(max) || max === min) max = min + 1;\n    return { min, max };\n  };\n  const noData = () => safe('<span class=\"tf-dim\">no data</span>');\n\n  // {{{tfTimeseries width height}}} — braille line chart of every numeric series\n  hb.registerHelper(\"tfTimeseries\", (width, height) => {\n    const series = numericSeries();\n    if (!series.length) return noData();\n    const f0 = series[0].field;\n    const rows = tf.lineChart(series, {\n      width: num(width, 72),\n      height: num(height, 12),\n      format: (v) => displayOf(f0, v).text,\n      formatLast: (v) => displayOf(f0, v).text,\n    });\n    return safe(tf.segmentsToHTML(rows));\n  });\n\n  // {{{tfStat sparkWidth}}} — one line per series: name, sparkline, value in threshold colour\n  hb.registerHelper(\"tfStat\", (sparkWidth) => {\n    const series = numericSeries();\n    if (!series.length) return noData();\n    const w = nameWidth(series);\n    const sw = num(sparkWidth, 24);\n    return safe(\n      series\n        .map((s, i) => {\n          const d = displayOf(s.field, s.last);\n          return (\n            colorSpan(\"■ \", \"\", \"tf-s\" + (i % 6)) +\n            tf.escapeHtml(tf.padRight(s.name, w)) +\n            \"  \" +\n            colorSpan(tf.sparkline(s.values, { width: sw }), \"\", \"tf-s\" + (i % 6)) +\n            \"  \" +\n            colorSpan(tf.padLeft(d.text, 10), d.color, \"tf-value\")\n          );\n        })\n        .join(\"\\n\")\n    );\n  });\n\n  // {{{tfBarGauge barWidth}}} — name, block bar on the field's min/max, value\n  hb.registerHelper(\"tfBarGauge\", (barWidth) => {\n    const series = numericSeries();\n    if (!series.length) return noData();\n    const w = nameWidth(series);\n    const bw = num(barWidth, 30);\n    const r = rangeOf(series);\n    return safe(\n      series\n        .map((s) => {\n          const d = displayOf(s.field, s.last);\n          const ratio = (s.last - r.min) / (r.max - r.min);\n          return tf.escapeHtml(tf.padRight(s.name, w)) + \"  \" + colorSpan(tf.bar(ratio, bw), d.color) + \"  \" + colorSpan(d.text, d.color, \"tf-value\");\n        })\n        .join(\"\\n\")\n    );\n  });\n\n  // {{{tfGauge meterWidth}}} — [████░░░░]  62%  value\n  hb.registerHelper(\"tfGauge\", (meterWidth) => {\n    const series = numericSeries();\n    if (!series.length) return noData();\n    const w = nameWidth(series);\n    const mw = num(meterWidth, 20);\n    const r = rangeOf(series);\n    return safe(\n      series\n        .map((s) => {\n          const d = displayOf(s.field, s.last);\n          const ratio = (s.last - r.min) / (r.max - r.min);\n          return tf.escapeHtml(tf.padRight(s.name, w)) + \"  \" + colorSpan(tf.meter(ratio, mw), d.color) + \"  \" + colorSpan(d.text, d.color, \"tf-value\");\n        })\n        .join(\"\\n\")\n    );\n  });\n\n  // {{{tfTable maxRows}}} — first frame as a monospace table, numbers via field display\n  hb.registerHelper(\"tfTable\", (maxRows) => {\n    const frame = frames()[0];\n    if (!frame || !frame.fields.length) return noData();\n    const limit = num(maxRows, 50);\n    const cols = frame.fields.map((f) => {\n      const vals = valuesOf(f);\n      const cells = vals.slice(0, limit).map((v) => {\n        if (f.type === \"number\") return displayOf(f, v);\n        if (f.type === \"time\") return { text: new Date(v).toLocaleTimeString(), color: \"\" };\n        return { text: v === null || v === undefined ? \"\" : String(v), color: \"\" };\n      });\n      // column headers are field names (frame name would repeat on every column)\n      const cfg = f.config || {};\n      const header = cfg.displayName || cfg.displayNameFromDS || f.name;\n      const width = Math.min(40, Math.max(header.length, ...cells.map((c) => c.text.length)));\n      return { header, cells, width, right: f.type === \"number\" };\n    });\n    const rows = [];\n    rows.push(cols.map((c) => colorSpan(tf.padRight(c.header, c.width), \"\", \"tf-dim\")).join(\"  \"));\n    rows.push(cols.map((c) => colorSpan(\"─\".repeat(c.width), \"\", \"tf-axis\")).join(\"  \"));\n    const n = Math.min(limit, ...cols.map((c) => c.cells.length));\n    for (let i = 0; i < n; i++) {\n      rows.push(\n        cols\n          .map((c) => {\n            const cell = c.cells[i];\n            const text = c.right ? tf.padLeft(cell.text, c.width) : tf.padRight(cell.text, c.width);\n            return colorSpan(text, cell.color);\n          })\n          .join(\"  \")\n      );\n    }\n    return safe(rows.join(\"\\n\"));\n  });\n});\n",
+      "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Animates the packet on the dashed edge under the box. Runs once per render\n// with `this` persisted between renders; the returned function is called by\n// the panel as cleanup before the next render, so timers never leak.\n\nconst tf = window.tuiflow;\nconst edge = context.element.querySelector(\".tf-edge\");\nif (!tf || !edge) {\n  return;\n}\n\n// Speed follows the latest rps value; fall back to 1.\n// In \"All data\" mode context.data is an array of frames (each an array of\n// rows); in \"All rows\" mode it is the rows array itself.\nconst frames = Array.isArray(context.data) ? context.data : [];\nconst rows = Array.isArray(frames[0]) ? frames[0] : frames;\nconst last = rows.length ? Number(rows[rows.length - 1].rps) : NaN;\nconst speed = Number.isFinite(last) ? 0.5 + last / 600 : 1;\n\nreturn tf.animate((tick) => {\n  edge.textContent = tf.edge(16, tick, { speed });\n}, 8);\n",
+      "styles": "/* Business Text panel → \"Styles\"\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+      "externalStyles": [],
+      "contentPartials": [],
+      "editors": [
+        "helpers",
+        "afterRender",
+        "styles"
+      ],
+      "editor": {
+        "format": "auto",
+        "language": "html"
+      },
+      "wrap": true,
+      "status": ""
+    }
+  }
+}

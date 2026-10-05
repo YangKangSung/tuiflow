@@ -15,9 +15,18 @@
 }
 .tf .tf-edge { color: #e8a06a; font-weight: 700; }
 .tf .tf-dim { opacity: 0.55; }
+.tf .tf-axis { opacity: 0.45; }
+.tf .tf-value { font-weight: 700; }
 .tf .tf-ok { color: #86d28a; }
 .tf .tf-warn { color: #e8a06a; }
 .tf .tf-crit { color: #e06c75; }
+/* series colours for tfTimeseries / tfStat (cycle of 6) */
+.tf .tf-s0 { color: #e8a06a; }
+.tf .tf-s1 { color: #8fb3ff; }
+.tf .tf-s2 { color: #86d28a; }
+.tf .tf-s3 { color: #c792ea; }
+.tf .tf-s4 { color: #e06c75; }
+.tf .tf-s5 { color: #9aa0a6; }
 
 /* Opt-in "video palette" regardless of Grafana theme: class="tf tf-video" */
 .tf-video { color: #c9ced6; background: #0f1218; }

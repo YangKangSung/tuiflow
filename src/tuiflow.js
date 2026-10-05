@@ -1,8 +1,8 @@
-/*!
+﻿/*!
  * tuiflow core — text-only primitives for TUI-style dashboards:
- * box-drawing frames, block bars, block sparklines, dashed edges with a
- * travelling packet, status bars and a cell grid ("Screen") that renders to
- * plain text or colour-classed HTML.
+ * box-drawing frames, block bars, block sparklines, braille line charts,
+ * dashed edges with a travelling packet, status bars and a cell grid
+ * ("Screen") that renders to plain text or colour-classed HTML.
  *
  * Zero dependencies. UMD: usable as <script src>, CommonJS require(), or
  * dynamic import() (then it registers itself as globalThis.tuiflow so it can
@@ -20,7 +20,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const VERSION = "0.1.0";
+  const VERSION = "0.2.0";
 
   // Eight vertical block levels, used by sparklines.
   const BLOCKS = "▁▂▃▄▅▆▇█";
@@ -38,7 +38,7 @@
   // --- string helpers -----------------------------------------------------
 
   // All glyphs are assumed to occupy one cell. Pick a monospace font with
-  // box-drawing + block coverage (JetBrains Mono, Cascadia, Fira Code...).
+  // box-drawing + block + braille coverage (JetBrains Mono, Cascadia, Fira Code...).
   function padRight(value, width, ch) {
     const s = String(value);
     ch = ch || " ";
@@ -65,6 +65,25 @@
 
   function escapeHtml(s) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  /** Compact number: 1234 → "1.2k", 0.123 → "0.12". */
+  function formatNumber(v, decimals) {
+    if (!Number.isFinite(v)) return "-";
+    const abs = Math.abs(v);
+    const units = [["T", 1e12], ["G", 1e9], ["M", 1e6], ["k", 1e3]];
+    for (let i = 0; i < units.length; i++) {
+      if (abs >= units[i][1]) return (v / units[i][1]).toFixed(decimals === undefined ? 1 : decimals) + units[i][0];
+    }
+    if (abs >= 100) return v.toFixed(0);
+    if (abs >= 10) return v.toFixed(decimals === undefined ? 1 : decimals);
+    return v.toFixed(decimals === undefined ? 2 : decimals);
+  }
+
+  /** "HH:MM" from a ms timestamp (local time). */
+  function formatTime(ms) {
+    const d = new Date(ms);
+    return padLeft(d.getHours(), 2, "0") + ":" + padLeft(d.getMinutes(), 2, "0");
   }
 
   // --- data glyphs --------------------------------------------------------
@@ -196,6 +215,198 @@
     }
     if (head) cells.push(head);
     return cells;
+  }
+
+  // --- braille line charts ------------------------------------------------
+
+  // Dot bits of a braille cell (U+2800 + bits), indexed [row 0..3][col 0..1].
+  const BRAILLE_BITS = [
+    [0x01, 0x08],
+    [0x02, 0x10],
+    [0x04, 0x20],
+    [0x40, 0x80],
+  ];
+
+  /**
+   * Plot several numeric series as braille dots (2x4 sub-cells per cell).
+   * series: number[][]   opts: { width, height, min, max }
+   * Returns { rows: string[], owner: number[][], min, max } where owner[y][x]
+   * is the index of the series that drew most dots in that cell (-1 = empty),
+   * so a renderer can colour each cell by series.
+   */
+  function braillePlot(series, opts) {
+    opts = opts || {};
+    const width = opts.width || 60;
+    const height = opts.height || 10;
+    const W = width * 2;
+    const H = height * 4;
+    const all = [].concat.apply([], series).map(Number).filter(Number.isFinite);
+    const min = opts.min !== undefined ? opts.min : all.length ? Math.min.apply(null, all) : 0;
+    let max = opts.max !== undefined ? opts.max : all.length ? Math.max.apply(null, all) : 1;
+    if (max === min) max = min + 1;
+
+    // one bitmask grid per series, so overlapping lines can still be attributed
+    const layers = series.map(() => new Uint8Array(width * height));
+    const plot = (layer, px, py) => {
+      if (px < 0 || px >= W || py < 0 || py >= H) return;
+      layer[(py >> 2) * width + (px >> 1)] |= BRAILLE_BITS[py & 3][px & 1];
+    };
+    const line = (layer, x0, y0, x1, y1) => {
+      // Bresenham so consecutive samples form a continuous stroke
+      const dx = Math.abs(x1 - x0);
+      const dy = -Math.abs(y1 - y0);
+      const sx = x0 < x1 ? 1 : -1;
+      const sy = y0 < y1 ? 1 : -1;
+      let err = dx + dy;
+      for (;;) {
+        plot(layer, x0, y0);
+        if (x0 === x1 && y0 === y1) break;
+        const e2 = 2 * err;
+        if (e2 >= dy) {
+          err += dy;
+          x0 += sx;
+        }
+        if (e2 <= dx) {
+          err += dx;
+          y0 += sy;
+        }
+      }
+    };
+
+    series.forEach((values, si) => {
+      const n = values.length;
+      let prev = null;
+      for (let i = 0; i < n; i++) {
+        const v = Number(values[i]);
+        if (!Number.isFinite(v)) {
+          prev = null;
+          continue;
+        }
+        const px = n === 1 ? W - 1 : Math.round((i / (n - 1)) * (W - 1));
+        const py = Math.round((1 - clamp01((v - min) / (max - min))) * (H - 1));
+        if (prev) line(layers[si], prev[0], prev[1], px, py);
+        else plot(layers[si], px, py);
+        prev = [px, py];
+      }
+    });
+
+    const popcount = (b) => {
+      let c = 0;
+      while (b) {
+        c += b & 1;
+        b >>= 1;
+      }
+      return c;
+    };
+    const rows = [];
+    const owner = [];
+    for (let y = 0; y < height; y++) {
+      let row = "";
+      const own = [];
+      for (let x = 0; x < width; x++) {
+        let bits = 0;
+        let best = -1;
+        let bestCount = 0;
+        for (let si = 0; si < layers.length; si++) {
+          const b = layers[si][y * width + x];
+          bits |= b;
+          const c = popcount(b);
+          if (c > 0 && c >= bestCount) {
+            bestCount = c;
+            best = si;
+          }
+        }
+        row += bits ? String.fromCharCode(0x2800 + bits) : " ";
+        own.push(best);
+      }
+      rows.push(row);
+      owner.push(own);
+    }
+    return { rows: rows, owner: owner, min: min, max: max };
+  }
+
+  /**
+   * Full line chart as "segment rows": each row is an array of [text, cls]
+   * pairs so it can be coloured per series in HTML and flattened to text.
+   *
+   * series: [{ name, values: number[], times?: number[] }]
+   * opts: { width, height, min, max, format(v) → string, formatLast(v),
+   *         legend:true, seriesClass(i) → cls, axisClass:"tf-axis", labelWidth }
+   */
+  function lineChart(series, opts) {
+    opts = opts || {};
+    const width = opts.width || 72;
+    const height = opts.height || 12;
+    const fmt = opts.format || ((v) => formatNumber(v));
+    const seriesClass = opts.seriesClass || ((i) => "tf-s" + (i % 6));
+    const axisCls = opts.axisClass || "tf-axis";
+
+    // y range first, so the labels and the plot agree
+    const all = [].concat.apply([], series.map((s) => s.values)).map(Number).filter(Number.isFinite);
+    const yMin = opts.min !== undefined ? opts.min : all.length ? Math.min.apply(null, all) : 0;
+    let yMax = opts.max !== undefined ? opts.max : all.length ? Math.max.apply(null, all) : 1;
+    if (yMax === yMin) yMax = yMin + 1;
+    const labels = [];
+    for (let y = 0; y < height; y++) {
+      labels.push(fmt(yMax - ((yMax - yMin) * y) / (height - 1)));
+    }
+    const labelWidth = opts.labelWidth || Math.max.apply(null, labels.map((l) => l.length));
+    const chartWidth = Math.max(10, width - labelWidth - 2);
+    const chart = braillePlot(series.map((s) => s.values), { width: chartWidth, height: height, min: yMin, max: yMax });
+
+    const rows = [];
+    for (let y = 0; y < height; y++) {
+      const segs = [[padLeft(labels[y], labelWidth) + " " + (y === height - 1 ? "┼" : "┤"), axisCls]];
+      // split the braille row into runs of equal owner so each run gets its series colour
+      let run = "";
+      let runOwner = null;
+      for (let x = 0; x < chartWidth; x++) {
+        const o = chart.owner[y][x];
+        if (o !== runOwner && run) {
+          segs.push([run, runOwner >= 0 ? seriesClass(runOwner) : ""]);
+          run = "";
+        }
+        runOwner = o;
+        run += chart.rows[y][x];
+      }
+      if (run) segs.push([run, runOwner >= 0 ? seriesClass(runOwner) : ""]);
+      rows.push(segs);
+    }
+    // x axis
+    rows.push([[" ".repeat(labelWidth + 1) + "└" + "─".repeat(chartWidth), axisCls]]);
+    const times = (series.find((s) => s.times && s.times.length) || {}).times;
+    if (times && times.length > 1) {
+      const t0 = formatTime(times[0]);
+      const t1 = formatTime(times[Math.floor((times.length - 1) / 2)]);
+      const t2 = formatTime(times[times.length - 1]);
+      const mid = Math.floor(chartWidth / 2) - Math.floor(t1.length / 2);
+      let axis = padRight(t0, Math.max(0, mid)) + t1;
+      axis = padRight(axis, Math.max(axis.length, chartWidth - t2.length)) + t2;
+      rows.push([[" ".repeat(labelWidth + 2) + axis, axisCls]]);
+    }
+    if (opts.legend !== false && series.length) {
+      const legend = [];
+      series.forEach((s, i) => {
+        const last = [].concat(s.values).reverse().find(Number.isFinite);
+        legend.push(["■ ", seriesClass(i)], [s.name + " " + (opts.formatLast || fmt)(last) + "   ", ""]);
+      });
+      rows.push([[" ".repeat(labelWidth + 2), ""]].concat(legend));
+    }
+    return rows;
+  }
+
+  function segmentsToText(rows) {
+    return rows.map((r) => r.map((s) => s[0]).join("").replace(/\s+$/, "")).join("\n");
+  }
+
+  function segmentsToHTML(rows) {
+    return rows
+      .map((r) =>
+        r
+          .map((s) => (s[1] ? '<span class="' + s[1] + '">' + escapeHtml(s[0]) + "</span>" : escapeHtml(s[0])))
+          .join("")
+      )
+      .join("\n");
   }
 
   // --- layout -------------------------------------------------------------
@@ -365,12 +576,18 @@
     padRight: padRight,
     center: center,
     escapeHtml: escapeHtml,
+    formatNumber: formatNumber,
+    formatTime: formatTime,
     bar: bar,
     meter: meter,
     sparkline: sparkline,
     resample: resample,
     edge: edge,
     vedge: vedge,
+    braillePlot: braillePlot,
+    lineChart: lineChart,
+    segmentsToText: segmentsToText,
+    segmentsToHTML: segmentsToHTML,
     box: box,
     table: table,
     statusBar: statusBar,

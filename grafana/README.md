@@ -7,17 +7,51 @@ grafana/
 ├─ docker-compose.yml            Grafana 12 + 프로비저닝 + ./plugins, ../src/tuiflow.js 마운트
 ├─ up.ps1                        Windows: WSL Docker Engine으로 기동/정지 (+ WSL keep-alive)
 ├─ fetch-plugins.ps1 / .sh       Business Text 플러그인을 호스트에서 ./plugins 로 다운로드
-├─ build-dashboard.js            business-text/* → provisioning/dashboards/tuiflow-demo.json
+├─ build-dashboard.js            business-text/* → provisioning/dashboards/*.json (demo, library)
+├─ build-library.js              business-text/* → library/*.json (라이브러리 패널 6종)
+├─ publish-library.js            library/*.json → Grafana /api/library-elements 에 upsert
 ├─ business-text/
-│  ├─ before.js                  "JavaScript code before content rendering": tuiflow import + Handlebars 헬퍼
+│  ├─ before.js                  Handlebars 헬퍼: 필드용(tfBar…) + 쿼리 무관 generic(tfTimeseries…)
 │  ├─ content.hbs                api-gateway 박스 (All data 모드, 3개 random_walk 쿼리)
 │  ├─ pods.hbs                   파드 테이블 (All rows 모드, csv_content 쿼리)
 │  ├─ after.js                   "JavaScript code after content ready": 점선 위 패킷 애니메이션
-│  └─ styles.css                 "Styles": 글꼴·팔레트
+│  └─ styles.css                 "Styles": 글꼴·팔레트·시리즈 색(tf-s0..5)
+├─ library/                      생성된 라이브러리 패널 JSON (tuiflow-timeseries, -stat, -bargauge, -gauge, -table, -flow)
 └─ provisioning/
    ├─ datasources/testdata.yaml  uid=testdata
-   └─ dashboards/                provider + 생성된 대시보드 JSON
+   └─ dashboards/                provider + tuiflow-demo.json + tuiflow-library.json
 ```
+
+## 라이브러리 패널 — 어떤 쿼리든 TUI로
+
+`{{{tfTimeseries}}}` `{{{tfStat}}}` `{{{tfBarGauge}}}` `{{{tfGauge}}}` `{{{tfTable}}}` 헬퍼는 필드 이름을 전혀 보지 않는다.
+`context.panelData.series`의 **숫자 필드 전부를 시리즈로** 삼고, Grafana 필드 설정(unit·decimals·min/max·thresholds·displayName·override)을 `field.display()`로 그대로 적용한다.
+그래서 쿼리만 바꾸면 기존 Time series / Stat / Bar gauge / Gauge / Table 패널이 TUI 룩이 된다.
+
+```bash
+npm run build              # library/*.json + provisioning/dashboards/*.json 재생성
+npm run publish:library    # 로컬 Grafana(admin/admin)에 6개 upsert
+# 다른 Grafana: GRAFANA_URL=https://… GRAFANA_TOKEN=glsa_… npm run publish:library
+```
+
+| 라이브러리 패널 | 대응 코어 패널 | Content |
+|---|---|---|
+| TUI Time series | Time series | `<pre class="tf">{{{tfTimeseries 90 14}}}</pre>` — 브라유(⣿) 라인 차트, y축 단위, 범례 |
+| TUI Stat | Stat | `{{{tfStat 28}}}` — 시리즈별 이름·스파크라인·값(임계값 색) |
+| TUI Bar gauge | Bar gauge | `{{{tfBarGauge 32}}}` — min/max 기준 블록 막대 |
+| TUI Gauge | Gauge | `{{{tfGauge 20}}}` — `[████░░] 62%` |
+| TUI Table | Table | `{{{tfTable 40}}}` — 첫 프레임을 표로, 숫자는 display 포맷 |
+| TUI Flow | (Canvas 대체) | `content.hbs` — 필드명 `rps`/`p95_ms`/`err_pct` 고정 |
+
+사용법 두 가지:
+
+1. 아무 대시보드에서 *Add → Import from library → TUI …* → (원하면 *Unlink*) → TestData 쿼리를 내 쿼리로 교체.
+2. 기존 패널을 그 자리에서 바꾸기: Visualization을 *Business Text*로 → Content에 `{{{tfTimeseries 90 14}}}` 한 줄 → "JavaScript code before content rendering"과 "Styles"에 `before.js`/`styles.css`를 붙여넣기. 쿼리·변수·시간범위는 그대로.
+
+괄호 안 숫자는 셀 단위 폭/높이다(패널 크기에 맞춰 조절). 자동 맞춤은 커스텀 패널 플러그인(로드맵)에서.
+라이브러리 패널은 Grafana가 파일 프로비저닝을 지원하지 않아 API로 넣는다(`publish-library.js`: 없으면 POST, 있으면 version 붙여 PATCH). `tuiflow-library` 대시보드는 uid 참조만 들고 있으므로 `publish:library` 뒤에 열어야 한다.
+
+`before.js`의 `import("/public/tuiflow.js?v=<package.json version>")` — 버전 쿼리는 빌드가 넣는다. 코어를 고치고 캐시가 남으면 `package.json` 버전을 올리고 `npm run build && npm run publish:library`.
 
 ## 실행
 

@@ -11,9 +11,10 @@
 
 | 경로 | 내용 |
 |---|---|
-| [`src/tuiflow.js`](src/tuiflow.js) | 코어. 의존성 0, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `Screen`(셀 그리드 → text/HTML) `animate` |
+| [`src/tuiflow.js`](src/tuiflow.js) | 코어. 의존성 0, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `braillePlot`/`lineChart`(⣿ 라인 차트, 시리즈별 색) `Screen`(셀 그리드 → text/HTML) `animate` |
 | [`demo/index.html`](demo/index.html) | 단독 데모(가짜 K8s 클러스터, 100×36 셀). 팔레트 3종(video/matrix/amber), CRT 오버레이, 전체화면, 프레임을 텍스트로 복사. 글꼴 동봉이라 오프라인 PC에서도 동작 |
 | [`grafana/`](grafana/) | Business Text 패널 소스(`before.js`/`content.hbs`/`pods.hbs`/`after.js`/`styles.css`) + TestData 기반 대시보드 JSON + WSL Docker 기동 스크립트. 사내 TLS 프록시·오프라인에서도 돌도록 플러그인은 호스트에서 받아 마운트 |
+| [`grafana/library/`](grafana/library/) | **라이브러리 패널 6종** (`TUI Time series` `Stat` `Bar gauge` `Gauge` `Table` `Flow`). 쿼리 무관 — 숫자 필드를 모두 시리즈로 삼고 Grafana 필드 설정(unit/thresholds/min·max)을 그대로 적용. `npm run publish:library`로 어떤 Grafana에든 등록 → *Import from library* → 쿼리만 교체 |
 | [`docs/research.md`](docs/research.md) | Grafana에서 TUI 룩을 내는 방법 전수 조사 (숨은 `matrix` 테마, Canvas 애니메이션 연결선, 플러그인, 터미널 도구, 라이브러리) |
 | [`docs/look-spec.md`](docs/look-spec.md) | 룩 정의서 — 글리프 어휘, 팔레트, 레이아웃·애니메이션 규칙, 타깃별 매핑 |
 | [`test/`](test/) | 코어 단위 테스트 + Business Text 템플릿을 플러그인과 같은 방식으로 렌더해 폭/헬퍼/정리 함수 검증 |
@@ -30,9 +31,13 @@ npm run serve            # python -m http.server 8787
 .\grafana\up.ps1               # → http://localhost:3000/d/tuiflow-demo/?theme=matrix  (admin/admin)
 #    Linux/macOS: bash grafana/fetch-plugins.sh && (cd grafana && docker compose up -d)
 
-# 3) 테스트 / 대시보드 JSON 재생성
+# 3) 라이브러리 패널 등록 (기존 차트를 TUI로 바꿔 쓰기)
+npm run publish:library        # → http://localhost:3000/d/tuiflow-library/?theme=matrix
+#    다른 Grafana: GRAFANA_URL=https://… GRAFANA_TOKEN=glsa_… npm run publish:library
+
+# 4) 테스트 / JSON 재생성
 npm install && npm test
-npm run build:dashboard
+npm run build                  # dashboards + library
 ```
 
 ## 코어 사용 예
@@ -59,10 +64,11 @@ Grafana에서는 같은 함수를 Handlebars 헬퍼로 감싼다 → [`grafana/b
 ## 로드맵
 
 - [x] 0.1 — 조사 정리, 코어 프리미티브, 단독 데모, Business Text 레시피 + TestData 대시보드
-- [ ] 0.2 — 코어: 꺾이는 연결선(`┐└┘` 라우팅), 세로 막대, 게이지, 상태 태그 헬퍼, `Scene` 선언형 레이아웃(JSON → Screen)
-- [ ] 0.3 — Grafana: Prometheus 쿼리 예제(kube-state-metrics), Canvas 패널 연결선 애니메이션 예제 JSON, `?theme=matrix` 키오스크 가이드
+- [x] 0.2 — 브라유 라인 차트(`lineChart`), 쿼리 무관 generic 헬퍼 5종, 라이브러리 패널 6종 + API 등록 스크립트, WSL Docker 기동 스크립트
+- [ ] 0.3 — 코어: 꺾이는 연결선(`┐└┘` 라우팅), 세로 막대, `Scene` 선언형 레이아웃(JSON → Screen); Grafana: Prometheus/kube-state-metrics 쿼리 예제, Canvas 연결선 애니메이션 예제
 - [ ] 0.4 — 프레젠테이션: 슬라이드 모드(장면 전환, 타이핑 효과, 스크립트된 이벤트), 녹화용 결정적 시드, PNG/SVG 내보내기
 - [ ] 0.5 — VS Code 확장: Webview 패널에 `tuiflow.js` + `--vscode-*` 테마 토큰 매핑, 워크스페이스 JSON 장면 파일 미리보기
+- [ ] 0.6 — 커스텀 패널 플러그인 `tuiflow-panel`: Visualization 피커에 TUI Time series/Stat/…, 패널 크기 자동 맞춤, 옵션 UI(글리프·팔레트·패킷 속도)
 - [ ] 1.0 — 실제 클러스터 연결(Prometheus HTTP API 직접 호출 모드), 설정 스키마, 문서 사이트
 
 ## 라이선스

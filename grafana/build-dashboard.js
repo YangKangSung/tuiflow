@@ -13,7 +13,8 @@ const fs = require("fs");
 const path = require("path");
 
 const here = __dirname;
-const read = (f) => fs.readFileSync(path.join(here, "business-text", f), "utf8");
+const version = require("../package.json").version;
+const read = (f) => fs.readFileSync(path.join(here, "business-text", f), "utf8").replace(/__TF_VERSION__/g, version);
 
 const TESTDATA = { type: "grafana-testdata-datasource", uid: "testdata" };
 
@@ -133,8 +134,59 @@ const dashboard = {
   ],
 };
 
+// Second dashboard: nothing but references to the library panels published by
+// publish-library.js. Grafana resolves them at load time, so this file stays
+// tiny and every panel updates when the library element does.
+const libRef = (id, uid, name, gridPos) => ({ id, gridPos, libraryPanel: { uid, name }, title: name });
+const libraryDashboard = {
+  uid: "tuiflow-library",
+  title: "tuiflow · library panels (any query → TUI)",
+  description: "Each panel is a tuiflow library panel. Run `node grafana/publish-library.js` first.",
+  tags: ["tuiflow", "library"],
+  timezone: "browser",
+  editable: true,
+  graphTooltip: 0,
+  schemaVersion: 39,
+  version: 1,
+  refresh: "10s",
+  time: { from: "now-1h", to: "now" },
+  templating: { list: [] },
+  annotations: { list: [] },
+  links: [{ title: "open with matrix theme", type: "link", url: "/d/tuiflow-library/?theme=matrix", icon: "external link" }],
+  panels: [
+    libRef(1, "tuiflow-timeseries", "TUI Time series", { x: 0, y: 0, w: 14, h: 11 }),
+    libRef(2, "tuiflow-stat", "TUI Stat", { x: 14, y: 0, w: 10, h: 5 }),
+    libRef(3, "tuiflow-bargauge", "TUI Bar gauge", { x: 14, y: 5, w: 10, h: 6 }),
+    libRef(4, "tuiflow-gauge", "TUI Gauge", { x: 0, y: 11, w: 8, h: 6 }),
+    libRef(5, "tuiflow-table", "TUI Table", { x: 8, y: 11, w: 16, h: 6 }),
+    libRef(6, "tuiflow-flow", "TUI Flow (api-gateway box)", { x: 0, y: 17, w: 12, h: 11 }),
+    {
+      id: 7,
+      type: "text",
+      title: "",
+      gridPos: { x: 12, y: 17, w: 12, h: 11 },
+      options: {
+        mode: "markdown",
+        content: [
+          "**Use these anywhere**: in any dashboard, *Add → Import from library* → pick a `TUI …` panel → *Unlink* (optional) → replace the TestData queries with your own.",
+          "",
+          "- The templates don't care about field names: every numeric field becomes a series; Grafana field config (unit, decimals, min/max, thresholds, display name) is honoured.",
+          "- Convert an existing panel: change its visualization to *Business Text*, paste `{{{tfTimeseries 90 14}}}` (or `tfStat` / `tfBarGauge` / `tfGauge` / `tfTable`) as Content and the helpers/styles from a TUI panel. Queries stay as they are.",
+          "- Numbers in the braces are cell widths/heights. Pick them for the panel size; auto-fit comes with the panel plugin.",
+          "- Reopen with [`?theme=matrix`](/d/tuiflow-library/?theme=matrix).",
+        ].join("\n"),
+      },
+    },
+  ],
+};
+
 const outDir = path.join(here, "provisioning", "dashboards");
 fs.mkdirSync(outDir, { recursive: true });
-const outFile = path.join(outDir, "tuiflow-demo.json");
-fs.writeFileSync(outFile, JSON.stringify(dashboard, null, 2) + "\n");
-console.log("wrote", path.relative(process.cwd(), outFile));
+[
+  ["tuiflow-demo.json", dashboard],
+  ["tuiflow-library.json", libraryDashboard],
+].forEach(([name, json]) => {
+  const outFile = path.join(outDir, name);
+  fs.writeFileSync(outFile, JSON.stringify(json, null, 2) + "\n");
+  console.log("wrote", path.relative(process.cwd(), outFile));
+});

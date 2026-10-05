@@ -1,0 +1,134 @@
+{
+  "uid": "tuiflow-library",
+  "title": "tuiflow · library panels (any query → TUI)",
+  "description": "Each panel is a tuiflow library panel. Run `node grafana/publish-library.js` first.",
+  "tags": [
+    "tuiflow",
+    "library"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "open with matrix theme",
+      "type": "link",
+      "url": "/d/tuiflow-library/?theme=matrix",
+      "icon": "external link"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-timeseries",
+        "name": "TUI Time series"
+      },
+      "title": "TUI Time series"
+    },
+    {
+      "id": 2,
+      "gridPos": {
+        "x": 14,
+        "y": 0,
+        "w": 10,
+        "h": 5
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-stat",
+        "name": "TUI Stat"
+      },
+      "title": "TUI Stat"
+    },
+    {
+      "id": 3,
+      "gridPos": {
+        "x": 14,
+        "y": 5,
+        "w": 10,
+        "h": 6
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-bargauge",
+        "name": "TUI Bar gauge"
+      },
+      "title": "TUI Bar gauge"
+    },
+    {
+      "id": 4,
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 8,
+        "h": 6
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-gauge",
+        "name": "TUI Gauge"
+      },
+      "title": "TUI Gauge"
+    },
+    {
+      "id": 5,
+      "gridPos": {
+        "x": 8,
+        "y": 11,
+        "w": 16,
+        "h": 6
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-table",
+        "name": "TUI Table"
+      },
+      "title": "TUI Table"
+    },
+    {
+      "id": 6,
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 12,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-flow",
+        "name": "TUI Flow (api-gateway box)"
+      },
+      "title": "TUI Flow (api-gateway box)"
+    },
+    {
+      "id": 7,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 12,
+        "h": 11
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Use these anywhere**: in any dashboard, *Add → Import from library* → pick a `TUI …` panel → *Unlink* (optional) → replace the TestData queries with your own.\n\n- The templates don't care about field names: every numeric field becomes a series; Grafana field config (unit, decimals, min/max, thresholds, display name) is honoured.\n- Convert an existing panel: change its visualization to *Business Text*, paste `{{{tfTimeseries 90 14}}}` (or `tfStat` / `tfBarGauge` / `tfGauge` / `tfTable`) as Content and the helpers/styles from a TUI panel. Queries stay as they are.\n- Numbers in the braces are cell widths/heights. Pick them for the panel size; auto-fit comes with the panel plugin.\n- Reopen with [`?theme=matrix`](/d/tuiflow-library/?theme=matrix)."
+      }
+    }
+  ]
+}
