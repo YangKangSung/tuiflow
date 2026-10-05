@@ -1,7 +1,7 @@
 {
   "uid": "tuiflow-library",
   "title": "tuiflow · library panels (any query → TUI)",
-  "description": "Each panel is a tuiflow library panel. Run `node grafana/publish-library.js` first.",
+  "description": "Each panel is a tuiflow library panel. Run `npm run publish:library` first.",
   "tags": [
     "tuiflow",
     "library"
@@ -28,6 +28,13 @@
       "type": "link",
       "url": "/d/tuiflow-library/?theme=matrix",
       "icon": "external link"
+    },
+    {
+      "title": "kiosk + matrix",
+      "type": "link",
+      "url": "/d/tuiflow-library/?theme=matrix&kiosk",
+      "targetBlank": true,
+      "icon": "external link"
     }
   ],
   "panels": [
@@ -36,8 +43,8 @@
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 14,
-        "h": 11
+        "w": 12,
+        "h": 10
       },
       "libraryPanel": {
         "uid": "tuiflow-timeseries",
@@ -48,10 +55,52 @@
     {
       "id": 2,
       "gridPos": {
-        "x": 14,
+        "x": 12,
         "y": 0,
-        "w": 10,
-        "h": 5
+        "w": 12,
+        "h": 10
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-trend",
+        "name": "TUI Trend"
+      },
+      "title": "TUI Trend"
+    },
+    {
+      "id": 3,
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-barchart",
+        "name": "TUI Bar chart"
+      },
+      "title": "TUI Bar chart"
+    },
+    {
+      "id": 4,
+      "gridPos": {
+        "x": 12,
+        "y": 10,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-columns",
+        "name": "TUI Columns (vertical bars)"
+      },
+      "title": "TUI Columns (vertical bars)"
+    },
+    {
+      "id": 5,
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 7
       },
       "libraryPanel": {
         "uid": "tuiflow-stat",
@@ -60,26 +109,12 @@
       "title": "TUI Stat"
     },
     {
-      "id": 3,
+      "id": 6,
       "gridPos": {
-        "x": 14,
-        "y": 5,
-        "w": 10,
-        "h": 6
-      },
-      "libraryPanel": {
-        "uid": "tuiflow-bargauge",
-        "name": "TUI Bar gauge"
-      },
-      "title": "TUI Bar gauge"
-    },
-    {
-      "id": 4,
-      "gridPos": {
-        "x": 0,
-        "y": 11,
-        "w": 8,
-        "h": 6
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 7
       },
       "libraryPanel": {
         "uid": "tuiflow-gauge",
@@ -88,12 +123,26 @@
       "title": "TUI Gauge"
     },
     {
-      "id": 5,
+      "id": 7,
       "gridPos": {
-        "x": 8,
-        "y": 11,
-        "w": 16,
-        "h": 6
+        "x": 0,
+        "y": 25,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-bargauge",
+        "name": "TUI Bar gauge"
+      },
+      "title": "TUI Bar gauge"
+    },
+    {
+      "id": 8,
+      "gridPos": {
+        "x": 12,
+        "y": 25,
+        "w": 12,
+        "h": 8
       },
       "libraryPanel": {
         "uid": "tuiflow-table",
@@ -102,10 +151,262 @@
       "title": "TUI Table"
     },
     {
-      "id": 6,
+      "id": 9,
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 33,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-piechart",
+        "name": "TUI Pie chart"
+      },
+      "title": "TUI Pie chart"
+    },
+    {
+      "id": 10,
+      "gridPos": {
+        "x": 12,
+        "y": 33,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-state-timeline",
+        "name": "TUI State timeline"
+      },
+      "title": "TUI State timeline"
+    },
+    {
+      "id": 11,
+      "gridPos": {
+        "x": 0,
+        "y": 41,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-status-history",
+        "name": "TUI Status history"
+      },
+      "title": "TUI Status history"
+    },
+    {
+      "id": 12,
+      "gridPos": {
+        "x": 12,
+        "y": 41,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-heatmap",
+        "name": "TUI Heatmap"
+      },
+      "title": "TUI Heatmap"
+    },
+    {
+      "id": 13,
+      "gridPos": {
+        "x": 0,
+        "y": 50,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-histogram",
+        "name": "TUI Histogram"
+      },
+      "title": "TUI Histogram"
+    },
+    {
+      "id": 14,
+      "gridPos": {
+        "x": 12,
+        "y": 50,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-candlestick",
+        "name": "TUI Candlestick"
+      },
+      "title": "TUI Candlestick"
+    },
+    {
+      "id": 15,
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-xychart",
+        "name": "TUI XY chart"
+      },
+      "title": "TUI XY chart"
+    },
+    {
+      "id": 16,
+      "gridPos": {
+        "x": 12,
+        "y": 59,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-logs",
+        "name": "TUI Logs"
+      },
+      "title": "TUI Logs"
+    },
+    {
+      "id": 17,
+      "gridPos": {
+        "x": 0,
+        "y": 68,
+        "w": 12,
+        "h": 10
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-nodegraph",
+        "name": "TUI Node graph"
+      },
+      "title": "TUI Node graph"
+    },
+    {
+      "id": 18,
+      "gridPos": {
+        "x": 12,
+        "y": 68,
+        "w": 12,
+        "h": 10
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-traces",
+        "name": "TUI Traces"
+      },
+      "title": "TUI Traces"
+    },
+    {
+      "id": 19,
+      "gridPos": {
+        "x": 0,
+        "y": 78,
+        "w": 12,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-flamegraph",
+        "name": "TUI Flame graph"
+      },
+      "title": "TUI Flame graph"
+    },
+    {
+      "id": 20,
+      "gridPos": {
+        "x": 12,
+        "y": 78,
+        "w": 12,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-canvas",
+        "name": "TUI Canvas"
+      },
+      "title": "TUI Canvas"
+    },
+    {
+      "id": 21,
+      "gridPos": {
+        "x": 0,
+        "y": 89,
+        "w": 12,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-geomap",
+        "name": "TUI Geomap"
+      },
+      "title": "TUI Geomap"
+    },
+    {
+      "id": 22,
+      "gridPos": {
+        "x": 12,
+        "y": 89,
+        "w": 12,
+        "h": 11
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-alertlist",
+        "name": "TUI Alert list"
+      },
+      "title": "TUI Alert list"
+    },
+    {
+      "id": 23,
+      "gridPos": {
+        "x": 0,
+        "y": 100,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-dashlist",
+        "name": "TUI Dashboard list"
+      },
+      "title": "TUI Dashboard list"
+    },
+    {
+      "id": 24,
+      "gridPos": {
+        "x": 12,
+        "y": 100,
+        "w": 12,
+        "h": 8
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-annolist",
+        "name": "TUI Annotations list"
+      },
+      "title": "TUI Annotations list"
+    },
+    {
+      "id": 25,
+      "gridPos": {
+        "x": 0,
+        "y": 108,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-text",
+        "name": "TUI Text"
+      },
+      "title": "TUI Text"
+    },
+    {
+      "id": 26,
+      "gridPos": {
+        "x": 12,
+        "y": 108,
+        "w": 12,
+        "h": 9
+      },
+      "libraryPanel": {
+        "uid": "tuiflow-news",
+        "name": "TUI News"
+      },
+      "title": "TUI News"
+    },
+    {
+      "id": 27,
+      "gridPos": {
+        "x": 0,
+        "y": 117,
         "w": 12,
         "h": 11
       },
@@ -116,18 +417,18 @@
       "title": "TUI Flow (api-gateway box)"
     },
     {
-      "id": 7,
+      "id": 28,
       "type": "text",
       "title": "",
       "gridPos": {
         "x": 12,
-        "y": 17,
+        "y": 117,
         "w": 12,
         "h": 11
       },
       "options": {
         "mode": "markdown",
-        "content": "**Use these anywhere**: in any dashboard, *Add → Import from library* → pick a `TUI …` panel → *Unlink* (optional) → replace the TestData queries with your own.\n\n- The templates don't care about field names: every numeric field becomes a series; Grafana field config (unit, decimals, min/max, thresholds, display name) is honoured.\n- Convert an existing panel: change its visualization to *Business Text*, paste `{{{tfTimeseries 90 14}}}` (or `tfStat` / `tfBarGauge` / `tfGauge` / `tfTable`) as Content and the helpers/styles from a TUI panel. Queries stay as they are.\n- Numbers in the braces are cell widths/heights. Pick them for the panel size; auto-fit comes with the panel plugin.\n- Reopen with [`?theme=matrix`](/d/tuiflow-library/?theme=matrix)."
+        "content": "**Use these anywhere**: in any dashboard, *Add → Import from library* → pick a `TUI …` panel → *Unlink* (optional) → replace the sample queries with your own.\n\n- Templates don't care about field names: numeric fields become series, the first string field becomes categories; Grafana field config (unit, decimals, min/max, thresholds, display name) is honoured.\n- Convert an existing panel in place: change its visualization to *Business Text*, paste the one-line Content (e.g. `{{{tfTimeseries 90 14}}}`) and the helpers/styles from any TUI panel. Queries stay as they are.\n- Numbers in the braces are cell widths/heights — pick them for the panel size; auto-fit comes with the panel plugin.\n- Compare with stock panels: [before / after](/d/tuiflow-before-after/?theme=matrix)."
       }
     }
   ]

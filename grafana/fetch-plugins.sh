@@ -8,8 +8,9 @@
 # the proxy CA, so download here and bind-mount the result. This also makes
 # the stack work on an air-gapped machine: copy grafana/plugins/ along.
 #
-#   bash grafana/fetch-plugins.sh            # latest
+#   bash grafana/fetch-plugins.sh            # 6.1.0 — last line that loads on Grafana 12.2
 #   bash grafana/fetch-plugins.sh 6.3.0      # pin a version
+# 6.3.0 declares grafanaDependency >=12.3.0; Grafana 12.2 then disables the plugin.
 #
 # On Windows use fetch-plugins.ps1 instead (some proxies reset curl from WSL
 # while the Windows HTTP stack goes through).
@@ -17,7 +18,7 @@ set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 dest="$here/plugins"
-version="${1:-latest}"
+version="${1:-6.1.0}"
 plugins=(marcusolsson-dynamictext-panel)
 github_fallback_tag="v6.1.0"
 

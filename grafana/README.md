@@ -8,7 +8,7 @@ grafana/
 ├─ up.ps1                        Windows: WSL Docker Engine으로 기동/정지 (+ WSL keep-alive)
 ├─ fetch-plugins.ps1 / .sh       Business Text 플러그인을 호스트에서 ./plugins 로 다운로드
 ├─ build-dashboard.js            business-text/* → provisioning/dashboards/*.json (demo, library)
-├─ build-library.js              business-text/* → library/*.json (라이브러리 패널 6종)
+├─ build-library.js              business-text/* → library/*.json (공식 visualization 25종 + Flow/Columns)
 ├─ publish-library.js            library/*.json → Grafana /api/library-elements 에 upsert
 ├─ business-text/
 │  ├─ before.js                  Handlebars 헬퍼: 필드용(tfBar…) + 쿼리 무관 generic(tfTimeseries…)
@@ -16,7 +16,8 @@ grafana/
 │  ├─ pods.hbs                   파드 테이블 (All rows 모드, csv_content 쿼리)
 │  ├─ after.js                   "JavaScript code after content ready": 점선 위 패킷 애니메이션
 │  └─ styles.css                 "Styles": 글꼴·팔레트·시리즈 색(tf-s0..5)
-├─ library/                      생성된 라이브러리 패널 JSON (tuiflow-timeseries, -stat, -bargauge, -gauge, -table, -flow)
+├─ catalog.js                    공식 visualization 1:1 카탈로그 (헬퍼·샘플 쿼리·stock 옵션)
+├─ library/                      생성된 라이브러리 패널 JSON (공식 25종 + Columns + Flow)
 └─ provisioning/
    ├─ datasources/testdata.yaml  uid=testdata
    └─ dashboards/                provider + tuiflow-demo.json + tuiflow-library.json
@@ -24,24 +25,34 @@ grafana/
 
 ## 라이브러리 패널 — 어떤 쿼리든 TUI로
 
-`{{{tfTimeseries}}}` `{{{tfStat}}}` `{{{tfBarGauge}}}` `{{{tfGauge}}}` `{{{tfTable}}}` 헬퍼는 필드 이름을 전혀 보지 않는다.
+`{{{tfTimeseries}}}` 등 generic 헬퍼는 필드 이름을 전혀 보지 않는다.
 `context.panelData.series`의 **숫자 필드 전부를 시리즈로** 삼고, Grafana 필드 설정(unit·decimals·min/max·thresholds·displayName·override)을 `field.display()`로 그대로 적용한다.
-그래서 쿼리만 바꾸면 기존 Time series / Stat / Bar gauge / Gauge / Table 패널이 TUI 룩이 된다.
+그래서 쿼리만 바꾸면 [공식 visualization 25종](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/)이 같은 TUI 톤으로 나온다.
 
 ```bash
 npm run build              # library/*.json + provisioning/dashboards/*.json 재생성
-npm run publish:library    # 로컬 Grafana(admin/admin)에 6개 upsert
+npm run publish:library    # 로컬 Grafana(admin/admin)에 카탈로그 upsert
 # 다른 Grafana: GRAFANA_URL=https://… GRAFANA_TOKEN=glsa_… npm run publish:library
 ```
 
 | 라이브러리 패널 | 대응 코어 패널 | Content |
 |---|---|---|
-| TUI Time series | Time series | `<pre class="tf">{{{tfTimeseries 90 14}}}</pre>` — 브라유(⣿) 라인 차트, y축 단위, 범례 |
-| TUI Stat | Stat | `{{{tfStat 28}}}` — 시리즈별 이름·스파크라인·값(임계값 색) |
-| TUI Bar gauge | Bar gauge | `{{{tfBarGauge 32}}}` — min/max 기준 블록 막대 |
-| TUI Gauge | Gauge | `{{{tfGauge 20}}}` — `[████░░] 62%` |
-| TUI Table | Table | `{{{tfTable 40}}}` — 첫 프레임을 표로, 숫자는 display 포맷 |
-| TUI Flow | (Canvas 대체) | `content.hbs` — 필드명 `rps`/`p95_ms`/`err_pct` 고정 |
+| TUI Time series | Time series | `{{{tfTimeseries 90 14}}}` — 브라유(⣿) 라인 차트 |
+| TUI Trend | Trend | `{{{tfTrend 80 12}}}` — 숫자 x축 라인 |
+| TUI Bar chart / Columns | Bar chart | `{{{tfBarChart 36}}}` / `{{{tfColumns 9 6}}}` |
+| TUI Stat / Gauge / Bar gauge | Stat / Gauge / Bar gauge | `{{{tfStat}}}` `{{{tfGauge}}}` `{{{tfBarGauge}}}` |
+| TUI Table | Table | `{{{tfTable 40}}}` |
+| TUI Pie chart | Pie chart | `{{{tfPie 6 0}}}` — 브라유 원반 |
+| TUI State timeline / Status history | State timeline / Status history | `{{{tfStateTimeline}}}` `{{{tfStatusHistory}}}` |
+| TUI Heatmap / Histogram | Heatmap / Histogram | `{{{tfHeatmap}}}` `{{{tfHistogram}}}` |
+| TUI Candlestick / XY | Candlestick / XY chart | `{{{tfCandlestick}}}` `{{{tfXY}}}` |
+| TUI Logs / Traces / Node graph | Logs / Traces / Node graph | `{{{tfLogs}}}` `{{{tfTraces}}}` `{{{tfNodeGraph}}}` |
+| TUI Flame graph | Flame graph | `{{{tfFlame 48}}}` — 레벨 들여쓰기 + 스캔 |
+| TUI Canvas | Canvas | `{{{tfCanvas 30}}}` — 점선 박스 + `.o@` 패킷 |
+| TUI Geomap | Geomap | `{{{tfGeomap 56 10}}}` — lat/lon `*` |
+| TUI Alert / Dashboard / Annotations list | Alert / Dashboard / Annotations list | `{{{tfAlertList}}}` `{{{tfDashboardList}}}` `{{{tfAnnotations}}}` |
+| TUI Text / News | Text / News | `{{{tfText}}}` `{{{tfNews}}}` |
+| TUI Flow | (커스텀) | `content.hbs` — 필드명 `rps`/`p95_ms`/`err_pct` 고정 |
 
 사용법 두 가지:
 

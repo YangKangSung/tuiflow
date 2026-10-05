@@ -3,10 +3,12 @@
 # Grafana container never has to reach grafana.com. Falls back to the GitHub
 # release asset when grafana.com is blocked.
 #
-#   .\grafana\fetch-plugins.ps1            # latest from grafana.com
+#   .\grafana\fetch-plugins.ps1            # 6.1.0 — last line that loads on Grafana 12.2
 #   .\grafana\fetch-plugins.ps1 -Version 6.3.0
+# 6.3.0 declares grafanaDependency >=12.3.0 and Grafana 12.2 silently disables it
+# (empty dashboards, no Business Text panels). Pin until the compose image is bumped.
 param(
-  [string]$Version = "latest",
+  [string]$Version = "6.1.0",
   [string]$GitHubFallbackTag = "v6.1.0"
 )
 $ErrorActionPreference = "Stop"

@@ -1,6 +1,6 @@
 {
   "name": "tuiflow",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "private": true,
   "description": "TUI-style animated dashboards (box drawing, block bars, flowing packets) for Grafana, VS Code and presentations",
   "main": "src/tuiflow.js",

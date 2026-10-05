@@ -53,3 +53,36 @@ test("Screen renders text and colour-classed HTML with escaping", () => {
   assert.equal(s.toText(), "<b>&ok\n");
   assert.equal(s.toHTML().split("\n")[0], '<span class="c-x">&lt;b&gt;</span>&amp;ok      ');
 });
+
+test("flame indents children and keeps bar width = avail", () => {
+  const fl = tf.flame(
+    [
+      { label: "total", level: 0, value: 100 },
+      { label: "child", level: 1, value: 40 },
+    ],
+    { width: 20, labelWidth: 6 }
+  );
+  assert.equal(fl.total, 100);
+  assert.equal(fl.rows[0].indent, 0);
+  assert.equal(fl.rows[1].indent, 2);
+  assert.equal(width(fl.rows[0].bar), 20);
+  assert.equal(width(fl.rows[1].bar), 18);
+  assert.ok(fl.rows[0].bar.startsWith("█"));
+  assert.ok(fl.rows[1].pct < fl.rows[0].pct);
+});
+
+test("geoPlot places * at lat/lon and keeps a rectangular grid", () => {
+  const g = tf.geoPlot(
+    [
+      { label: "Seoul", lat: 37.57, lon: 126.98 },
+      { label: "Virginia", lat: 39.04, lon: -77.49 },
+    ],
+    { width: 36, height: 8 }
+  );
+  assert.equal(g.rows.length, 8);
+  g.rows.forEach((r) => assert.equal(width(r), 36));
+  const marks = g.rows.join("").split("*").length - 1;
+  assert.equal(marks, 2);
+  const owners = g.owner.flat();
+  assert.ok(owners.includes(0) && owners.includes(1));
+});

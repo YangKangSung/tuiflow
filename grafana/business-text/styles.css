@@ -20,6 +20,14 @@
 .tf .tf-ok { color: #86d28a; }
 .tf .tf-warn { color: #e8a06a; }
 .tf .tf-crit { color: #e06c75; }
+.tf .tf-border { opacity: 0.6; }
+.tf .tf-up { color: #86d28a; }
+.tf .tf-down { color: #e06c75; }
+/* heatmap density levels */
+.tf .tf-h1 { color: #4b5563; }
+.tf .tf-h2 { color: #8fb3ff; }
+.tf .tf-h3 { color: #e8a06a; }
+.tf .tf-h4 { color: #ffd27a; }
 /* series colours for tfTimeseries / tfStat (cycle of 6) */
 .tf .tf-s0 { color: #e8a06a; }
 .tf .tf-s1 { color: #8fb3ff; }
@@ -27,6 +35,18 @@
 .tf .tf-s3 { color: #c792ea; }
 .tf .tf-s4 { color: #e06c75; }
 .tf .tf-s5 { color: #9aa0a6; }
+
+/* flame scan, geomap ping, CRT cursor */
+.tf .tf-scan { color: #ffd27a; }
+.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }
+.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }
+@keyframes tf-ping {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+@keyframes tf-blink {
+  50% { opacity: 0; }
+}
 
 /* Opt-in "video palette" regardless of Grafana theme: class="tf tf-video" */
 .tf-video { color: #c9ced6; background: #0f1218; }
