@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "Tuiflow",
+  "id": "yangkangsung-tuiflow-panel",
+  "info": {
+    "keywords": ["panel", "tui", "terminal", "chart"],
+    "description": "Terminal-style charts for any Grafana query: braille time series, bars, gauges, tables, logs, maps and the rest of the core visualizations.",
+    "author": {
+      "name": "YangKangSung",
+      "url": "https://github.com/YangKangSung/tuiflow"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      { "name": "Project", "url": "https://github.com/YangKangSung/tuiflow" }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=11.0.0",
+    "plugins": []
+  }
+}

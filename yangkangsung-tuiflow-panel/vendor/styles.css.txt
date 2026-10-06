@@ -1,0 +1,52 @@
+/* Business Text panel → "Styles"
+ * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)
+ * and block elements (U+2580–259F); mixed fonts break the grid. */
+.tf {
+  font-family: "JetBrains Mono", "Cascadia Mono", "Fira Code", "DejaVu Sans Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.25;
+  margin: 0;
+  padding: 8px 10px;
+  white-space: pre;
+  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;
+     only semantic accents below get fixed colours. */
+  color: inherit;
+  background: transparent;
+}
+.tf .tf-edge { color: #e8a06a; font-weight: 700; }
+.tf .tf-dim { opacity: 0.55; }
+.tf .tf-axis { opacity: 0.45; }
+.tf .tf-value { font-weight: 700; }
+.tf .tf-ok { color: #86d28a; }
+.tf .tf-warn { color: #e8a06a; }
+.tf .tf-crit { color: #e06c75; }
+.tf .tf-border { opacity: 0.6; }
+.tf .tf-up { color: #86d28a; }
+.tf .tf-down { color: #e06c75; }
+/* heatmap density levels */
+.tf .tf-h1 { color: #4b5563; }
+.tf .tf-h2 { color: #8fb3ff; }
+.tf .tf-h3 { color: #e8a06a; }
+.tf .tf-h4 { color: #ffd27a; }
+/* series colours for tfTimeseries / tfStat (cycle of 6) */
+.tf .tf-s0 { color: #e8a06a; }
+.tf .tf-s1 { color: #8fb3ff; }
+.tf .tf-s2 { color: #86d28a; }
+.tf .tf-s3 { color: #c792ea; }
+.tf .tf-s4 { color: #e06c75; }
+.tf .tf-s5 { color: #9aa0a6; }
+
+/* flame scan, geomap ping, CRT cursor */
+.tf .tf-scan { color: #ffd27a; }
+.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }
+.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }
+@keyframes tf-ping {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+@keyframes tf-blink {
+  50% { opacity: 0; }
+}
+
+/* Opt-in "video palette" regardless of Grafana theme: class="tf tf-video" */
+.tf-video { color: #c9ced6; background: #0f1218; }
