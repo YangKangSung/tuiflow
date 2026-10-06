@@ -185,7 +185,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**tuiflow** — every panel above is plain text: box drawing, `█▓░` bars, `▁▂▃▅▇` sparklines and a `.o@` packet travelling on a dashed edge, rendered by a Business Text panel.\n\n- Full terminal look: reopen this dashboard with [`?theme=matrix`](/d/tuiflow-demo/?theme=matrix) (hidden built-in Grafana theme: monospace font, no rounded corners).\n- Every official Grafana visualization as TUI: [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix).\n- Sources: `grafana/business-text/*.{js,hbs,css}` → `npm run build` regenerates this JSON. Core library: `/public/tuiflow.js`."
+        "content": "**tuiflow** — every panel above is plain text: box drawing, `█▓░` bars, `▁▂▃▅▇` sparklines and a `.o@` packet travelling on a dashed edge, rendered by a Business Text panel.\n\n- Full terminal look: reopen this dashboard with [`?theme=matrix`](/d/tuiflow-demo/?theme=matrix) (hidden built-in Grafana theme: monospace font, no rounded corners).\n- Every panel on one page: [gallery](/d/tuiflow-gallery/?theme=matrix) · [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix).\n- Sources: `grafana/business-text/*.{js,hbs,css}` → `npm run build` regenerates this JSON. Core library: `/public/tuiflow.js`."
       }
     }
   ]

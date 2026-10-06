@@ -13,7 +13,8 @@ Reference look: [X video (eng_khairallah1)](https://x.com/eng_khairallah1/status
 |---|---|
 | [`src/tuiflow.js`](src/tuiflow.js) | Core. Zero dependencies, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `braillePlot`/`lineChart`/`flame`/`geoPlot` `Screen` `animate` |
 | [`demo/index.html`](demo/index.html) | Standalone demo (fake K8s cluster, 100×36 cells). Three palettes (video/matrix/amber), CRT overlay, fullscreen, copy the frame as text. The font is bundled, so it works on an offline PC |
-| [`grafana/`](grafana/) | Business Text panel sources + three TestData dashboards (demo / library / before-after) + a WSL Docker start script. Plugins are downloaded on the host and mounted, so the stack also runs behind a TLS-inspecting proxy and offline |
+| [`grafana/`](grafana/) | Business Text panel sources + TestData dashboards + a WSL Docker start script. Plugins are downloaded on the host and mounted, so the stack also runs behind a TLS-inspecting proxy and offline |
+| [`tuiflow-tui-panel/`](tuiflow-tui-panel/) | Grafana panel plugin. Visualization list name **tuiflow**. `npm run plugin:pack` builds a catalog zip. Not submitted to grafana.com |
 | [`grafana/library/`](grafana/library/) | **The 25 official Grafana visualizations, plus Flow and Columns**, in the same TUI tone. Query-agnostic: every numeric field is a series, and Grafana field config is applied as-is. `npm run publish:library` → *Import from library* → swap the query |
 | [`grafana/catalog.js`](grafana/catalog.js) | 1:1 catalogue of the [official visualization list](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/) |
 | [`docs/research.md`](docs/research.md) | Survey of every way to get a TUI look in Grafana (hidden `matrix` theme, animated Canvas connections, plugins, terminal tools, libraries) |

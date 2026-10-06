@@ -4,9 +4,11 @@
  * from the Business Text sources and the panel catalogue (catalog.js):
  *
  *   tuiflow-demo.json          hand-made flow box + pods table
+ *   tuiflow-gallery.json       every catalogue panel, inlined (no library publish)
  *   tuiflow-library.json       references to every library panel (uid only)
  *   tuiflow-before-after.json  stock Grafana panel on the left, same query +
  *                              same fieldConfig rendered by tuiflow on the right
+ *   tuiflow-plugin.json        every catalogue example on the panel plugin
  *
  *   node grafana/build-dashboard.js
  *
@@ -102,10 +104,47 @@ const demo = base(
       "**tuiflow** — every panel above is plain text: box drawing, `█▓░` bars, `▁▂▃▅▇` sparklines and a `.o@` packet travelling on a dashed edge, rendered by a Business Text panel.",
       "",
       "- Full terminal look: reopen this dashboard with [`?theme=matrix`](/d/tuiflow-demo/?theme=matrix) (hidden built-in Grafana theme: monospace font, no rounded corners).",
-      "- Every official Grafana visualization as TUI: [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix).",
+      "- Every panel on one page: [gallery](/d/tuiflow-gallery/?theme=matrix) · [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix).",
       "- Sources: `grafana/business-text/*.{js,hbs,css}` → `npm run build` regenerates this JSON. Core library: `/public/tuiflow.js`.",
     ]),
   ]
+);
+
+// ---------------------------------------------------------------- gallery (every panel, self-contained)
+
+const galleryPanels = [
+  markdown(1, { x: 0, y: 0, w: 24, h: 2 }, [
+    "**Every tuiflow panel** so far, on synthetic TestData. Panels are inlined, so this page renders without `npm run publish:library`.",
+    "",
+    "Reuse one elsewhere: [library](/d/tuiflow-library/?theme=matrix) (*Add → Import from library*). Compare with stock Grafana: [before / after](/d/tuiflow-before-after/?theme=matrix).",
+  ]),
+];
+{
+  let y = 2;
+  let id = 2;
+  for (let i = 0; i < CATALOG.length; i += 2) {
+    const a = CATALOG[i];
+    const b = CATALOG[i + 1];
+    const h = Math.max(a.h, b ? b.h : 0);
+    const left = tuiPanelModel(a);
+    left.id = id++;
+    left.gridPos = { x: 0, y, w: 12, h };
+    galleryPanels.push(left);
+    if (b) {
+      const right = tuiPanelModel(b);
+      right.id = id++;
+      right.gridPos = { x: 12, y, w: 12, h };
+      galleryPanels.push(right);
+    }
+    y += h;
+  }
+}
+const gallery = base(
+  "tuiflow-gallery",
+  "tuiflow · all panels (TestData demo)",
+  "Every tuiflow panel rendered from the catalogue on synthetic TestData. Self-contained: no library publish required.",
+  ["demo", "gallery"],
+  galleryPanels
 );
 
 // ---------------------------------------------------------------- library references
@@ -187,14 +226,69 @@ const beforeAfter = base(
   { graphTooltip: 1 }
 );
 
+// ---------------------------------------------------------------- panel plugin examples
+
+const VIEW_BY_UID = {
+  "tuiflow-piechart": "pie",
+  "tuiflow-state-timeline": "state",
+  "tuiflow-status-history": "status",
+  "tuiflow-xychart": "xy",
+  "tuiflow-flamegraph": "flame",
+  "tuiflow-alertlist": "alerts",
+  "tuiflow-dashlist": "dashboards",
+  "tuiflow-annolist": "annotations",
+};
+const pluginView = (entry) => VIEW_BY_UID[entry.uid] || entry.uid.replace(/^tuiflow-/, "");
+
+const pluginPanels = [
+  markdown(1, { x: 0, y: 0, w: 24, h: 2 }, [
+    "**tuiflow panel plugin** examples. Each panel is visualization `tuiflow` with a different View, and the same TestData query the Business Text catalogue uses.",
+    "",
+    "Grafana's own theme stays as it is. Open [the gallery](/d/tuiflow-gallery/?theme=dark) for the Business Text versions of the same drawings.",
+  ]),
+];
+{
+  let y = 2;
+  let id = 2;
+  for (let i = 0; i < CATALOG.length; i += 2) {
+    const pair = [CATALOG[i], CATALOG[i + 1]].filter(Boolean);
+    const h = Math.max(...pair.map((e) => e.h));
+    pair.forEach((entry, col) => {
+      pluginPanels.push(
+        Object.assign(entry.panelExtra ? Object.assign({}, entry.panelExtra) : {}, {
+          id: id++,
+          type: "tuiflow-tui-panel",
+          title: entry.name.replace(/^TUI /, ""),
+          description: entry.description,
+          gridPos: { x: col * 12, y, w: 12, h },
+          datasource: TESTDATA,
+          targets: entry.targets,
+          fieldConfig: entry.fieldConfig,
+          options: { view: pluginView(entry) },
+        })
+      );
+    });
+    y += h;
+  }
+}
+const pluginDash = base(
+  "tuiflow-plugin",
+  "tuiflow · panel plugin examples",
+  "Every tuiflow view on the panel plugin, with the catalogue's TestData queries.",
+  ["plugin", "example"],
+  pluginPanels
+);
+
 // ---------------------------------------------------------------- write
 
 const outDir = path.join(here, "provisioning", "dashboards");
 fs.mkdirSync(outDir, { recursive: true });
 [
   ["tuiflow-demo.json", demo],
+  ["tuiflow-gallery.json", gallery],
   ["tuiflow-library.json", library],
   ["tuiflow-before-after.json", beforeAfter],
+  ["tuiflow-plugin.json", pluginDash],
 ].forEach(([name, json]) => {
   const outFile = path.join(outDir, name);
   fs.writeFileSync(outFile, JSON.stringify(json, null, 2) + "\n");

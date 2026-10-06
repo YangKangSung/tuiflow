@@ -9,6 +9,7 @@
     "build:dashboard": "node grafana/build-dashboard.js",
     "build:library": "node grafana/build-library.js",
     "build": "npm run build:dashboard && npm run build:library",
+    "plugin:pack": "npm --prefix tuiflow-tui-panel run pack",
     "publish:library": "node grafana/publish-library.js",
     "test": "node test/core.test.js && node test/grafana-templates.test.js && node test/plugin-render.test.js"
   },

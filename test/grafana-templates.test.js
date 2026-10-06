@@ -398,6 +398,14 @@ test("library panels match the catalogue and both dashboards cover all of them",
   const dashDir = path.join(__dirname, "..", "grafana", "provisioning", "dashboards");
   const lib = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-library.json"), "utf8"));
   assert.deepEqual(new Set(lib.panels.filter((p) => p.libraryPanel).map((p) => p.libraryPanel.uid)), uids);
+  const gallery = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-gallery.json"), "utf8"));
+  const galleryTitles = gallery.panels.filter((p) => p.type === "marcusolsson-dynamictext-panel").map((p) => p.title);
+  assert.deepEqual(new Set(galleryTitles), new Set(CATALOG.map((e) => e.name)));
+  assert.equal(galleryTitles.length, CATALOG.length);
+  const pluginDash = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-plugin.json"), "utf8"));
+  const pluginViews = pluginDash.panels.filter((p) => p.type === "tuiflow-tui-panel").map((p) => p.options.view);
+  assert.equal(pluginViews.length, CATALOG.length);
+  assert.equal(new Set(pluginViews).size, CATALOG.length);
   const ba = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-before-after.json"), "utf8"));
   // intro markdown is also type "text" but has no targets; the stock Text viz does
   const stock = ba.panels.filter((p) => p.type !== "marcusolsson-dynamictext-panel" && Array.isArray(p.targets));

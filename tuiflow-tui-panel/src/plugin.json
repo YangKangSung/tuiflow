@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/main/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "tuiflow",
+  "id": "tuiflow-tui-panel",
+  "state": "beta",
+  "info": {
+    "keywords": ["tuiflow", "tui", "terminal", "ascii", "panel"],
+    "description": "Terminal-style charts for any Grafana query: braille lines, block bars, boxes and a travelling packet. Grafana's own theme stays as it is.",
+    "author": {
+      "name": "YangKangSung",
+      "url": "https://github.com/YangKangSung/tuiflow"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "repository",
+        "url": "https://github.com/YangKangSung/tuiflow"
+      },
+      {
+        "name": "documentation",
+        "url": "https://github.com/YangKangSung/tuiflow/blob/main/tuiflow-tui-panel/src/README.md"
+      },
+      {
+        "name": "license",
+        "url": "https://github.com/YangKangSung/tuiflow/blob/main/tuiflow-tui-panel/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=12.0.0",
+    "plugins": []
+  }
+}

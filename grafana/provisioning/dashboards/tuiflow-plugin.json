@@ -1,0 +1,1405 @@
+{
+  "uid": "tuiflow-plugin",
+  "title": "tuiflow · panel plugin examples",
+  "description": "Every tuiflow view on the panel plugin, with the catalogue's TestData queries.",
+  "tags": [
+    "tuiflow",
+    "plugin",
+    "example"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "open with matrix theme",
+      "type": "link",
+      "url": "/d/tuiflow-plugin/?theme=matrix",
+      "icon": "external link"
+    },
+    {
+      "title": "kiosk + matrix",
+      "type": "link",
+      "url": "/d/tuiflow-plugin/?theme=matrix&kiosk",
+      "targetBlank": true,
+      "icon": "external link"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**tuiflow panel plugin** examples. Each panel is visualization `tuiflow` with a different View, and the same TestData query the Business Text catalogue uses.\n\nGrafana's own theme stays as it is. Open [the gallery](/d/tuiflow-gallery/?theme=dark) for the Business Text versions of the same drawings."
+      }
+    },
+    {
+      "id": 2,
+      "type": "tuiflow-tui-panel",
+      "title": "Time series",
+      "description": "Braille line chart of every numeric series, y axis in the field unit, legend with last values.",
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "timeseries"
+      }
+    },
+    {
+      "id": 3,
+      "type": "tuiflow-tui-panel",
+      "title": "Trend",
+      "description": "Line over a numeric x axis (first numeric field = x).",
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "rpm,torque_nm,power_kw\n1000,126,13.2\n1250,141,18.5\n1500,156,24.5\n1750,170,31.2\n2000,182,38.1\n2250,194,45.7\n2500,204,53.4\n2750,213,61.3\n3000,221,69.4\n3250,228,77.6\n3500,233,85.4\n3750,237,93.1\n4000,239,100.1\n4250,239,106.4\n4500,238,112.2\n4750,236,117.4\n5000,232,121.5\n5250,227,124.8\n5500,220,126.7\n5750,212,127.7\n6000,202,126.9\n6250,191,125\n6500,178,121.2\n6750,165,116.6\n7000,150,110"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "trend"
+      }
+    },
+    {
+      "id": 4,
+      "type": "tuiflow-tui-panel",
+      "title": "Bar chart",
+      "description": "Horizontal grouped bars from a categorical frame (first string field = labels).",
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "service,requests,errors\napi-gateway,812,12\norders-svc,431,3\npayments-svc,268,9\nauth-svc,190,1\nsearch-svc,122,0"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "barchart"
+      }
+    },
+    {
+      "id": 5,
+      "type": "tuiflow-tui-panel",
+      "title": "Columns (vertical bars)",
+      "description": "Vertical block columns, first numeric field per category.",
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "service,requests,errors\napi-gateway,812,12\norders-svc,431,3\npayments-svc,268,9\nauth-svc,190,1\nsearch-svc,122,0"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "columns"
+      }
+    },
+    {
+      "id": 6,
+      "type": "tuiflow-tui-panel",
+      "title": "Stat",
+      "description": "Name · sparkline · last value per series, coloured by thresholds.",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "stat"
+      }
+    },
+    {
+      "id": 7,
+      "type": "tuiflow-tui-panel",
+      "title": "Gauge",
+      "description": "[████░░░░] percent meter per series on the field's min/max.",
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 7
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "gauge"
+      }
+    },
+    {
+      "id": 8,
+      "type": "tuiflow-tui-panel",
+      "title": "Bar gauge",
+      "description": "Block bar per series on the field's min/max, threshold colour.",
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "bargauge"
+      }
+    },
+    {
+      "id": 9,
+      "type": "tuiflow-tui-panel",
+      "title": "Table",
+      "description": "First frame as a monospace table; numeric cells use the field display.",
+      "gridPos": {
+        "x": 12,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "pod,ready,restarts,cpu_m,mem_mi,status\ningress-nginx-controller-6b8f-x2k1,1/1,0,120,210,Running\ningress-nginx-controller-6b8f-p9zq,1/1,0,98,205,Running\napi-gateway-7d9f8c-4hv2x,1/1,0,310,540,Running\napi-gateway-7d9f8c-m8ql7,1/1,1,290,512,Running\norders-svc-5c6b7d-abc12,1/1,0,180,420,Running\norders-svc-5c6b7d-def34,1/1,0,175,415,Running\norders-svc-5c6b7d-ghi56,1/1,0,190,430,Running\norders-svc-5c6b7d-jkl78,0/1,0,0,0,Pending\npayments-svc-69fd4-q2wer,1/1,3,220,980,Running\npayments-svc-69fd4-t5yui,0/1,7,15,1010,CrashLoopBackOff\npostgres-0,1/1,0,410,1800,Running"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "table"
+      }
+    },
+    {
+      "id": 10,
+      "type": "tuiflow-tui-panel",
+      "title": "Pie chart",
+      "description": "Braille disc coloured per slice + legend with percentages. Second argument > 0 makes a donut.",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "service,requests,errors\napi-gateway,812,12\norders-svc,431,3\npayments-svc,268,9\nauth-svc,190,1\nsearch-svc,122,0"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "pie"
+      }
+    },
+    {
+      "id": 11,
+      "type": "tuiflow-tui-panel",
+      "title": "State timeline",
+      "description": "One row per series, █ runs coloured by threshold / value mapping (string states get palette colours).",
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "state"
+      }
+    },
+    {
+      "id": 12,
+      "type": "tuiflow-tui-panel",
+      "title": "Status history",
+      "description": "Discrete ▇ blocks per sample bucket, coloured by threshold.",
+      "gridPos": {
+        "x": 0,
+        "y": 43,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "status"
+      }
+    },
+    {
+      "id": 13,
+      "type": "tuiflow-tui-panel",
+      "title": "Heatmap",
+      "description": "Value buckets × time buckets, density as ░▒▓█ with a 4-step colour ramp.",
+      "gridPos": {
+        "x": 12,
+        "y": 43,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "latency",
+          "startValue": 120,
+          "spread": 25,
+          "noise": 15,
+          "min": 10,
+          "max": 400,
+          "seriesCount": 12
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "heatmap"
+      }
+    },
+    {
+      "id": 14,
+      "type": "tuiflow-tui-panel",
+      "title": "Histogram",
+      "description": "Distribution of all values as block columns.",
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "api-gateway",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "orders-svc",
+          "startValue": 180,
+          "spread": 20,
+          "noise": 8,
+          "min": 20,
+          "max": 400
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "payments-svc",
+          "startValue": 90,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 0,
+          "min": 0,
+          "max": 600,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 300
+              },
+              {
+                "color": "red",
+                "value": 450
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "histogram"
+      }
+    },
+    {
+      "timeFrom": "24h",
+      "id": 15,
+      "type": "tuiflow-tui-panel",
+      "title": "Candlestick",
+      "description": "Open/high/low/close fields (by name, else first four numeric fields); █ up, ░ down.",
+      "gridPos": {
+        "x": 12,
+        "y": 52,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "time,open,high,low,close\n2026-10-05T00:00:00.000Z,120,120.5,118.5,119\n2026-10-05T00:15:00.000Z,119,121.79,117.5,120.79\n2026-10-05T00:30:00.000Z,120.79,124.65,118.29,123.15\n2026-10-05T00:45:00.000Z,123.15,128.01,122.15,126.01\n2026-10-05T01:00:00.000Z,126.01,131.78,124.01,129.28\n2026-10-05T01:15:00.000Z,129.28,133.35,128.78,132.85\n2026-10-05T01:30:00.000Z,132.85,137.58,131.35,136.58\n2026-10-05T01:45:00.000Z,136.58,141.82,134.08,140.32\n2026-10-05T02:00:00.000Z,140.32,145.92,139.32,143.92\n2026-10-05T02:15:00.000Z,143.92,149.72,141.92,147.22\n2026-10-05T02:30:00.000Z,147.22,150.56,146.72,150.06\n2026-10-05T02:45:00.000Z,150.06,153.29,148.56,152.29\n2026-10-05T03:00:00.000Z,152.29,157.49,149.79,155.99\n2026-10-05T03:15:00.000Z,155.99,160.85,154.99,158.85\n2026-10-05T03:30:00.000Z,158.85,163.29,156.85,160.79\n2026-10-05T03:45:00.000Z,160.79,162.25,160.29,161.75\n2026-10-05T04:00:00.000Z,161.75,162.75,160.22,161.72\n2026-10-05T04:15:00.000Z,161.72,163.22,158.2,160.7\n2026-10-05T04:30:00.000Z,160.7,162.7,157.73,158.73\n2026-10-05T04:45:00.000Z,158.73,161.23,153.88,155.88\n2026-10-05T05:00:00.000Z,155.88,156.38,151.75,152.25\n2026-10-05T05:15:00.000Z,152.25,153.25,146.46,147.96\n2026-10-05T05:30:00.000Z,147.96,149.46,140.65,143.15\n2026-10-05T05:45:00.000Z,143.15,145.15,139.18,140.18\n2026-10-05T06:00:00.000Z,140.18,142.68,135,137\n2026-10-05T06:15:00.000Z,137,137.5,133.26,133.76\n2026-10-05T06:30:00.000Z,133.76,134.76,129.13,130.63\n2026-10-05T06:45:00.000Z,130.63,132.13,125.24,127.74\n2026-10-05T07:00:00.000Z,127.74,129.74,124.21,125.21\n2026-10-05T07:15:00.000Z,125.21,127.71,121.15,123.15\n2026-10-05T07:30:00.000Z,123.15,123.65,121.13,121.63\n2026-10-05T07:45:00.000Z,121.63,122.63,119.2,120.7\n2026-10-05T08:00:00.000Z,120.7,122.2,117.87,120.37\n2026-10-05T08:15:00.000Z,120.37,122.62,119.37,120.62\n2026-10-05T08:30:00.000Z,120.62,126.1,118.62,123.6\n2026-10-05T08:45:00.000Z,123.6,127.53,123.1,127.03\n2026-10-05T09:00:00.000Z,127.03,131.8,125.53,130.8\n2026-10-05T09:15:00.000Z,130.8,136.29,128.3,134.79\n2026-10-05T09:30:00.000Z,134.79,140.86,133.79,138.86\n2026-10-05T09:45:00.000Z,138.86,145.35,136.86,142.85"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": "candlestick"
+      }
+    },
+    {
+      "id": 16,
+      "type": "tuiflow-tui-panel",
+      "title": "XY chart",
+      "description": "Scatter: first numeric field = x, the rest = y series.",
+      "gridPos": {
+        "x": 0,
+        "y": 61,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "latency_ms,rps,errors\n20,850,0\n30,854,0\n33,836,0\n36,817,0\n39,839,0\n42,820,0\n45,802,0\n48,783,0\n58,787,0\n61,769,0\n64,750,0\n67,772,0\n70,753,0\n73,735,0\n76,716,0\n86,720,0\n89,702,0\n92,683,0\n95,665,0\n98,686,0\n101,668,0\n104,649,0\n114,653,0\n117,635,0.2\n120,616,0.4\n123,598,0.1\n126,619,0.3\n129,601,0.5\n132,582,0.7\n142,546,1.13\n145,568,0.83\n148,549,1.03\n151,531,1.23\n154,552,1.43\n157,534,1.63\n160,515,1.33\n170,479,1.77\n173,501,1.97\n176,482,2.17\n179,464,2.37\n182,445,2.07\n185,467,2.27\n188,448,2.47\n198,412,2.9\n201,434,3.1\n204,415,2.8\n207,397,3\n210,378,3.2\n213,400,3.4\n216,381,3.6\n226,345,3.53\n229,367,3.73\n232,348,3.93\n235,330,4.13\n238,311,4.33\n241,333,4.03\n244,314,4.23\n254,278,4.67\n257,260,4.87\n260,281,5.07"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "xy"
+      }
+    },
+    {
+      "id": 17,
+      "type": "tuiflow-tui-panel",
+      "title": "Logs",
+      "description": "time · [level] · line, newest first; level from a level field or detected in the text.",
+      "gridPos": {
+        "x": 12,
+        "y": 61,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "logs",
+          "lines": 30,
+          "levelColumn": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "logs"
+      }
+    },
+    {
+      "id": 18,
+      "type": "tuiflow-tui-panel",
+      "title": "Node graph",
+      "description": "Layered boxes (longest path from roots) + edge list. Basic.",
+      "gridPos": {
+        "x": 0,
+        "y": 70,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "node_graph"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "nodegraph"
+      }
+    },
+    {
+      "id": 19,
+      "type": "tuiflow-tui-panel",
+      "title": "Traces",
+      "description": "Span waterfall: indent by depth, bar = start offset + duration, coloured by service.",
+      "gridPos": {
+        "x": 12,
+        "y": 70,
+        "w": 12,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "trace",
+          "spanCount": 14
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "traces"
+      }
+    },
+    {
+      "id": 20,
+      "type": "tuiflow-tui-panel",
+      "title": "Flame graph",
+      "description": "Inclusive stacked bars from label/level/value(/self) fields; children indent under the parent. Hottest frame is scanned.",
+      "gridPos": {
+        "x": 0,
+        "y": 80,
+        "w": 12,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "label,level,value,self\ntotal,0,10000,200\nruntime.goexit,1,400,400\nnet/http.(*conn).serve,1,9600,100\nnet/http.serverHandler.ServeHTTP,2,9500,50\nshop/api.(*Gateway).ServeHTTP,3,9400,200\nshop/api.auth,4,1200,1200\nshop/api.route,4,8000,100\nshop/orders.Create,5,5200,200\nshop/orders.db.Insert,6,3800,3800\nshop/orders.cache.Get,6,800,800\nshop/payments.Authorize,5,2700,300\nshop/payments.stripe,6,2400,2400\nencoding/json.Marshal,5,200,200"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "flame"
+      }
+    },
+    {
+      "id": 21,
+      "type": "tuiflow-tui-panel",
+      "title": "Canvas",
+      "description": "Freeform TUI layout: one dashed box per category (or series), .o@ packets on the links between them.",
+      "gridPos": {
+        "x": 12,
+        "y": 80,
+        "w": 12,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "service,requests,errors\napi-gateway,812,12\norders-svc,431,3\npayments-svc,268,9\nauth-svc,190,1\nsearch-svc,122,0"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "canvas"
+      }
+    },
+    {
+      "id": 22,
+      "type": "tuiflow-tui-panel",
+      "title": "Geomap",
+      "description": "Equirectangular lat/lon grid; * markers from lat/lon fields, pulsing.",
+      "gridPos": {
+        "x": 0,
+        "y": 91,
+        "w": 12,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "name,lat,lon,rps\nSeoul,37.57,126.98,812\nTokyo,35.68,139.69,640\nSingapore,1.35,103.82,410\nFrankfurt,50.11,8.68,380\nVirginia,39.04,-77.49,520\nSao Paulo,-23.55,-46.63,210\nSydney,-33.87,151.21,180"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "geomap"
+      }
+    },
+    {
+      "id": 23,
+      "type": "tuiflow-tui-panel",
+      "title": "Alert list",
+      "description": "Active alerts from the Alertmanager API (fetched by the panel itself).",
+      "gridPos": {
+        "x": 12,
+        "y": 91,
+        "w": 12,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "alerts"
+      }
+    },
+    {
+      "id": 24,
+      "type": "tuiflow-tui-panel",
+      "title": "Dashboard list",
+      "description": "Dashboards from /api/search as links.",
+      "gridPos": {
+        "x": 0,
+        "y": 102,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "dashboards"
+      }
+    },
+    {
+      "id": 25,
+      "type": "tuiflow-tui-panel",
+      "title": "Annotations list",
+      "description": "time · title · #tags from a frame, or /api/annotations when the query is empty.",
+      "gridPos": {
+        "x": 12,
+        "y": 102,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "time,title,tags\n2026-10-06T01:12:00Z,deploy shop v2.4.1,deploy\n2026-10-06T02:40:00Z,payments-svc CrashLoop spike,incident\n2026-10-06T03:05:00Z,scaled orders-svc 3 → 6,autoscale\n2026-10-06T04:18:00Z,postgres failover complete,db"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "annotations"
+      }
+    },
+    {
+      "id": 26,
+      "type": "tuiflow-tui-panel",
+      "title": "Text",
+      "description": "Dashed CRT frame around string-field lines (or a default runbook) with a blinking block cursor.",
+      "gridPos": {
+        "x": 0,
+        "y": 110,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "line\n# shop · on-call runbook\n\n## payments-svc CrashLoop\n1. kubectl logs -p payments-svc\n2. check postgres connections\n3. page @sre if 3+ restarts\n\ndash: /d/tuiflow-library  theme=matrix"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "text"
+      }
+    },
+    {
+      "id": 27,
+      "type": "tuiflow-tui-panel",
+      "title": "News",
+      "description": "time · source · title, newest first. String fields title/source plus a time field.",
+      "gridPos": {
+        "x": 12,
+        "y": 110,
+        "w": 12,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "time,source,title\n2026-10-06T08:10:00Z,grafana,Unified alerting grouping is GA\n2026-10-05T16:40:00Z,kubernetes,1.32 changelog: in-place resize GA\n2026-10-04T11:05:00Z,prometheus,Native histograms default in 3.x\n2026-10-03T09:22:00Z,grafana,Canvas connections: packet-style edges\n2026-10-02T18:00:00Z,cilium,Kube-proxy-free datapath notes\n2026-10-01T07:15:00Z,localai,Backend gallery: ds4 + Metal matrix"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "news"
+      }
+    },
+    {
+      "id": 28,
+      "type": "tuiflow-tui-panel",
+      "title": "Flow (api-gateway box)",
+      "description": "Hand-made box with bars, sparklines and an animated packet edge; template expects fields rps, p95_ms, err_pct.",
+      "gridPos": {
+        "x": 0,
+        "y": 119,
+        "w": 12,
+        "h": 11
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "rps",
+          "startValue": 300,
+          "spread": 30,
+          "noise": 10,
+          "min": 50,
+          "max": 600
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "p95_ms",
+          "startValue": 80,
+          "spread": 15,
+          "noise": 5,
+          "min": 10,
+          "max": 250
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "err_pct",
+          "startValue": 0.4,
+          "spread": 0.3,
+          "noise": 0.1,
+          "min": 0,
+          "max": 5
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "view": "flow"
+      }
+    }
+  ]
+}

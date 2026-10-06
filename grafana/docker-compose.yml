@@ -34,11 +34,12 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
-      # Local unsigned build of yangkangsung-tuiflow-panel (dist copied into ./plugins).
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: yangkangsung-tuiflow-panel
+      # Local unsigned builds. Catalog signing is separate.
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: "yangkangsung-tuiflow-panel,tuiflow-tui-panel"
     volumes:
       - ./provisioning:/etc/grafana/provisioning:ro
       - ./plugins:/var/lib/grafana/plugins
+      - ./../tuiflow-tui-panel/dist:/var/lib/grafana/plugins/tuiflow-tui-panel:ro
       # Served at /public/tuiflow.js so Business Text can `import()` it.
       - ../src/tuiflow.js:/usr/share/grafana/public/tuiflow.js:ro
       - grafana-data:/var/lib/grafana
