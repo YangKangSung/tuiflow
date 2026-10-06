@@ -1,71 +1,71 @@
-# Look spec — "terminal diagram" 스타일 정의
+# Look spec — the "terminal diagram" style
 
-레퍼런스: [X 영상 (eng_khairallah1, 2026-10-04)](https://x.com/eng_khairallah1/status/2106852012558266388/video/1) —
-"Claude Code agent tree"를 터미널 창(`~/agent-tree · zsh · 90x46`) 안에서 애니메이션 다이어그램으로 보여주는 24초 클립.
-영상 자체는 저작권이 있으니 저장하지 않고, 룩을 구성하는 요소만 아래에 정리한다. 이 문서가 모든 타깃(Grafana 패널, VS Code 웹뷰, 프레젠테이션 HTML)의 공통 기준이다.
+Reference: [X video (eng_khairallah1, 2026-10-04)](https://x.com/eng_khairallah1/status/2106852012558266388/video/1) —
+a 24-second clip that shows a "Claude Code agent tree" as an animated diagram inside a terminal window (`~/agent-tree · zsh · 90x46`).
+The video itself is copyrighted, so it is not stored here. Only the elements that make up the look are listed below. This document is the shared standard for every target (Grafana panel, VS Code webview, presentation HTML).
 
-## 1. 캔버스
+## 1. Canvas
 
-| 항목 | 값 |
+| Item | Value |
 |---|---|
-| 그리드 | 90×46 셀 (영상). 데모는 100×36 |
-| 글꼴 | 단일 모노스페이스. 박스문자(U+2500–257F)·블록(U+2580–259F)·`╌ ┆ ▶ ▼`를 모두 가진 글꼴이어야 함 — JetBrains Mono, Cascadia Mono, Fira Code, DejaVu Sans Mono |
-| 크기/행간 | 12.5–13px, line-height 1.25 (셀 비율 ≈ 0.6 : 1.25) |
-| 배경 | 어두운 차콜 `#0f1218` (순흑 아님). 창 크롬: 좌상단 ●●● 트래픽 라이트 + 가운데 제목 |
-| 모서리 | 없음 (radius 0) |
+| Grid | 90×46 cells (the video). The demo is 100×36 |
+| Font | One monospace face that covers box drawing (U+2500–257F), blocks (U+2580–259F), and `╌ ┆ ▶ ▼` — JetBrains Mono, Cascadia Mono, Fira Code, DejaVu Sans Mono |
+| Size / leading | 12.5–13px, line-height 1.25 (cell ratio ≈ 0.6 : 1.25) |
+| Background | Dark charcoal `#0f1218` (not pure black). Window chrome: ●●● traffic lights at the top left, title centered |
+| Corners | None (radius 0) |
 
-## 2. 글리프 어휘
+## 2. Glyph vocabulary
 
-| 역할 | 글리프 | 비고 |
+| Role | Glyphs | Notes |
 |---|---|---|
-| 박스 테두리(점선) | `┌ ┐ └ ┘` + `╌`(가로) `┆`(세로) | 영상의 주 노드 스타일. `tf.box(..., {style:"dashed"})` |
-| 박스 테두리(실선) | `┌ ┐ └ ┘ ─ │` | 보조 패널·로그 영역 |
-| 연결선 | `╌╌╌╌` + 화살촉 `▶ ▼ ◀` | 모서리는 `┐ └ ┘` 로 꺾음 |
-| 패킷 | `.o@` (진행 방향으로 `@`가 앞) / 역방향 `@o.` | 3셀, 8fps 전후로 1셀씩 이동 |
-| 수평 막대 | `█` 채움 + `░` 빈칸, 끝셀은 `▏▎▍▌▋▊▉` 로 1/8 정밀도 | `tf.bar(ratio, width)` |
-| 스파크라인 | `▁▂▃▄▅▆▇█` | `tf.sparkline(values, {width})` |
-| 상태 태그 | `[ok returned]` `[plan mode]` `[ready]` | 대괄호 + 소문자, 색은 의미별 |
-| 구분선 | `┄┄┄ 제목 ┄┄┄` | 섹션 헤더(세션 로그 등) |
-| 상태줄 | ` key:[value]  key:[value] ` | tmux 풍, 배경색 한 단계 밝게 |
+| Box border (dashed) | `┌ ┐ └ ┘` + `╌` (horizontal) `┆` (vertical) | The video's main node style. `tf.box(..., {style:"dashed"})` |
+| Box border (solid) | `┌ ┐ └ ┘ ─ │` | Secondary panels and the log area |
+| Connection | `╌╌╌╌` + arrowheads `▶ ▼ ◀` | Corners turn with `┐ └ ┘` |
+| Packet | `.o@` (`@` leads in the direction of travel) / reverse `@o.` | 3 cells, about one cell per frame at 8 fps |
+| Horizontal bar | `█` fill + `░` empty; the last cell uses `▏▎▍▌▋▊▉` for 1/8 precision | `tf.bar(ratio, width)` |
+| Sparkline | `▁▂▃▄▅▆▇█` | `tf.sparkline(values, {width})` |
+| Status tag | `[ok returned]` `[plan mode]` `[ready]` | Brackets + lowercase, color by meaning |
+| Divider | `┄┄┄ title ┄┄┄` | Section header (session log and similar) |
+| Status line | ` key:[value]  key:[value] ` | tmux style, background one step lighter |
 
-## 3. 색 (video palette)
+## 3. Color (video palette)
 
-| 토큰 | 값 | 용도 |
+| Token | Value | Use |
 |---|---|---|
-| fg | `#c9ced6` | 기본 텍스트 |
-| dim | `#5c6370` | 라벨, 보조 설명, 상태줄 글자 |
-| border | `#3a4150` | 박스·구분선 |
-| orange | `#e8a06a` | 1순위 강조(영상의 "opus"), 패킷, 기본 막대 |
-| blue | `#8fb3ff` | 2순위(영상의 "sonnet") |
-| green | `#86d28a` | 정상/워크로드(영상의 "jev") |
-| gray | `#9aa0a6` | 대기/관찰자(영상의 "fable") |
-| red | `#e06c75` | 경고·에러 막대 |
-| status-bg | `#171b23` | 상태줄 배경 |
+| fg | `#c9ced6` | Default text |
+| dim | `#5c6370` | Labels, secondary copy, status-line text |
+| border | `#3a4150` | Boxes and dividers |
+| orange | `#e8a06a` | Primary accent (the video's "opus"), packets, the default bar |
+| blue | `#8fb3ff` | Secondary (the video's "sonnet") |
+| green | `#86d28a` | Healthy / workload (the video's "jev") |
+| gray | `#9aa0a6` | Idle / observer (the video's "fable") |
+| red | `#e06c75` | Warning and error bars |
+| status-bg | `#171b23` | Status-line background |
 
-변형 팔레트: `matrix`(검정 + `#00c017/#00ff41`, Grafana 숨은 테마와 동일 계열), `amber`(`#0a0700` + `#ffb000`). CRT 오버레이(스캔라인·비네트·글로우·미세 깜빡임)는 선택.
+Variant palettes: `matrix` (black + `#00c017`/`#00ff41`, the same family as Grafana's hidden theme), `amber` (`#0a0700` + `#ffb000`). The CRT overlay (scanlines, vignette, glow, a slight flicker) is optional.
 
-## 4. 레이아웃 규칙
+## 4. Layout rules
 
-1. 노드는 폭 고정 박스(데모 26셀). 제목은 상단 테두리에 `┌ title ╌╌┐` 로 박음.
-2. 박스 내부 한 줄 = `라벨(5) 막대(8–14) 값(우측 정렬 5–7)`. 값 폭을 고정해 줄 길이가 흔들리지 않게 한다.
-3. 수평 연결선은 박스 사이 간격(8–12셀) 전체를 쓴다. 수직 연결선은 박스 중앙 열.
-4. 패킷 속도는 데이터(rps 등)에 비례. 값이 0이면 패킷을 없애고 점선만 남긴다.
-5. 하단 1/3은 로그 테이블(시각 · 주체 · 메시지) + 마지막 줄 상태줄.
-6. 모든 요소는 문자열이다. 색은 HTML 렌더 시 `<span class>`로만 입힌다 → `toText()`로 복사하면 그대로 슬라이드/README에 붙는다.
+1. A node is a fixed-width box (26 cells in the demo). The title is set into the top border as `┌ title ╌╌┐`.
+2. One line inside a box is `label(5) bar(8–14) value(right-aligned 5–7)`. Keep the value width fixed so line length does not jitter.
+3. A horizontal connection uses the whole gap between boxes (8–12 cells). A vertical connection uses the box's center column.
+4. Packet speed is proportional to the data (rps and similar). At value 0, drop the packet and leave the dashed line.
+5. The bottom third is a log table (time · actor · message) plus a status line on the last row.
+6. Every element is a string. Color is applied only as `<span class>` at HTML render time, so `toText()` pastes straight into a slide or a README.
 
-## 5. 애니메이션
+## 5. Animation
 
-| 대상 | 방식 | 주기 |
+| Target | Behavior | Cadence |
 |---|---|---|
-| 패킷 | tick마다 1셀 이동, 끝에 닿으면 처음부터 | 8 fps 기준 |
-| 막대/값 | 데이터 갱신 시 즉시 교체 (보간 없음, 터미널답게) | 데이터 주기 |
-| 로그 | 위에서 아래로 쌓임, 최신이 위 | 이벤트 발생 시 |
-| 커서/깜빡임 | 상태줄 끝 `█` 블록 커서 토글 | 1 Hz |
+| Packet | Move one cell per tick, wrap at the end | At 8 fps |
+| Bars / values | Replace immediately when data updates (no interpolation; that is the terminal) | Data interval |
+| Log | Stack top to bottom, newest on top | On each event |
+| Cursor / blink | Toggle a `█` block cursor at the end of the status line | 1 Hz |
 
-## 6. 타깃별 매핑
+## 6. Per-target mapping
 
-| 타깃 | 렌더 경로 |
+| Target | Render path |
 |---|---|
-| 단독 HTML (프레젠테이션) | `demo/index.html` — `tf.Screen` → `<pre>` innerHTML |
-| Grafana | Business Text 패널: Handlebars 템플릿 + `before.js` 헬퍼 + `after.js` 애니메이션. 전체 UI는 `?theme=matrix` |
-| VS Code | Webview 패널에 같은 `tuiflow.js` + 테마 토큰(`--vscode-*`)으로 색 매핑 (예정) |
+| Standalone HTML (presentation) | `demo/index.html` — `tf.Screen` → `<pre>` innerHTML |
+| Grafana | Business Text panel: Handlebars template + `before.js` helpers + `after.js` animation. The rest of the UI uses `?theme=matrix` |
+| VS Code | The same `tuiflow.js` in a webview panel, colors mapped from theme tokens (`--vscode-*`) (planned) |

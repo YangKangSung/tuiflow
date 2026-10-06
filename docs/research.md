@@ -1,69 +1,69 @@
-# 조사: Grafana에서 TUI(터미널) 룩 대시보드를 만드는 방법 전부
+# Survey: every way to build a TUI (terminal) look dashboard in Grafana
 
-조사일 2026-10-05. 각 항목은 해당 프로젝트의 문서·소스에서 직접 확인한 내용만 적었다. 별점은 레퍼런스 영상의 룩을 얼마나 그대로 낼 수 있는가(★5 = 거의 동일).
+Surveyed 2026-10-05. Each row is only what was checked directly in that project's docs or source. Stars measure how closely the reference video's look can be reproduced (★5 = nearly the same).
 
-## 0. 결론 요약
+## 0. Summary
 
-1. **Grafana 12에는 선택 UI에 숨겨진 내장 테마 `matrix`가 있다.** `fontFamily: monospace`, `borderRadius: 0`, 검정/초록. URL에 `?theme=matrix`만 붙이면 전체 UI가 터미널처럼 바뀐다. 백엔드 `IsValidThemeID`가 허용하므로 preferences API로 영구 적용도 된다.
-2. **코어 Canvas 패널 연결선은 11.0부터 Dashed/Dotted + 애니메이션, 12.2부터 필드값으로 방향 제어**가 된다. 플러그인 없이 "흐르는 선"이 가능.
-3. 영상 룩의 요소는 전부 텍스트다. 따라서 **Business Text(또는 HTML Graphics) 패널에서 `<pre>`를 데이터로 채우는 것**이 가장 현실적인 1순위이고, 이 저장소의 `src/tuiflow.js`가 그 텍스트 생성기다.
-4. 진짜 터미널이 필요하면 **Grafatui / grom**(Grafana 대시보드 JSON을 읽어 Prometheus를 터미널에 그림)을 ttyd로 서빙해 Grafana iframe에 넣거나, 아예 `cool-retro-term` 안에서 돌린다.
+1. **Grafana 12 has a built-in `matrix` theme hidden from the theme picker.** `fontFamily: monospace`, `borderRadius: 0`, black/green. Appending `?theme=matrix` turns the whole UI into a terminal. The backend allows it through `IsValidThemeID`, so the preferences API can apply it permanently.
+2. **Core Canvas connection lines have Dashed/Dotted plus animation since 11.0, and direction driven by a field value since 12.2.** A "flowing line" is possible with no plugin.
+3. Every element of the video look is text. The practical first choice is therefore **filling a `<pre>` from data in a Business Text (or HTML Graphics) panel**, and this repo's `src/tuiflow.js` is the text generator for that.
+4. When a real terminal is required, serve **Grafatui / grom** (they read Grafana dashboard JSON and draw Prometheus in a terminal) with ttyd inside a Grafana iframe, or run them inside `cool-retro-term`.
 
-## 1. Grafana 패널 안에서
+## 1. Inside a Grafana panel
 
-| 방법 | 룩 | 난이도 | 비고 |
+| Approach | Look | Difficulty | Notes |
 |---|---|---|---|
-| [Business Text](https://grafana.com/docs/plugins/marcusolsson-dynamictext-panel/latest/) (`marcusolsson-dynamictext-panel`) | ★5 | 중 | Handlebars로 `<pre>` 채움. Before/After JS 코드는 `new Function('context', code)`로 실행 → 최상위 `await` 불가, Promise 반환은 가능. `context.handlebars`, `context.data`(All rows: 행 배열, All data: 프레임 배열), After에 `context.element`. 외부 `<script>`는 Grafana 11에서 제거, 코드 내 `import()`만 가능. 외부 CSS URL은 됨. |
-| [HTML Graphics](https://gapit-htmlgraphics-panel.gapit.io/docs/options/) (`gapit-htmlgraphics-panel`) | ★5 | 중 | HTML/SVG + CSS + `onInit`/`onRender`. v2.2.3(2025-11). |
-| [Business Charts](https://grafana.com/docs/plugins/volkovlabs-echarts-panel/latest/charts-function/) (Apache ECharts) | ★4 | 중 | `lines` 시리즈 `effect.show:true` = 선 따라 점이 흐르는 효과. `graph` 시리즈 + monospace 폰트로 노드/엣지. |
-| [Canvas](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/canvas/) (코어) | ★3 | 하 | 박스·텍스트·메트릭 값·연결선. 글꼴 지정 불가 → matrix 테마와 조합. 연결선 애니메이션 [#85556](https://github.com/grafana/grafana/issues/85556), 방향=필드 [What's new 2025-08](https://grafana.com/whats-new/2025-08-21-dynamic-connection-direction-in-canvas-visualizations/), 값 0에서 애니메이션 안 멈추는 버그 [#112196](https://github.com/grafana/grafana/issues/112196). |
-| [Flow panel](https://grafana.com/grafana/plugins/andrewbmchugh-flow-panel/) (`andrewbmchugh-flow-panel`) | ★4 | 중 | draw.io SVG + YAML 매핑. draw.io "flow animation" 엣지(Export as SVG 필요), 속도를 데이터로 제어. 옛 FlowCharting(Angular)은 11.x에서 사실상 종료. |
-| Text 패널 + iframe → 실제 TUI | ★5 | 중 | `[panels] disable_sanitize_html=true`, `[security] allow_embedding=true`. ttyd / textual-serve로 k9s·Grafatui·kutop·자작 Ratatui 서빙. https↔https 스킴 일치 필수 ([정리](https://github.com/jangaraj/grafana-iframe)). |
-| [Text 패널](https://grafana.com/docs/grafana/latest/panels/visualizations/text-panel/) (Markdown/HTML/Code) | ★3 | 하 | 변수 치환만. 정적 ASCII 토폴로지 표시용. |
-| 커스텀 패널 플러그인 ([@grafana/create-plugin](https://grafana.com/developers/plugin-tools/)) | ★5 | 상 | React 패널에서 xterm.js / `@beamterm/renderer` / Ratzilla WASM 직접 렌더. |
-| Split Flap (dzaczek) | ★2 | 하 | 공항 플랩 디스플레이. 레트로 카운터 포인트용. |
+| [Business Text](https://grafana.com/docs/plugins/marcusolsson-dynamictext-panel/latest/) (`marcusolsson-dynamictext-panel`) | ★5 | medium | Fill a `<pre>` with Handlebars. Before/After JS runs as `new Function('context', code)`, so a top-level `await` is unavailable and returning a Promise is fine. `context.handlebars`, `context.data` (All rows: row array, All data: frame array), and `context.element` in After. External `<script>` was removed in Grafana 11; only `import()` inside the code works. An external CSS URL works. |
+| [HTML Graphics](https://gapit-htmlgraphics-panel.gapit.io/docs/options/) (`gapit-htmlgraphics-panel`) | ★5 | medium | HTML/SVG + CSS + `onInit`/`onRender`. v2.2.3 (2025-11). |
+| [Business Charts](https://grafana.com/docs/plugins/volkovlabs-echarts-panel/latest/charts-function/) (Apache ECharts) | ★4 | medium | A `lines` series with `effect.show:true` is a dot traveling along the line. A `graph` series plus a monospace font draws nodes and edges. |
+| [Canvas](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/canvas/) (core) | ★3 | low | Boxes, text, metric values, connections. No font control, so pair it with the matrix theme. Connection animation [#85556](https://github.com/grafana/grafana/issues/85556), direction = field [What's new 2025-08](https://grafana.com/whats-new/2025-08-21-dynamic-connection-direction-in-canvas-visualizations/), animation does not stop at value 0 [#112196](https://github.com/grafana/grafana/issues/112196). |
+| [Flow panel](https://grafana.com/grafana/plugins/andrewbmchugh-flow-panel/) (`andrewbmchugh-flow-panel`) | ★4 | medium | draw.io SVG + YAML mapping. draw.io "flow animation" edges (Export as SVG is required), speed driven by data. The old FlowCharting (Angular) is effectively dead on 11.x. |
+| Text panel + iframe → a real TUI | ★5 | medium | `[panels] disable_sanitize_html=true`, `[security] allow_embedding=true`. Serve k9s, Grafatui, kutop, or a custom Ratatui app with ttyd / textual-serve. https↔https scheme match is required ([notes](https://github.com/jangaraj/grafana-iframe)). |
+| [Text panel](https://grafana.com/docs/grafana/latest/panels/visualizations/text-panel/) (Markdown/HTML/Code) | ★3 | low | Variable substitution only. For a static ASCII topology. |
+| Custom panel plugin ([@grafana/create-plugin](https://grafana.com/developers/plugin-tools/)) | ★5 | high | Render xterm.js / `@beamterm/renderer` / Ratzilla WASM directly in a React panel. |
+| Split Flap (dzaczek) | ★2 | low | Airport flap display. For a retro counter accent. |
 
-## 2. Grafana 자체를 터미널처럼
+## 2. Make Grafana itself look like a terminal
 
-| 방법 | 비고 |
+| Approach | Notes |
 |---|---|
-| 숨은 테마 `matrix` | [matrix.json](https://github.com/grafana/grafana/blob/main/packages/grafana-data/src/themes/themeDefinitions/matrix.json). 선택 목록([getSelectableThemes.ts](https://github.com/grafana/grafana/blob/main/public/app/core/components/ThemeSelector/getSelectableThemes.ts))에는 없지만 [index.go `getThemeForIndexData`](https://github.com/grafana/grafana/blob/main/pkg/api/index.go)가 `?theme=` 값을 `IsValidThemeID`로만 검사. v12.0.0에도 존재(`matrix.ts`). `tron`, `synthwave`, `gloom`, `mars` 등도 같은 방식. |
-| 실험 테마 선택 UI | feature toggle `grafanaconThemes` / `extraThemes` ([What's new 2025-04](https://grafana.com/whats-new/2025-04-11-introducing-experimental-themes/)). |
-| 전역 CSS 주입 | nginx `sub_filter '</head>' '<link rel=stylesheet href=/custom.css></head>'` ([예](https://github.com/Zidichy/GrafOrg)), Business Text 외부 CSS, 브라우저 Stylus. Grafana 팀: "CSS/DOM은 API 계약이 아니다" ([#71662](https://github.com/grafana/grafana/issues/71662)). 키오스크용. |
-| CRT 오버레이 CSS | [afterglow-crt](https://github.com/HauntedCrusader/afterglow-crt)(crt-green/amber 프리셋), [ysrtv](https://github.com/Yaser-Allahim/ysrtv), [labcat-crt](https://github.com/andymai/labcat-crt), [vault66-crt-effect](https://github.com/mdombrov-33/vault66-crt-effect)(React). |
-| 공식 커스텀 테마 | 2026-03 해커톤 드래프트 PR [#119725](https://github.com/grafana/grafana/pull/119725), 미병합. |
+| Hidden `matrix` theme | [matrix.json](https://github.com/grafana/grafana/blob/main/packages/grafana-data/src/themes/themeDefinitions/matrix.json). Absent from the picker ([getSelectableThemes.ts](https://github.com/grafana/grafana/blob/main/public/app/core/components/ThemeSelector/getSelectableThemes.ts)), but [index.go `getThemeForIndexData`](https://github.com/grafana/grafana/blob/main/pkg/api/index.go) checks a `?theme=` value only with `IsValidThemeID`. Still present in v12.0.0 (`matrix.ts`). `tron`, `synthwave`, `gloom`, `mars`, and others work the same way. |
+| Experimental theme picker | Feature toggles `grafanaconThemes` / `extraThemes` ([What's new 2025-04](https://grafana.com/whats-new/2025-04-11-introducing-experimental-themes/)). |
+| Inject global CSS | nginx `sub_filter '</head>' '<link rel=stylesheet href=/custom.css></head>'` ([example](https://github.com/Zidichy/GrafOrg)), Business Text external CSS, browser Stylus. Grafana team: "CSS/DOM is not an API contract" ([#71662](https://github.com/grafana/grafana/issues/71662)). For kiosks. |
+| CRT overlay CSS | [afterglow-crt](https://github.com/HauntedCrusader/afterglow-crt) (crt-green/amber presets), [ysrtv](https://github.com/Yaser-Allahim/ysrtv), [labcat-crt](https://github.com/andymai/labcat-crt), [vault66-crt-effect](https://github.com/mdombrov-33/vault66-crt-effect) (React). |
+| Official custom themes | March 2026 hackathon draft PR [#119725](https://github.com/grafana/grafana/pull/119725), unmerged. |
 
-## 3. Grafana 밖, 진짜 터미널
+## 3. Outside Grafana, a real terminal
 
-| 도구 | 비고 |
+| Tool | Notes |
 |---|---|
-| [Grafatui](https://github.com/fedexist/grafatui) (Rust) | Prometheus 직접 조회, Grafana 대시보드 JSON 임포트(timeseries/stat/gauge/bargauge/table/heatmap, 템플릿 변수), SVG/PNG 스냅샷. 2026-06 v0.1.x. |
-| [grom](https://github.com/qf-studio/grom) | btop 스타일(braille, 그라데이션 미터), Grafana JSON 임포트. 2026-07 시작. |
-| [sampler](https://github.com/sqshq/sampler) | YAML의 셸 명령 → runchart/sparkline/barchart/gauge/asciibox. |
-| k9s `:pulses`, [kdash](https://github.com/kdash-rs/kdash), [kutop](https://github.com/ken-jo/kutop), kubetui | K8s 전용. kutop은 Textual 기반 btop 룩. |
-| grafterm, ascii-grafana | 레거시(2019). |
-| DIY: Ratatui/[Ratzilla](https://github.com/ratatui/ratzilla), [termdash](https://github.com/mum4k/termdash), [ntcharts](https://github.com/NimbleMarkets/ntcharts), Textual+[textual-plotext](https://github.com/textualize/textual-plotext) | termdash SegmentDisplay(16세그먼트)가 특히 레트로. Ratzilla는 같은 Rust 코드를 WASM(WebGL2)으로 브라우저에. |
-| ASCII 토폴로지 | [kubectl-graph](https://github.com/steveteuber/kubectl-graph)(DOT/mermaid) → graph-easy `--as=boxart` / [D2 0.7.1+ `.txt`](https://d2lang.com/blog/ascii/) / mermaid-ascii. kube-lineage, kubectl tree는 트리. CronJob → Infinity 데이터소스 → Business Text `<pre>`. |
-| [cool-retro-term](https://github.com/Swordfish90/cool-retro-term) | 진짜 CRT 셰이더. 벽걸이 최종 룩. 반대로 Grafana 렌더 PNG를 chafa로 터미널에 뿌리는 변칙도 가능. |
+| [Grafatui](https://github.com/fedexist/grafatui) (Rust) | Queries Prometheus directly, imports Grafana dashboard JSON (timeseries/stat/gauge/bargauge/table/heatmap, template variables), SVG/PNG snapshots. 2026-06 v0.1.x. |
+| [grom](https://github.com/qf-studio/grom) | btop style (braille, gradient meters), Grafana JSON import. Started 2026-07. |
+| [sampler](https://github.com/sqshq/sampler) | Shell commands in YAML → runchart/sparkline/barchart/gauge/asciibox. |
+| k9s `:pulses`, [kdash](https://github.com/kdash-rs/kdash), [kutop](https://github.com/ken-jo/kutop), kubetui | Kubernetes only. kutop is a Textual btop look. |
+| grafterm, ascii-grafana | Legacy (2019). |
+| DIY: Ratatui/[Ratzilla](https://github.com/ratatui/ratzilla), [termdash](https://github.com/mum4k/termdash), [ntcharts](https://github.com/NimbleMarkets/ntcharts), Textual+[textual-plotext](https://github.com/textualize/textual-plotext) | termdash SegmentDisplay (16-segment) is especially retro. Ratzilla runs the same Rust code in the browser as WASM (WebGL2). |
+| ASCII topology | [kubectl-graph](https://github.com/steveteuber/kubectl-graph) (DOT/mermaid) → graph-easy `--as=boxart` / [D2 0.7.1+ `.txt`](https://d2lang.com/blog/ascii/) / mermaid-ascii. kube-lineage and kubectl tree are trees. CronJob → Infinity datasource → Business Text `<pre>`. |
+| [cool-retro-term](https://github.com/Swordfish90/cool-retro-term) | A real CRT shader. The wall-display end look. The reverse also works: render Grafana to PNG and print it in the terminal with chafa. |
 
-## 4. 조립용 라이브러리 (웹)
+## 4. Libraries for assembling it (web)
 
-| 라이브러리 | 용도 |
+| Library | Use |
 |---|---|
-| [WebTUI CSS](https://webtui.ironclad.sh/) (`@webtui/css`) | `box-="square"` 등 속성으로 TUI 테두리·타이포. catppuccin/gruvbox/nord 테마. Business Text 외부 CSS로 로드. |
-| [asciichart](https://github.com/kroitor/asciichart), [chartscii](https://github.com/tool3/chartscii), `@panzi/unicode-bar-chart` | ASCII/유니코드 차트 문자열 생성. 의존성 0. |
-| [xterm.js](https://github.com/xtermjs/xterm.js), [@beamterm/renderer](https://github.com/junkdog/beamterm), Ratzilla, vue-tui | 브라우저 셀 렌더러. beamterm은 PTY 없는 표시 전용 WebGL2 렌더러. |
-| 글꼴 | JetBrains Mono(OFL, 저장소에 동봉), Cascadia Mono, Fira Code, IBM Plex Mono. Nerd Font 아이콘은 WebTUI plugin-nf. |
+| [WebTUI CSS](https://webtui.ironclad.sh/) (`@webtui/css`) | TUI borders and type via attributes such as `box-="square"`. catppuccin/gruvbox/nord themes. Load as Business Text external CSS. |
+| [asciichart](https://github.com/kroitor/asciichart), [chartscii](https://github.com/tool3/chartscii), `@panzi/unicode-bar-chart` | Generate ASCII/Unicode chart strings. Zero dependencies. |
+| [xterm.js](https://github.com/xtermjs/xterm.js), [@beamterm/renderer](https://github.com/junkdog/beamterm), Ratzilla, vue-tui | Browser cell renderers. beamterm is a display-only WebGL2 renderer with no PTY. |
+| Fonts | JetBrains Mono (OFL, bundled in this repo), Cascadia Mono, Fira Code, IBM Plex Mono. Nerd Font icons via WebTUI plugin-nf. |
 
-## 5. 추천 조합
+## 5. Recommended combinations
 
-- **A. Grafana 안에서 끝내기**: `?theme=matrix` + Business Text(`src/tuiflow.js` import, Handlebars 헬퍼, after-render 애니메이션) + 토폴로지는 Canvas(점선 애니메이션, 방향=필드) 또는 Business Charts(lines effect). → 이 저장소 `grafana/`.
-- **B. 실제 TUI를 Grafana에 끼워 넣기**: 클러스터 안 ttyd/textual-serve 파드로 Grafatui·kutop 서빙 → Text 패널 `<iframe>`. 인증(ttyd `-c`, oauth2-proxy)·스킴 일치 주의.
-- **C. Grafana 밖, 모니터를 CRT로**: cool-retro-term + grom/Grafatui(Grafana JSON 재사용) + tmux pane에 kubectl-graph → D2 `.txt` watch.
+- **A. Stay inside Grafana**: `?theme=matrix` + Business Text (`src/tuiflow.js` import, Handlebars helpers, after-render animation) + topology as Canvas (dashed animation, direction = field) or Business Charts (lines effect). → this repo's `grafana/`.
+- **B. Embed a real TUI in Grafana**: serve Grafatui or kutop from a ttyd/textual-serve pod in the cluster → Text panel `<iframe>`. Watch authentication (ttyd `-c`, oauth2-proxy) and scheme match.
+- **C. Outside Grafana, CRT on the monitor**: cool-retro-term + grom/Grafatui (reuse Grafana JSON) + a tmux pane watching kubectl-graph → D2 `.txt`.
 
-## 6. 주의
+## 6. Caveats
 
-- 전역 CSS 주입과 `matrix` 테마는 비공식/실험 영역 — 업그레이드 시 깨질 수 있음.
-- Canvas 요소는 글꼴 지정 불가(색·크기·정렬만).
-- Business Text의 Before 코드는 async 함수가 아니므로 `await import()` 대신 `return import(...).then(...)` 패턴을 쓴다(`grafana/business-text/before.js`).
-- iframe 방식은 셸 노출 범위를 최소화할 것. textual-serve는 셸을 노출하지 않음.
+- Global CSS injection and the `matrix` theme are unofficial/experimental. They can break on upgrade.
+- Canvas elements cannot set a font (color, size, and alignment only).
+- Business Text's Before code is not an async function, so use `return import(...).then(...)` instead of `await import()` (`grafana/business-text/before.js`).
+- Keep the iframe approach's shell exposure small. textual-serve does not expose a shell.

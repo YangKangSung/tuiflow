@@ -1,47 +1,47 @@
 # tuiflow
 
-**터미널(TUI) 룩의 애니메이션 다이어그램·차트를 웹에서 — Grafana 대시보드, VS Code 확장, 프레젠테이션용.**
+**Animated terminal-style diagrams and charts on the web — for Grafana dashboards, a VS Code extension, and presentations.**
 
-점선 박스 노드, 그 사이를 흐르는 `.o@` 패킷, `█▓░` 막대, `▁▂▃▅▇` 스파크라인, 세션 로그, tmux 풍 상태줄.
-모든 요소를 **문자열**로 만들고 색만 `<span>`으로 입힌다. 그래서 같은 코드가 브라우저·Grafana 패널·VS Code 웹뷰·슬라이드에서 그대로 돈다.
+Dashed box nodes, `.o@` packets flowing between them, `█▓░` bars, `▁▂▃▅▇` sparklines, a session log, and a tmux-style status line.
+Every element is a **string**. Color is only a `<span>`. The same code runs in a browser, a Grafana panel, a VS Code webview, and a slide.
 
-레퍼런스 룩: [X 영상 (eng_khairallah1)](https://x.com/eng_khairallah1/status/2106852012558266388/video/1) → 요소 분해는 [docs/look-spec.md](docs/look-spec.md).
+Reference look: [X video (eng_khairallah1)](https://x.com/eng_khairallah1/status/2106852012558266388/video/1). The breakdown of its parts is [docs/look-spec.md](docs/look-spec.md).
 
-## 지금 들어 있는 것 (v0.4)
+## What is in v0.4
 
-| 경로 | 내용 |
+| Path | Contents |
 |---|---|
-| [`src/tuiflow.js`](src/tuiflow.js) | 코어. 의존성 0, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `braillePlot`/`lineChart`/`flame`/`geoPlot` `Screen` `animate` |
-| [`demo/index.html`](demo/index.html) | 단독 데모(가짜 K8s 클러스터, 100×36 셀). 팔레트 3종(video/matrix/amber), CRT 오버레이, 전체화면, 프레임을 텍스트로 복사. 글꼴 동봉이라 오프라인 PC에서도 동작 |
-| [`grafana/`](grafana/) | Business Text 패널 소스 + TestData 대시보드 3종(demo / library / before-after) + WSL Docker 기동 스크립트. 사내 TLS 프록시·오프라인에서도 돌도록 플러그인은 호스트에서 받아 마운트 |
-| [`grafana/library/`](grafana/library/) | **공식 Grafana visualization 25종 + Flow/Columns** 을 같은 TUI 톤으로. 쿼리 무관 — 숫자 필드를 시리즈로 삼고 Grafana 필드 설정을 그대로 적용. `npm run publish:library` → *Import from library* → 쿼리만 교체 |
-| [`grafana/catalog.js`](grafana/catalog.js) | [공식 시각화 목록](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/) 1:1 카탈로그 |
-| [`docs/research.md`](docs/research.md) | Grafana에서 TUI 룩을 내는 방법 전수 조사 (숨은 `matrix` 테마, Canvas 애니메이션 연결선, 플러그인, 터미널 도구, 라이브러리) |
-| [`docs/look-spec.md`](docs/look-spec.md) | 룩 정의서 — 글리프 어휘, 팔레트, 레이아웃·애니메이션 규칙, 타깃별 매핑 |
-| [`test/`](test/) | 코어 단위 테스트 + Business Text 템플릿을 플러그인과 같은 방식으로 렌더해 폭/헬퍼/정리 함수 검증 |
+| [`src/tuiflow.js`](src/tuiflow.js) | Core. Zero dependencies, UMD. `bar` `sparkline` `meter` `box` `edge` `vedge` `table` `statusBar` `braillePlot`/`lineChart`/`flame`/`geoPlot` `Screen` `animate` |
+| [`demo/index.html`](demo/index.html) | Standalone demo (fake K8s cluster, 100×36 cells). Three palettes (video/matrix/amber), CRT overlay, fullscreen, copy the frame as text. The font is bundled, so it works on an offline PC |
+| [`grafana/`](grafana/) | Business Text panel sources + three TestData dashboards (demo / library / before-after) + a WSL Docker start script. Plugins are downloaded on the host and mounted, so the stack also runs behind a TLS-inspecting proxy and offline |
+| [`grafana/library/`](grafana/library/) | **The 25 official Grafana visualizations, plus Flow and Columns**, in the same TUI tone. Query-agnostic: every numeric field is a series, and Grafana field config is applied as-is. `npm run publish:library` → *Import from library* → swap the query |
+| [`grafana/catalog.js`](grafana/catalog.js) | 1:1 catalogue of the [official visualization list](https://grafana.com/docs/grafana/latest/visualizations/panels-visualizations/visualizations/) |
+| [`docs/research.md`](docs/research.md) | Survey of every way to get a TUI look in Grafana (hidden `matrix` theme, animated Canvas connections, plugins, terminal tools, libraries) |
+| [`docs/look-spec.md`](docs/look-spec.md) | Look spec — glyph vocabulary, palettes, layout and animation rules, per-target mapping |
+| [`test/`](test/) | Core unit tests, plus Business Text templates rendered the way the plugin does, checking width, helpers, and cleanup |
 
-## 빠른 시작
+## Quick start
 
 ```bash
-# 1) 데모 (아무 정적 서버. 더블클릭 file:// 로도 열림)
+# 1) Demo (any static server; file:// from a double-click also works)
 npm run serve            # python -m http.server 8787
-# → http://localhost:8787/demo/index.html   키: Space 일시정지 · T 테마 · C CRT · F 전체화면
+# → http://localhost:8787/demo/index.html   keys: Space pause · T theme · C CRT · F fullscreen
 
-# 2) Grafana — Windows + WSL Docker Engine (Docker Desktop 불필요)
-.\grafana\fetch-plugins.ps1    # 최초 1회
+# 2) Grafana — Windows + WSL Docker Engine (Docker Desktop is not required)
+.\grafana\fetch-plugins.ps1    # once
 .\grafana\up.ps1               # → http://localhost:3000/d/tuiflow-demo/?theme=matrix  (admin/admin)
 #    Linux/macOS: bash grafana/fetch-plugins.sh && (cd grafana && docker compose up -d)
 
-# 3) 라이브러리 패널 등록 (기존 차트를 TUI로 바꿔 쓰기)
+# 3) Register library panels (turn an existing chart into the TUI look)
 npm run publish:library        # → http://localhost:3000/d/tuiflow-library/?theme=matrix
-#    다른 Grafana: GRAFANA_URL=https://… GRAFANA_TOKEN=glsa_… npm run publish:library
+#    Another Grafana: GRAFANA_URL=https://… GRAFANA_TOKEN=glsa_… npm run publish:library
 
-# 4) 테스트 / JSON 재생성
+# 4) Tests / regenerate JSON
 npm install && npm test
 npm run build                  # dashboards + library
 ```
 
-## 코어 사용 예
+## Core example
 
 ```html
 <script src="src/tuiflow.js"></script>
@@ -60,19 +60,19 @@ npm run build                  # dashboards + library
 </script>
 ```
 
-Grafana에서는 같은 함수를 Handlebars 헬퍼로 감싼다 → [`grafana/business-text/before.js`](grafana/business-text/before.js).
+In Grafana the same functions are wrapped as Handlebars helpers → [`grafana/business-text/before.js`](grafana/business-text/before.js).
 
-## 로드맵
+## Roadmap
 
-- [x] 0.1 — 조사 정리, 코어 프리미티브, 단독 데모, Business Text 레시피 + TestData 대시보드
-- [x] 0.2 — 브라유 라인 차트(`lineChart`), 쿼리 무관 generic 헬퍼 5종, 라이브러리 패널 6종 + API 등록 스크립트, WSL Docker 기동 스크립트
-- [x] 0.3 — 브라유 라인/파이/스캐터, generic 헬퍼, 라이브러리 패널 + before/after 대시보드
-- [x] 0.4 — 공식 Grafana visualization 25종을 같은 TUI 톤으로 (Flame / Canvas / Geomap / Annotations / Text / News 포함)
-- [ ] 0.5 — 프레젠테이션: 슬라이드 모드(장면 전환, 타이핑 효과, 스크립트된 이벤트), 녹화용 결정적 시드, PNG/SVG 내보내기
-- [ ] 0.6 — VS Code 확장: Webview 패널에 `tuiflow.js` + `--vscode-*` 테마 토큰 매핑, 워크스페이스 JSON 장면 파일 미리보기
-- [ ] 0.7 — 커스텀 패널 플러그인 `tuiflow-panel`: Visualization 피커에 TUI Time series/Stat/…, 패널 크기 자동 맞춤, 옵션 UI(글리프·팔레트·패킷 속도)
-- [ ] 1.0 — 실제 클러스터 연결(Prometheus HTTP API 직접 호출 모드), 설정 스키마, 문서 사이트
+- [x] 0.1 — Research notes, core primitives, standalone demo, Business Text recipe + TestData dashboard
+- [x] 0.2 — Braille line chart (`lineChart`), five query-agnostic generic helpers, six library panels + API publish script, WSL Docker start script
+- [x] 0.3 — Braille line / pie / scatter, generic helpers, library panels + before/after dashboard
+- [x] 0.4 — All 25 official Grafana visualizations in the same TUI tone (including Flame / Canvas / Geomap / Annotations / Text / News)
+- [ ] 0.5 — Presentations: slide mode (scene changes, typing effect, scripted events), a deterministic seed for recording, PNG/SVG export
+- [ ] 0.6 — VS Code extension: webview panel with `tuiflow.js` + `--vscode-*` theme-token mapping, preview of workspace JSON scene files
+- [ ] 0.7 — Panel plugin `yangkangsung-tuiflow-panel` (one visualization, kind is an option). The code is in the repo; catalog submission still needs a public repository and a Grafana Cloud login
+- [ ] 1.0 — A live cluster (direct Prometheus HTTP API mode), a config schema, a docs site
 
-## 라이선스
+## License
 
-미정(private). 동봉 글꼴 JetBrains Mono는 [SIL OFL 1.1](demo/fonts/OFL.txt).
+[Apache-2.0](LICENSE). The bundled JetBrains Mono font is [SIL OFL 1.1](demo/fonts/OFL.txt).
