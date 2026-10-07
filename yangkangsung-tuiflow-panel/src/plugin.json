@@ -17,7 +17,11 @@
     "links": [
       { "name": "Project", "url": "https://github.com/YangKangSung/tuiflow" }
     ],
-    "screenshots": [],
+    "screenshots": [
+      { "name": "Time series", "path": "img/screenshot-timeseries.png" },
+      { "name": "Stat", "path": "img/screenshot-stat.png" },
+      { "name": "Bar chart", "path": "img/screenshot-barchart.png" }
+    ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },

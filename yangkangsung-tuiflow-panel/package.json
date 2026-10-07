@@ -1,6 +1,6 @@
 {
   "name": "yangkangsung-tuiflow-panel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "sync-vendor": "node scripts/sync-vendor.js",
     "prebuild": "node scripts/sync-vendor.js",
@@ -64,7 +64,8 @@
     "webpack-cli": "^6.0.0",
     "webpack-livereload-plugin": "^3.0.2",
     "webpack-subresource-integrity": "^5.1.0",
-    "webpack-virtual-modules": "^0.6.2"
+    "webpack-virtual-modules": "^0.6.2",
+    "braces": "file:third_party/braces"
   },
   "engines": {
     "node": ">=22"
@@ -80,5 +81,9 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
-  "packageManager": "npm@10.9.7"
+  "packageManager": "npm@10.9.7",
+  "overrides": {
+    "basic-ftp": "6.2.1",
+    "braces": "file:third_party/braces"
+  }
 }

@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * tuiflow core — text-only primitives for TUI-style dashboards:
  * box-drawing frames, block bars, block sparklines, braille line charts,
  * dashed edges with a travelling packet, status bars and a cell grid
