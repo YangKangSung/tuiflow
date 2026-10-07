@@ -6,7 +6,7 @@ import flowSource from '../../grafana/business-text/content.hbs';
 import { TuiflowView } from './types';
 
 const CELL_W = 7.8;
-const CELL_H = 16.25;
+const CELL_H = 15.6;
 
 export function cellSize(width: number, height: number): { cols: number; rows: number } {
   return {
@@ -28,7 +28,7 @@ function helperCall(view: TuiflowView, cols: number, rows: number): string {
     case 'rows':
       return `${view.helper} ${Math.max(8, h)}`;
     case 'pie':
-      return `${view.helper} ${Math.max(4, Math.min(12, Math.floor(h / 2)))} 0`;
+      return `${view.helper} ${Math.max(4, Math.min(12, Math.floor(h / 2)))} 0 ${CELL_H / CELL_W}`;
     case 'bins':
       return `${view.helper} ${Math.max(8, Math.floor(w / 2))} ${h}`;
     case 'none':

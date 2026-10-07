@@ -4,7 +4,11 @@
 .tf {
   font-family: "JetBrains Mono", "Cascadia Mono", "Fira Code", "DejaVu Sans Mono", Consolas, monospace;
   font-size: 13px;
-  line-height: 1.25;
+  /* 2ch matches braillePie's default aspect so the disc is a circle, not an oval. */
+  line-height: 2ch;
+  letter-spacing: 0;
+  font-kerning: none;
+  font-variant-ligatures: none;
   margin: 0;
   padding: 8px 10px;
   white-space: pre;
@@ -46,6 +50,11 @@
 }
 @keyframes tf-blink {
   50% { opacity: 0; }
+}
+
+/* Beat Grafana's `pre { line-height }` so the 2ch cell stays 2:1. */
+pre.tf {
+  line-height: 2ch;
 }
 
 /* Opt-in "video palette" regardless of Grafana theme: class="tf tf-video" */

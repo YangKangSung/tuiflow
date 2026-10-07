@@ -384,15 +384,18 @@
 
   /**
    * Pie / donut as a braille disc. values: number[] (one slice per value).
-   * opts: { radius (cells, default 6), donut: 0..1 inner ratio }
+   * opts: { radius (cells, default 6), donut: 0..1 inner ratio,
+   *         aspect: cellHeight/cellWidth (default 2, a 2ch line-height cell) }
    * Returns { rows, owner } — owner = slice index per cell for colouring.
-   * Cells are 2 dots wide and 4 tall, so the disc is drawn 2:1 to look round.
+   * Braille is 2 dots wide and 4 tall. A circle in pixels needs a canvas
+   * whose cell width/height matches `aspect`, then y-dots scaled by aspect/2.
    */
   function braillePie(values, opts) {
     opts = opts || {};
     const radius = opts.radius || 6; // in cell rows
-    const height = radius * 2;
-    const width = radius * 4; // monospace cells are ~half as wide as tall
+    const aspect = opts.aspect > 0 ? opts.aspect : 2;
+    const height = Math.max(2, radius * 2);
+    const width = Math.max(2, Math.round(height * aspect));
     const cv = new BrailleCanvas(width, height, values.length);
     const total = values.reduce((a, b) => a + (Number.isFinite(b) && b > 0 ? b : 0), 0) || 1;
     const bounds = [];
@@ -404,14 +407,15 @@
     });
     const cx = cv.W / 2;
     const cy = cv.H / 2;
-    const R = cv.H / 2;
+    // One x-dot is 1/2 cell wide; one y-dot is 1/4 cell tall. In pixels
+    // y-dots are (aspect/2) times an x-dot, so scale dy to keep the disc round.
+    const yScale = aspect / 2;
+    const R = Math.min(cx, cy * yScale);
     const inner = (opts.donut || 0) * R;
     for (let py = 0; py < cv.H; py++) {
       for (let px = 0; px < cv.W; px++) {
-        // a cell is ~half as wide as it is tall, so 2x4 braille dots are square:
-        // with width = 4*radius cells the dot grid is W == H and the disc is round
         const dx = px + 0.5 - cx;
-        const dy = py + 0.5 - cy;
+        const dy = (py + 0.5 - cy) * yScale;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d > R || d < inner) continue;
         let a = Math.atan2(dx, -dy) / (2 * Math.PI); // 0 at 12 o'clock, clockwise
@@ -420,7 +424,60 @@
         if (si >= 0) cv.dot(si, px, py);
       }
     }
-    return cv.compose();
+    const out = cv.compose();
+    // Colour is per cell so atan2 cuts stair-step. Overlay a 1-cell Bresenham
+    // radius; the glyph follows the local step so the line stays thin.
+    strokePieRays(out, width, height, bounds);
+    return out;
+  }
+
+  function walkRay(x0, y0, x1, y1, visit) {
+    let x = x0;
+    let y = y0;
+    const adx = Math.abs(x1 - x0);
+    const ady = Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+    let err = adx - ady;
+    const first = ady * 2 < adx ? "─" : adx * 2 < ady ? "│" : sx === sy ? "╲" : "╱";
+    visit(x, y, first);
+    while (x !== x1 || y !== y1) {
+      const e2 = 2 * err;
+      const stepX = e2 > -ady;
+      const stepY = e2 < adx;
+      if (stepX) {
+        err -= ady;
+        x += sx;
+      }
+      if (stepY) {
+        err += adx;
+        y += sy;
+      }
+      const ch = stepX && stepY ? (sx === sy ? "╲" : "╱") : stepY ? "│" : "─";
+      visit(x, y, ch);
+    }
+  }
+
+  function strokePieRays(out, width, height, bounds) {
+    const live = bounds.filter((b) => b[1] > b[0]);
+    if (live.length < 2) return;
+    const grids = out.rows.map((row) => Array.from(row));
+    const cx = (width - 1) / 2;
+    const cy = (height - 1) / 2;
+    live.forEach((b) => {
+      const theta = b[0] * 2 * Math.PI;
+      const x0 = Math.round(cx);
+      const y0 = Math.round(cy);
+      const x1 = Math.round(cx + (width / 2) * Math.sin(theta));
+      const y1 = Math.round(cy + (height / 2) * -Math.cos(theta));
+      walkRay(x0, y0, x1, y1, (x, y, ch) => {
+        if (y < 0 || y >= height || x < 0 || x >= width) return;
+        if (grids[y][x] === " ") return;
+        grids[y][x] = ch;
+        out.owner[y][x] = -1;
+      });
+    });
+    out.rows = grids.map((g) => g.join(""));
   }
 
   /** Shade character for a 0..1 density: " ░▒▓█". */

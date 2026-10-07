@@ -14,6 +14,18 @@ interface Props extends PanelProps<TuiflowOptions> {}
 const cellWidth = 8;
 const lineHeight = 16;
 
+function measureCellAspect(root: HTMLElement): number {
+  const probe = document.createElement('pre');
+  probe.className = 'tf';
+  probe.style.cssText = 'position:absolute;visibility:hidden;padding:0;margin:0;border:0';
+  probe.textContent = '00\n00';
+  root.appendChild(probe);
+  const box = probe.getBoundingClientRect();
+  root.removeChild(probe);
+  const aspect = box.height / 2 / (box.width / 2);
+  return aspect > 0 && Number.isFinite(aspect) ? aspect : 2;
+}
+
 export const TuiflowPanel: React.FC<Props> = ({ options, data, width, height }) => {
   const ref = useRef<HTMLDivElement>(null);
   const cols = options.columns > 0 ? options.columns : Math.max(24, Math.floor((width - 20) / cellWidth));
@@ -26,6 +38,8 @@ export const TuiflowPanel: React.FC<Props> = ({ options, data, width, height }) 
     }
     let stop = () => {};
     let alive = true;
+    root.innerHTML = '<style>' + cssSource + '</style>';
+    const aspect = measureCellAspect(root);
     renderTuiflow({
       tf,
       Handlebars,
@@ -34,6 +48,7 @@ export const TuiflowPanel: React.FC<Props> = ({ options, data, width, height }) 
       kind: options.kind,
       cols,
       rows,
+      aspect,
     }).then((html) => {
       if (!alive || !ref.current) {
         return;

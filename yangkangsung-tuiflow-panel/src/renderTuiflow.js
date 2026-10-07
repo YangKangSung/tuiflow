@@ -38,7 +38,7 @@ function htmlOf(value) {
   return String(value ?? '');
 }
 
-function callKind(helpers, kind, cols, rows) {
+function callKind(helpers, kind, cols, rows, aspect) {
   const h = helpers;
   switch (kind) {
     case 'timeseries':
@@ -58,7 +58,7 @@ function callKind(helpers, kind, cols, rows) {
     case 'table':
       return h.tfTable(rows);
     case 'pie':
-      return h.tfPie(Math.max(4, Math.min(12, Math.floor(rows / 2) || 6)), 0);
+      return h.tfPie(Math.max(4, Math.min(12, Math.floor(rows / 2) || 6)), 0, aspect);
     case 'stateTimeline':
       return h.tfStateTimeline(cols);
     case 'statusHistory':
@@ -102,7 +102,7 @@ function stubCoreImport(source) {
   return source.replace(/return import\([\s\S]*?\)\.then\(\(\) => \{/, 'return Promise.resolve().then(() => {');
 }
 
-async function renderTuiflow({ tf, Handlebars, beforeSource, series, kind, cols, rows }) {
+async function renderTuiflow({ tf, Handlebars, beforeSource, series, kind, cols, rows, aspect }) {
   const root = globalThis;
   if (!root.window) {
     root.window = root;
@@ -114,7 +114,7 @@ async function renderTuiflow({ tf, Handlebars, beforeSource, series, kind, cols,
   // before.js is the Business Text function body. It reads window.tuiflow.
   const run = new Function('context', stubCoreImport(beforeSource));
   await run({ handlebars: hb, panelData: { series: series || [] } });
-  return '<pre class="tf">' + htmlOf(callKind(hb.helpers, kind, cols, rows)) + '</pre>';
+  return '<pre class="tf">' + htmlOf(callKind(hb.helpers, kind, cols, rows, aspect)) + '</pre>';
 }
 
 function startAfter(afterSource, element) {

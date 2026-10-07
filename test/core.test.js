@@ -86,3 +86,21 @@ test("geoPlot places * at lat/lon and keeps a rectangular grid", () => {
   const owners = g.owner.flat();
   assert.ok(owners.includes(0) && owners.includes(1));
 });
+
+test("braillePie canvas matches cell aspect so the disc is round", () => {
+  const a = tf.braillePie([1, 1, 1], { radius: 4, aspect: 2 });
+  assert.equal(a.rows.length, 8);
+  assert.equal(width(a.rows[0]), 16);
+  const b = tf.braillePie([1, 1, 1], { radius: 4, aspect: 1 });
+  assert.equal(b.rows.length, 8);
+  assert.equal(width(b.rows[0]), 8);
+  const filled = a.rows.join("").replace(/ /g, "");
+  assert.ok(filled.length > 20);
+});
+
+test("braillePie draws straight box-drawing radii between slices", () => {
+  const pie = tf.braillePie([1, 1], { radius: 6, aspect: 2 });
+  const mid = Math.floor(pie.rows[0].length / 2);
+  const col = pie.rows.map((row) => row[mid]).join("");
+  assert.match(col, /│/);
+});

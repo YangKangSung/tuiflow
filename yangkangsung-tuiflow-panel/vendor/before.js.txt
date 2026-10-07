@@ -299,8 +299,8 @@ return import("/public/tuiflow.js?v=__TF_VERSION__").then(() => {
     return safe(out.join("\n"));
   });
 
-  // {{{tfPie radius donut}}} — braille disc; labels from a string field or one slice per series
-  hb.registerHelper("tfPie", (radius, donut) => {
+  // {{{tfPie radius donut aspect}}} — braille disc; labels from a string field or one slice per series
+  hb.registerHelper("tfPie", (radius, donut, aspect) => {
     const c = categorical();
     let labels, values, fields;
     if (c) {
@@ -314,7 +314,8 @@ return import("/public/tuiflow.js?v=__TF_VERSION__").then(() => {
       values = s.map((x) => x.last);
       fields = s.map((x) => x.field);
     }
-    const pie = tf.braillePie(values, { radius: num(radius, 6), donut: num(donut, 0) });
+    const aspectN = typeof aspect === "number" && aspect > 0 ? aspect : 2;
+    const pie = tf.braillePie(values, { radius: num(radius, 6), donut: num(donut, 0), aspect: aspectN });
     const disc = tf.ownedSegments(pie.rows, pie.owner, sCls).map((segs) => segs.map((s) => colorSpan(s[0], "", s[1])).join(""));
     const total = values.reduce((a, b) => a + (Number.isFinite(b) && b > 0 ? b : 0), 0) || 1;
     const lw = Math.min(24, Math.max(...labels.map((l) => String(l).length)));
