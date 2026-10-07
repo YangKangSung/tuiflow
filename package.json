@@ -6,6 +6,7 @@
   "main": "src/tuiflow.js",
   "scripts": {
     "serve": "python -m http.server 8787",
+    "demo:kinds": "node demo/build-plugin-kinds.js",
     "build:dashboard": "node grafana/build-dashboard.js",
     "build:library": "node grafana/build-library.js",
     "build": "npm run build:dashboard && npm run build:library",

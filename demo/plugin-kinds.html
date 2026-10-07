@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>tuiflow · all panels</title>
+<link rel="stylesheet" href="../grafana/business-text/styles.css" />
+<style>
+  @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  html, body { margin: 0; background: #111217; color: #c9ced6; }
+  body { font-family: "JetBrains Mono", Consolas, monospace; }
+  header { position: sticky; top: 0; z-index: 2; background: #111217; border-bottom: 1px solid #2c3235; padding: 10px 16px 8px; }
+  header h1 { margin: 0 0 6px; font-size: 16px; font-weight: 500; }
+  header p { margin: 0 0 8px; color: #8e8e8e; font-size: 12px; }
+  header a { color: #8fb3ff; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 12px; }
+  nav a { color: #9aa0a6; text-decoration: none; }
+  nav a:hover { color: #c9ced6; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 16px 32px; }
+  .panel { background: #181b1f; border: 1px solid #2c3235; min-width: 0; overflow: auto; }
+  .panel.wide { grid-column: 1 / -1; }
+  .panel h2 { margin: 0; padding: 8px 12px 0; font-size: 14px; font-weight: 500; }
+  .panel h2 button { font: inherit; color: #c9ced6; background: transparent; border: 1px solid #3a4150; margin-left: 8px; cursor: pointer; }
+  .panel p { margin: 2px 12px 6px; color: #8e8e8e; font-size: 12px; }
+  .tf { font-family: "JetBrains Mono", Consolas, monospace; color: #c9ced6; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .panel.wide { grid-column: auto; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>tuiflow panels</h1>
+  <p>Every visualization in yangkangsung-tuiflow-panel, drawn from sample frames. The cluster scene is the <a href="index.html">standalone demo</a>.</p>
+  <nav><a href="#k-timeseries">Time series</a><a href="#k-trend">Trend</a><a href="#k-barchart">Bar chart</a><a href="#k-columns">Columns</a><a href="#k-stat">Stat</a><a href="#k-gauge">Gauge</a><a href="#k-bargauge">Bar gauge</a><a href="#k-table">Table</a><a href="#k-pie">Pie chart</a><a href="#k-stateTimeline">State timeline</a><a href="#k-statusHistory">Status history</a><a href="#k-heatmap">Heatmap</a><a href="#k-histogram">Histogram</a><a href="#k-candlestick">Candlestick</a><a href="#k-xy">XY chart</a><a href="#k-logs">Logs</a><a href="#k-nodegraph">Node graph</a><a href="#k-traces">Traces</a><a href="#k-flame">Flame graph</a><a href="#k-canvas">Canvas</a><a href="#k-geomap">Geomap</a><a href="#k-alertlist">Alert list</a><a href="#k-dashlist">Dashboard list</a><a href="#k-annotations">Annotations list</a><a href="#k-text">Text</a><a href="#k-news">News</a></nav>
+</header>
+<div class="grid">
+<section class="panel wide" id="k-live">
+  <h2>Time series · live <button type="button" id="live-pause">pause</button></h2>
+  <p>New samples enter on the right. The clock on the axis moves with them.</p>
+  <pre id="live-ts" class="tf"></pre>
+</section>
+<section class="panel wide" id="k-timeseries"><h2>Time series</h2><p>Braille line chart of every numeric series.</p><pre class="tf"><span class="tf-axis">413 req/s ┤</span>      <span class="tf-s0">⣀⠤⠔⠒⠒⠒⠊⠉⠉⠒⠤⢄⡀</span>                                    <span class="tf-s0">⣀⠤⠔⠊⠉⠉</span>
+<span class="tf-axis">374 req/s ┤</span>  <span class="tf-s0">⣀⠤⠊⠉</span>            <span class="tf-s0">⠈⠑⠤⣀</span>                             <span class="tf-s0">⣀⠤⠊⠉</span>      
+<span class="tf-axis">335 req/s ┤</span><span class="tf-s0">⡠⠊</span>                    <span class="tf-s0">⠑⠒⠤⡀</span>                     <span class="tf-s0">⢀⡠⠔⠉</span>          
+<span class="tf-axis">296 req/s ┤</span>                         <span class="tf-s0">⠈⠒⠤⣀</span>               <span class="tf-s0">⢀⣀⠤⠃</span>             
+<span class="tf-axis">257 req/s ┤</span>                             <span class="tf-s0">⠑⠢⢄⣀</span>      <span class="tf-s0">⢀⡠⠤⠤⠒⠁</span>                
+<span class="tf-axis">218 req/s ┤</span><span class="tf-s1">⠒⠉⠉⠉⠉⠉⠒⠤⠤⠤⣀</span>                      <span class="tf-s0">⠉⠑⠊⠉⠉⠉⠁</span>   <span class="tf-s1">⢀⡠⠤⠤⠒⠊⠉⠉⠉⠉⠑⠒⠒⠤⢄⣀⣀⣀</span>
+<span class="tf-axis">179 req/s ┤</span>           <span class="tf-s1">⠉⠉⠑⠒⠤⣀⡀</span>                   <span class="tf-s1">⣀⠤⠔⠒⠒⠉⠁</span>                 
+<span class="tf-axis">140 req/s ┤</span>                 <span class="tf-s1">⠈⠉⠒⠤⢄⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⣀⠤⠔⠊⠉</span>                        
+<span class="tf-axis">101 req/s ┤</span><span class="tf-s2">⠤⠒⠤⠤⢄⣀⣀</span>                            <span class="tf-s2">⢀⠤⠤⠤⠔⠒⠒⠒⠒⠒⠒⠤⠒⠒⠢⠤⠤⢄⣀⣀</span>      
+<span class="tf-axis"> 62 req/s ┼</span>       <span class="tf-s2">⠉⠑⠒⠒⠤⠔⠢⠤⠤⠤⢄⣀⣀⣀⣀⣀⣀⠤⠤⠔⠒⠒⠒⠒⠊⠉⠉⠉⠁</span>                   <span class="tf-s2">⠉⠉⠑⠊⠉⠒</span>
+<span class="tf-axis">          └─────────────────────────────────────────────────────────────</span>
+<span class="tf-axis">           18:00                       18:23                       18:47</span>
+           <span class="tf-s0">■ </span>api-gateway 413 req/s   <span class="tf-s1">■ </span>orders-svc 202 req/s   <span class="tf-s2">■ </span>payments-svc 81 req/s   </pre></section>
+<section class="panel wide" id="k-trend"><h2>Trend</h2><p>Line over a numeric x axis. The first number column is x.</p><pre class="tf"><span class="tf-axis">239 ┤</span><span>                  </span><span class="tf-s0">⢀⣀⣀⠤⠤⠔⠒⠒⠉⠉⠉⠉⠉⠉⠉⠉⠉⠑⠒⠒⠒⠒⠢⠤⠤⣀⣀</span><span>              </span>
+<span class="tf-axis">214 ┤</span><span>             </span><span class="tf-s0">⣀⠤⠔⠊⠉⠁</span><span>                          </span><span class="tf-s0">⠉⠒⠒⠤⢄⡀</span><span>        </span>
+<span class="tf-axis">189 ┤</span><span>        </span><span class="tf-s0">⢀⡠⠔⠊⠉</span><span>                                     </span><span class="tf-s0">⠈⠑⠢⢄⡀</span><span>    </span>
+<span class="tf-axis">164 ┤</span><span>    </span><span class="tf-s0">⣀⠤⠒⠉⠁</span><span>                                             </span><span class="tf-s0">⠈⠑⠒⠤⣀</span>
+<span class="tf-axis">139 ┤</span><span class="tf-s0">⢀⡠⠔⠉</span><span>                                       </span><span class="tf-s1">⣀⣀⣀⣀⣀⣀⣀</span><span>         </span>
+<span class="tf-axis">114 ┤</span><span class="tf-s0">⠁</span><span>                             </span><span class="tf-s1">⢀⣀⣀⠤⠤⠔⠒⠒⠉⠉⠉⠉⠉</span><span>       </span><span class="tf-s1">⠉⠉⠉⠉⠉⠒⠒⠢⠤</span>
+<span class="tf-axis"> 88 ┤</span><span>                       </span><span class="tf-s1">⢀⣀⡠⠔⠒⠊⠉⠁</span><span>                            </span>
+<span class="tf-axis"> 63 ┤</span><span>                </span><span class="tf-s1">⣀⣀⠤⠒⠒⠉⠉⠁</span><span>                                   </span>
+<span class="tf-axis"> 38 ┤</span><span>         </span><span class="tf-s1">⣀⡠⠔⠒⠊⠉⠉</span><span>                                           </span>
+<span class="tf-axis"> 13 ┼</span><span class="tf-s1">⣀⡠⠤⠤⠒⠒⠊⠉⠉</span><span>                                                  </span>
+<span class="tf-axis">     1000                                                   7000</span>
+     <span class="tf-s0">■ </span>torque_nm   <span class="tf-s1">■ </span>power_kw<span class="tf-dim">   x: rpm</span></pre></section>
+<section class="panel" id="k-barchart"><h2>Bar chart</h2><p>Horizontal bars. The first string column is the label.</p><pre class="tf">api-gateway   <span class="tf-s0">████████████████████████████████████</span> <span class="tf-value">812</span>
+              <span class="tf-s1">▌░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">12</span>
+orders-svc    <span class="tf-s0">███████████████████▏░░░░░░░░░░░░░░░░</span> <span class="tf-value">431</span>
+              <span class="tf-s1">▏░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">3</span>
+payments-svc  <span class="tf-s0">███████████▉░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">268</span>
+              <span class="tf-s1">▍░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">9</span>
+auth-svc      <span class="tf-s0">████████▍░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">190</span>
+              <span class="tf-s1">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">1</span>
+search-svc    <span class="tf-s0">█████▍░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">122</span>
+              <span class="tf-s1">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">0</span>
+
+<span class="tf-s0">■ </span>requests   <span class="tf-s1">■ </span>errors</pre></section>
+<section class="panel" id="k-columns"><h2>Columns</h2><p>Vertical columns from the first number column.</p><pre class="tf"><span class="tf-axis">812 ┤</span><span class="tf-s0">█████                        </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████                        </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████                        </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████ ▂▂▂▂▂                  </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████ █████                  </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████ █████ ▅▅▅▅▅            </span>
+<span class="tf-axis">    ┤</span><span class="tf-s0">█████ █████ █████ ▇▇▇▇▇ ▂▂▂▂▂</span>
+<span class="tf-axis">  0 ┼</span><span class="tf-s0">█████ █████ █████ █████ █████</span>
+<span class="tf-dim">     api-g order payme auth- searc</span></pre></section>
+<section class="panel" id="k-stat"><h2>Stat</h2><p>Name, sparkline, and last value.</p><pre class="tf"><span class="tf-s0">■ </span>api-gateway   <span class="tf-s0">▄▅▆▆▇▇█████▇▇▆▆▅▅▄▃▃▂▁▁▁▁▁▁▂▂▃▃▄▅▅▆▇▇▇██</span>  <span class="tf-value" style="color:#e8a06a"> 413 req/s</span>
+<span class="tf-s1">■ </span>orders-svc    <span class="tf-s1">▇████▇▇▆▆▅▄▄▃▂▂▁▁▁▁▁▁▁▂▂▃▄▅▅▆▆▇█████▇▇▆▆</span>  <span class="tf-value" style="color:#86d28a"> 202 req/s</span>
+<span class="tf-s2">■ </span>payments-svc  <span class="tf-s2">▇█▇▆▆▅▄▃▃▃▂▂▁▁▁▁▂▂▃▃▄▄▅▅▇▇▇▇█▇▇██▇▆▅▅▄▃▄</span>  <span class="tf-value" style="color:#86d28a">  81 req/s</span></pre></section>
+<section class="panel" id="k-gauge"><h2>Gauge</h2><p>Meter against the field min and max.</p><pre class="tf">api-gateway   <span style="color:#e8a06a">[██████████████████████░░░░░░░░░░]  69%</span>  <span class="tf-value" style="color:#e8a06a">413 req/s</span>
+orders-svc    <span style="color:#86d28a">[██████████▊░░░░░░░░░░░░░░░░░░░░░]  34%</span>  <span class="tf-value" style="color:#86d28a">202 req/s</span>
+payments-svc  <span style="color:#86d28a">[████▎░░░░░░░░░░░░░░░░░░░░░░░░░░░]  13%</span>  <span class="tf-value" style="color:#86d28a">81 req/s</span></pre></section>
+<section class="panel" id="k-bargauge"><h2>Bar gauge</h2><p>Block bar and last value.</p><pre class="tf">api-gateway   <span style="color:#e8a06a">██████████████████████████████▎░░░░░░░░░░░░░</span>  <span class="tf-value" style="color:#e8a06a">413 req/s</span>
+orders-svc    <span style="color:#86d28a">██████████████▉░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  <span class="tf-value" style="color:#86d28a">202 req/s</span>
+payments-svc  <span style="color:#86d28a">█████▉░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  <span class="tf-value" style="color:#86d28a">81 req/s</span></pre></section>
+<section class="panel wide" id="k-table"><h2>Table</h2><p>First frame as a monospace table.</p><pre class="tf"><span class="tf-dim">pod                               </span>  <span class="tf-dim">ready</span>  <span class="tf-dim">restarts</span>  <span class="tf-dim">cpu_m</span>  <span class="tf-dim">mem_mi</span>  <span class="tf-dim">status          </span>
+<span class="tf-axis">──────────────────────────────────</span>  <span class="tf-axis">─────</span>  <span class="tf-axis">────────</span>  <span class="tf-axis">─────</span>  <span class="tf-axis">──────</span>  <span class="tf-axis">────────────────</span>
+<span>ingress-nginx-controller-6b8f-x2k1</span>  <span>1/1  </span>  <span>       0</span>  <span>  120</span>  <span>   210</span>  <span>Running         </span>
+<span>ingress-nginx-controller-6b8f-p9zq</span>  <span>1/1  </span>  <span>       0</span>  <span>   98</span>  <span>   205</span>  <span>Running         </span>
+<span>api-gateway-7d9f8c-4hv2x          </span>  <span>1/1  </span>  <span>       0</span>  <span>  310</span>  <span>   540</span>  <span>Running         </span>
+<span>api-gateway-7d9f8c-m8ql7          </span>  <span>1/1  </span>  <span>       1</span>  <span>  290</span>  <span>   512</span>  <span>Running         </span>
+<span>orders-svc-5c6b7d-abc12           </span>  <span>1/1  </span>  <span>       0</span>  <span>  180</span>  <span>   420</span>  <span>Running         </span>
+<span>orders-svc-5c6b7d-def34           </span>  <span>1/1  </span>  <span>       0</span>  <span>  175</span>  <span>   415</span>  <span>Running         </span>
+<span>orders-svc-5c6b7d-ghi56           </span>  <span>1/1  </span>  <span>       0</span>  <span>  190</span>  <span>   430</span>  <span>Running         </span>
+<span>orders-svc-5c6b7d-jkl78           </span>  <span>0/1  </span>  <span>       0</span>  <span>    0</span>  <span>     0</span>  <span>Pending         </span>
+<span>payments-svc-69fd4-q2wer          </span>  <span>1/1  </span>  <span>       3</span>  <span>  220</span>  <span>   980</span>  <span>Running         </span>
+<span>payments-svc-69fd4-t5yui          </span>  <span>0/1  </span>  <span>       7</span>  <span>   15</span>  <span>  1010</span>  <span>CrashLoopBackOff</span>
+<span>postgres-0                        </span>  <span>1/1  </span>  <span>       0</span>  <span>  410</span>  <span>  1800</span>  <span>Running         </span></pre></section>
+<section class="panel" id="k-pie"><h2>Pie chart</h2><p>Braille disc and a percent legend.</p><pre class="tf"><span>       </span><span class="tf-s3">⣀</span><span class="tf-s4">⣤⣴⣶⣾⣿⣿</span><span class="tf-s0">⣿⣿⣷⣶⣦⣤⣀</span><span>       </span>   
+<span>    </span><span class="tf-s3">⢀⣴⣾⣿⣿</span><span class="tf-s4">⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀</span><span>    </span>   
+<span>  </span><span class="tf-s3">⢀⣴⣿⣿⣿⣿⣿⣿</span><span class="tf-s4">⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀</span><span>  </span>   
+<span> </span><span class="tf-s3">⢠⣾⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s4">⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄</span><span> </span>   
+<span class="tf-s2">⢀⣿⣿⣿⣿</span><span class="tf-s3">⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s4">⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀</span>   <span class="tf-s0">■ </span>api-gateway    45%  <span class="tf-value">812</span>
+<span class="tf-s2">⣸⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s3">⣿⣿⣿⣿⣿</span><span class="tf-s4">⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇</span>   <span class="tf-s1">■ </span>orders-svc     24%  <span class="tf-value">431</span>
+<span class="tf-s2">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s3">⣿</span><span class="tf-s4">⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span>   <span class="tf-s2">■ </span>payments-svc   15%  <span class="tf-value">268</span>
+<span class="tf-s2">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s1">⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span>   <span class="tf-s3">■ </span>auth-svc       10%  <span class="tf-value">190</span>
+<span class="tf-s2">⢹⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s1">⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏</span>   <span class="tf-s4">■ </span>search-svc      7%  <span class="tf-value">122</span>
+<span class="tf-s2">⠈⣿⣿</span><span class="tf-s1">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁</span>   
+<span> </span><span class="tf-s1">⠘⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃</span><span> </span>   
+<span>  </span><span class="tf-s1">⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⣿⣿⣿⣿⠟⠁</span><span>  </span>   
+<span>    </span><span class="tf-s1">⠈⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿</span><span class="tf-s0">⣿⣿⣿⡿⠟⠁</span><span>    </span>   
+<span>       </span><span class="tf-s1">⠉⠛⠻⠿⢿⣿⣿⣿⣿⡿⠿⠟</span><span class="tf-s0">⠛⠉</span><span>       </span>   </pre></section>
+<section class="panel" id="k-stateTimeline"><h2>State timeline</h2><p>One row of threshold-coloured runs per series.</p><pre class="tf">api-gateway  <span style="color:#e8a06a">████████████████████████████</span><span style="color:#86d28a">██████████████████████</span><span style="color:#e8a06a">██████████████</span>
+orders-svc   <span style="color:#86d28a">████████████████████████████████████████████████████████████████</span>
+payments-svc <span style="color:#86d28a">████████████████████████████████████████████████████████████████</span>
+<span class="tf-axis">             18:00                                                      18:47</span></pre></section>
+<section class="panel" id="k-statusHistory"><h2>Status history</h2><p>One block per sample.</p><pre class="tf">api-gateway  <span style="color:#e8a06a">▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ </span><span style="color:#86d28a">▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ </span><span style="color:#e8a06a">▇ ▇ ▇ ▇ ▇ ▇ ▇ </span>
+orders-svc   <span style="color:#86d28a">▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ </span>
+payments-svc <span style="color:#86d28a">▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ ▇ </span>
+<span class="tf-axis">             18:00                                                      18:47</span></pre></section>
+<section class="panel wide" id="k-heatmap"><h2>Heatmap</h2><p>Value buckets over time, shaded by density.</p><pre class="tf"><span class="tf-axis">365 req/s ┤</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span>                                           </span>
+<span class="tf-axis">327 req/s ┤</span><span class="tf-h1">░</span><span>             </span><span class="tf-h2">▒▒</span><span> </span><span class="tf-h2">▒▒</span><span> </span><span class="tf-h1">░░</span><span>                                  </span>
+<span class="tf-axis">289 req/s ┤</span><span>      </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span>       </span><span class="tf-h1">░░</span><span> </span><span class="tf-h3">▓</span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒▒</span><span> </span><span class="tf-h1">░</span><span>                   </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span>
+<span class="tf-axis">252 req/s ┤</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span>          </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span>  </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span>       </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span>      </span>
+<span class="tf-axis">214 req/s ┤</span><span class="tf-h1">░</span><span>        </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span>         </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h2">▒▒</span><span> </span><span class="tf-h2">▒</span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓</span><span class="tf-h4">█</span><span> </span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓▓</span><span> </span><span class="tf-h1">░░</span><span>       </span><span class="tf-h1">░</span><span> </span>
+<span class="tf-axis">176 req/s ┤</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span>         </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span>          </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒▒</span><span> </span><span class="tf-h3">▓▓</span><span> </span><span class="tf-h4">██</span><span> </span><span class="tf-h4">█</span><span class="tf-h3">▓</span><span> </span><span class="tf-h1">░</span><span> </span>
+<span class="tf-axis">138 req/s ┤</span><span class="tf-h4">█</span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓▓</span><span> </span><span class="tf-h3">▓</span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span>        </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span>          </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span class="tf-h2">▒</span><span> </span><span class="tf-h3">▓</span><span> </span>
+<span class="tf-axis">101 req/s ┤</span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓▓</span><span> </span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓▓</span><span> </span><span class="tf-h3">▓</span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span>     </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span>           </span><span class="tf-h1">░</span><span> </span>
+<span class="tf-axis"> 63 req/s ┤</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span class="tf-h3">▓</span><span> </span><span class="tf-h3">▓</span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span> </span><span class="tf-h2">▒</span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span>   </span>
+<span class="tf-axis"> 25 req/s ┼</span><span class="tf-h1">░</span><span>                       </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░░</span><span> </span><span class="tf-h1">░</span><span> </span>
+<span class="tf-axis">           18:00                                              18:35</span></pre></section>
+<section class="panel" id="k-histogram"><h2>Histogram</h2><p>Distribution of every value.</p><pre class="tf"><span class="tf-axis">15 ┤</span><span class="tf-s0">                            ██                              </span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">  ▃▃    ▃▃                  ██                              </span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">  ██    ██                  ██                              </span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">▆▆██▂▂  ██                  ██                              </span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">██████▆▆██  ▂▂          ▂▂▂▂██                            ▆▆</span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">██████████▁▁██    ▁▁  ▅▅██████                      ▁▁  ▅▅██</span>
+<span class="tf-axis">   ┤</span><span class="tf-s0">██████████████▅▅▁▁██▁▁████████▅▅▁▁▁▁▁▁▁▁  ▁▁▅▅▁▁▅▅▁▁██▅▅████</span>
+<span class="tf-axis"> 0 ┼</span><span class="tf-s0">████████████████████████████████████████▄▄██████████████████</span>
+<span class="tf-axis">    62 req/s                                           413 req/s</span></pre></section>
+<section class="panel wide" id="k-candlestick"><h2>Candlestick</h2><p>Open, high, low, close. Filled is up, hollow is down.</p><pre class="tf"><span class="tf-axis">163.3 ┤</span><span>                          </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">│</span><span> </span><span class="tf-down">│</span><span>                                        </span>
+<span class="tf-axis">158.2 ┤</span><span>                        </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span> </span><span class="tf-down">│</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>                                      </span>
+<span class="tf-axis">153.1 ┤</span><span>                      </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>           </span><span class="tf-down">│</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>                                    </span>
+<span class="tf-axis">148.0 ┤</span><span>                </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>                 </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>                                  </span>
+<span class="tf-axis">142.9 ┤</span><span>              </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span>                         </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">│</span><span>                           </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span>
+<span class="tf-axis">137.9 ┤</span><span>            </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span>                             </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>                       </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span>
+<span class="tf-axis">132.8 ┤</span><span>        </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>                                 </span><span class="tf-down">│</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>                 </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span>  </span>
+<span class="tf-axis">127.7 ┤</span><span>      </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span>                                         </span><span class="tf-down">│</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span>         </span><span class="tf-up">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>    </span>
+<span class="tf-axis">122.6 ┤</span><span class="tf-down">│</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>                                               </span><span class="tf-down">│</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-down">░</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">█</span><span>        </span>
+<span class="tf-axis">117.5 ┼</span><span class="tf-down">░</span><span> </span><span class="tf-up">█</span><span> </span><span class="tf-up">│</span><span>                                                         </span><span class="tf-down">│</span><span> </span><span class="tf-down">│</span><span> </span><span class="tf-up">│</span><span> </span><span class="tf-up">│</span><span>          </span>
+<span>       </span><span class="tf-up">last 142.8  ▲ 4.0</span>
+<span class="tf-axis">       09:00                                                                     18:45</span></pre></section>
+<section class="panel wide" id="k-xy"><h2>XY chart</h2><p>Scatter. First number column is x.</p><pre class="tf"><span class="tf-axis">854 ┤</span><span class="tf-s0">⠁</span><span> </span><span class="tf-s0">⠈⠂⠔⠠⠄⡀</span><span> </span><span class="tf-s0">⢀</span><span>                                                 </span>
+<span class="tf-axis">759 ┤</span><span>          </span><span class="tf-s0">⠑⠈⠂⠢</span><span>  </span><span class="tf-s0">⠄⡀</span><span>                                         </span>
+<span class="tf-axis">664 ┤</span><span>                 </span><span class="tf-s0">⠈⠐⠉⠐</span><span>  </span><span class="tf-s0">⠢⢀</span><span> </span><span class="tf-s0">⡀</span><span>                                </span>
+<span class="tf-axis">569 ┤</span><span>                         </span><span class="tf-s0">⠁⠈⠈</span><span> </span><span class="tf-s0">⠠⠐⠄⡠⢀⡀</span><span>                        </span>
+<span class="tf-axis">474 ┤</span><span>                                    </span><span class="tf-s0">⠐⠈⠂⢄⠄⡀</span><span>  </span><span class="tf-s0">⡀</span><span>              </span>
+<span class="tf-axis">380 ┤</span><span>                                           </span><span class="tf-s0">⠈</span><span> </span><span class="tf-s0">⠑⠠⠂⠄</span><span> </span><span class="tf-s0">⡀⢄</span><span>       </span>
+<span class="tf-axis">285 ┤</span><span>                                                    </span><span class="tf-s0">⠈⠂⠑</span><span>  </span><span class="tf-s0">⠄⡠</span>
+<span class="tf-axis">190 ┤</span><span>                                                           </span>
+<span class="tf-axis"> 95 ┤</span><span>                                                           </span>
+<span class="tf-axis">  0 ┼</span><span class="tf-s1">⡀</span><span> </span><span class="tf-s1">⢀⡀⣀⢀⡀⡀</span><span> </span><span class="tf-s1">⢀⣀⢀⡀⣀</span><span>  </span><span class="tf-s1">⡀⣀⢀⣀⢀</span><span>  </span><span class="tf-s1">⣀⢀⡀⣀⢀</span><span> </span><span class="tf-s1">⢀⢀⡀⣀⢀⡀</span><span> </span><span class="tf-s1">⢀⢀⡀⣀⡀⡀</span><span> </span><span class="tf-s1">⢀⡀⣀⢀⡀⡀</span><span> </span><span class="tf-s1">⡀⣀⢀⡀⣀</span><span>  </span><span class="tf-s1">⡀⣀</span>
+<span class="tf-axis">     20                                                      260</span>
+     <span class="tf-s0">■ </span>rps   <span class="tf-s1">■ </span>errors<span class="tf-dim">   x: latency_ms</span></pre></section>
+<section class="panel wide" id="k-logs"><h2>Logs</h2><p>Newest line first, with a level tag.</p><pre class="tf"><span class="tf-dim">18:05:15</span> <span class="tf-ok">[info] </span> ingress: cert renewed shop.example.com
+<span class="tf-dim">18:04:30</span> <span class="tf-warn">[warn] </span> worker-3: memory pressure 85%
+<span class="tf-dim">18:03:45</span> <span class="tf-crit">[error]</span> payments: connection refused to stripe
+<span class="tf-dim">18:03:00</span> <span class="tf-ok">[info] </span> postgres: autovacuum finished on orders
+<span class="tf-dim">18:02:15</span> <span class="tf-warn">[warn] </span> payments: stripe latency 1.8s
+<span class="tf-dim">18:01:30</span> <span class="tf-dim">[debug]</span> orders: cache miss on sku-441
+<span class="tf-dim">18:00:45</span> <span class="tf-ok">[info] </span> orders: created order 88421
+<span class="tf-dim">18:00:00</span> <span class="tf-ok">[info] </span> gateway: accepted checkout from 10.0.4.12</pre></section>
+<section class="panel wide" id="k-nodegraph"><h2>Node graph</h2><p>Boxes layered from roots, plus the edge list.</p><pre class="tf"><span>┌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span><span class="tf-edge">     </span><span>┌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span><span class="tf-edge">     </span><span>┌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span><span class="tf-edge">     </span><span>┌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>
+<span class="tf-border">┆ ingress     ┆</span><span class="tf-edge"> ╌╌▶ </span><span class="tf-border">┆ api-gateway ┆</span><span class="tf-edge"> ╌╌▶ </span><span class="tf-border">┆ orders      ┆</span><span class="tf-edge"> ╌╌▶ </span><span class="tf-border">┆ postgres    ┆</span>
+<span class="tf-border">┆ 812 req/s   ┆</span><span class="tf-edge">     </span><span class="tf-border">┆ 640 req/s   ┆</span><span class="tf-edge">     </span><span class="tf-border">┆ 431 req/s   ┆</span><span class="tf-edge">     </span><span class="tf-border">┆ 120 req/s   ┆</span>
+<span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span><span class="tf-edge">     </span><span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span><span class="tf-edge">     </span><span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span><span class="tf-edge">     </span><span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span>┌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span><span class="tf-edge">     </span><span class="tf-border">               </span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">┆ payments    ┆</span><span class="tf-edge"> ╌╌▶ </span><span class="tf-border">               </span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">┆ 268 req/s   ┆</span><span class="tf-edge">     </span><span class="tf-border">               </span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span><span class="tf-edge">     </span><span class="tf-border">               </span>
+<span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span><span class="tf-edge">     </span><span class="tf-border">               </span>
+<span class="tf-dim">edges</span>
+  ingress<span class="tf-edge"> ──▶ </span>api-gateway
+  api-gateway<span class="tf-edge"> ──▶ </span>orders
+  api-gateway<span class="tf-edge"> ──▶ </span>payments
+  orders<span class="tf-edge"> ──▶ </span>postgres</pre></section>
+<section class="panel wide" id="k-traces"><h2>Traces</h2><p>Span waterfall indented by parent.</p><pre class="tf">GET /checkout        <span class="tf-s4">████████████████████████████████████████████████</span> <span class="tf-dim">180ms</span><span class="tf-dim">  gateway</span>
+  auth.Verify        <span class="tf-s4">  ██████                                        </span> <span class="tf-dim">22.0ms</span><span class="tf-dim">  gateway</span>
+  orders.Create      <span class="tf-s1">         ████████████████████████               </span> <span class="tf-dim">90.0ms</span><span class="tf-dim">  orders</span>
+    cache.Get        <span class="tf-s1">           ███                                  </span> <span class="tf-dim">12.0ms</span><span class="tf-dim">  orders</span>
+    db.Insert        <span class="tf-s5">               █████████████                    </span> <span class="tf-dim">48.0ms</span><span class="tf-dim">  postgres</span>
+  payments.Authorize <span class="tf-s5">                                  ███████████   </span> <span class="tf-dim">40.0ms</span><span class="tf-dim">  payments</span></pre></section>
+<section class="panel wide" id="k-flame"><h2>Flame graph</h2><p>Inclusive stack from label, level, and value.</p><pre class="tf"><span class="tf-flame" data-tf-i="0"><span>total                       </span> <span class="tf-s0">████████████████████████████████████████████████</span> <span class="tf-value">100%</span></span>
+<span class="tf-flame" data-tf-i="1"><span>runtime.goexit              </span>   <span class="tf-s1">██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">  4%</span></span>
+<span class="tf-flame" data-tf-i="2"><span>net/http.(*conn).serve      </span>   <span class="tf-s1">████████████████████████████████████████████░░</span> <span class="tf-value"> 96%</span></span>
+<span class="tf-flame" data-tf-i="3"><span>net/http.serverHandler.Serve</span>     <span class="tf-s2">██████████████████████████████████████████░░</span> <span class="tf-value"> 95%</span></span>
+<span class="tf-flame" data-tf-i="4"><span>shop/api.(*Gateway).ServeHTT</span>       <span class="tf-s3">███████████████████████████████████████░░░</span> <span class="tf-value"> 94%</span></span>
+<span class="tf-flame" data-tf-i="5"><span>shop/api.auth               </span>         <span class="tf-s4">█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value"> 12%</span></span>
+<span class="tf-flame" data-tf-i="6"><span>shop/api.route              </span>         <span class="tf-s4">████████████████████████████████░░░░░░░░</span> <span class="tf-value"> 80%</span></span>
+<span class="tf-flame" data-tf-i="7"><span>shop/orders.Create          </span>           <span class="tf-s5">████████████████████░░░░░░░░░░░░░░░░░░</span> <span class="tf-value"> 52%</span></span>
+<span class="tf-flame" data-tf-i="8"><span>shop/orders.db.Insert       </span>             <span class="tf-s0">██████████████░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value"> 38%</span></span>
+<span class="tf-flame" data-tf-i="9"><span>shop/orders.cache.Get       </span>             <span class="tf-s0">███░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">  8%</span></span>
+<span class="tf-flame" data-tf-i="10"><span>shop/payments.Authorize     </span>           <span class="tf-s5">██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value"> 27%</span></span>
+<span class="tf-flame" data-tf-i="11"><span>shop/payments.stripe        </span>             <span class="tf-s0">█████████░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value"> 24%</span></span>
+<span class="tf-flame" data-tf-i="12"><span>encoding/json.Marshal       </span>           <span class="tf-s5">█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> <span class="tf-value">  2%</span></span></pre></section>
+<section class="panel wide" id="k-canvas"><h2>Canvas</h2><p>Dashed boxes with a packet on each link.</p><pre class="tf"><span class="tf-border">┌ api-gateway ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>                   <span class="tf-border">┌ orders-svc ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>
+<span class="tf-border">┆ request ██████████    812    ┆</span> <span class="tf-packet tf-edge">.o@╌╌╌╌╌╌╌╌╌╌╌╌╌▶</span> <span class="tf-border">┆ request █████▎░░░░    431    ┆</span>
+<span class="tf-border">┆ errors  ▏░░░░░░░░░     12    ┆</span>                   <span class="tf-border">┆ errors  ░░░░░░░░░░      3    ┆</span>
+<span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span>                   <span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span>
+
+<span class="tf-border">┌ payments-svc ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>                   <span class="tf-border">┌ auth-svc ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>
+<span class="tf-border">┆ request ███▎░░░░░░    268    ┆</span> <span class="tf-packet tf-edge">.o@╌╌╌╌╌╌╌╌╌╌╌╌╌▶</span> <span class="tf-border">┆ request ██▍░░░░░░░    190    ┆</span>
+<span class="tf-border">┆ errors  ▏░░░░░░░░░      9    ┆</span>                   <span class="tf-border">┆ errors  ░░░░░░░░░░      1    ┆</span>
+<span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span>                   <span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span>
+
+<span class="tf-border">┌ search-svc ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>
+<span class="tf-border">┆ request █▌░░░░░░░░    122    ┆</span>
+<span class="tf-border">┆ errors  ░░░░░░░░░░      0    ┆</span>
+<span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span></pre></section>
+<section class="panel wide" id="k-geomap"><h2>Geomap</h2><p>Lat/lon markers on an equirectangular grid.</p><pre class="tf"><span class="tf-axis">90N┤</span><span class="tf-axis">·                           ·                          ·</span>
+<span class="tf-axis">70N┤</span><span class="tf-axis">·                           ·                          ·</span>
+<span class="tf-axis">50N┤</span><span class="tf-axis">·                           ·</span><span class="tf-ping tf-s3">*</span><span class="tf-axis">                         ·</span>
+<span class="tf-axis">30N┤</span><span class="tf-axis">·               </span><span class="tf-ping tf-s4">*</span><span class="tf-axis">           ·                  </span><span class="tf-ping tf-s0">*</span><span class="tf-axis"> </span><span class="tf-ping tf-s1">*</span><span class="tf-axis">     ·</span>
+<span class="tf-axis">10N┤</span><span class="tf-axis">·                           ·              </span><span class="tf-ping tf-s2">*</span><span class="tf-axis">           ·</span>
+<span class="tf-axis">10S┤</span><span class="tf-axis">+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌+╌╌╌╌╌╌╌</span>
+<span class="tf-axis">30S┤</span><span class="tf-axis">·                   </span><span class="tf-ping tf-s5">*</span><span class="tf-axis">       ·                      </span><span class="tf-ping tf-s0">*</span><span class="tf-axis">   ·</span>
+<span class="tf-axis">50S┤</span><span class="tf-axis">·                           ·                          ·</span>
+<span class="tf-axis">70S┤</span><span class="tf-axis">·                           ·                          ·</span>
+<span class="tf-axis">90S┤</span><span class="tf-axis">·                           ·                          ·</span>
+<span class="tf-axis">   └────────────────────────────────────────────────────────</span>
+<span class="tf-axis">    180W                                                180E</span>
+<span class="tf-s0">* </span>Seoul      <span class="tf-dim"> 37.6,  127.0</span>  <span class="tf-value">812</span>
+<span class="tf-s1">* </span>Tokyo      <span class="tf-dim"> 35.7,  139.7</span>  <span class="tf-value">640</span>
+<span class="tf-s2">* </span>Singapore  <span class="tf-dim">  1.4,  103.8</span>  <span class="tf-value">410</span>
+<span class="tf-s3">* </span>Frankfurt  <span class="tf-dim"> 50.1,    8.7</span>  <span class="tf-value">380</span>
+<span class="tf-s4">* </span>Virginia   <span class="tf-dim"> 39.0,  -77.5</span>  <span class="tf-value">520</span>
+<span class="tf-s5">* </span>Sao Paulo  <span class="tf-dim">-23.6,  -46.6</span>  <span class="tf-value">210</span>
+<span class="tf-s0">* </span>Sydney     <span class="tf-dim">-33.9,  151.2</span>  <span class="tf-value">180</span></pre></section>
+<section class="panel" id="k-alertlist"><h2>Alert list</h2><p>Sample firing alerts. In Grafana this list comes from Alertmanager.</p><pre class="tf"><span class="tf-crit">[firing]    </span> PaymentsDown   <span class="tf-dim">critical</span> <span class="tf-dim">09:12</span>  stripe connection refused
+<span class="tf-warn">[firing]    </span> HighErrorRate  <span class="tf-dim">warning </span> <span class="tf-dim">09:18</span>  api-gateway errors above 2%
+<span class="tf-dim">[pending]   </span> NodeMemory     <span class="tf-dim">warning </span> <span class="tf-dim">09:21</span>  worker-3 memory 85%</pre></section>
+<section class="panel" id="k-dashlist"><h2>Dashboard list</h2><p>Sample dashboard links. In Grafana this list comes from /api/search.</p><pre class="tf"><span class="tf-edge">▸ </span>Tuiflow demo     <span class="tf-dim">General         </span> <span class="tf-s1">#kiosk</span>
+<span class="tf-edge">▸ </span>Tuiflow library  <span class="tf-dim">General         </span> <span class="tf-s1">#tui</span>
+<span class="tf-edge">▸ </span>Shop overview    <span class="tf-dim">shop            </span> <span class="tf-s1">#slo</span></pre></section>
+<section class="panel" id="k-annotations"><h2>Annotations list</h2><p>Time, title, and tags.</p><pre class="tf"><span class="tf-s0">※ </span><span class="tf-dim">01:12</span> deploy shop v2.4.1  <span class="tf-s1">#deploy</span>
+<span class="tf-s0">※ </span><span class="tf-dim">02:40</span> payments-svc CrashLoop spike  <span class="tf-s1">#incident</span>
+<span class="tf-s0">※ </span><span class="tf-dim">03:05</span> scaled orders-svc 3 → 6  <span class="tf-s1">#autoscale</span>
+<span class="tf-s0">※ </span><span class="tf-dim">04:18</span> postgres failover complete  <span class="tf-s1">#db</span></pre></section>
+<section class="panel wide" id="k-text"><h2>Text</h2><p>Dashed frame around string lines.</p><pre class="tf"><span class="tf-border">┌ text ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐</span>
+<span class="tf-border">┆ # shop · on-call runbook                         ┆</span>
+<span class="tf-border">┆                                                  ┆</span>
+<span class="tf-border">┆ ## payments-svc CrashLoop                        ┆</span>
+<span class="tf-border">┆ 1. kubectl logs -p payments-svc                  ┆</span>
+<span class="tf-border">┆ 2. check postgres connections                    ┆</span>
+<span class="tf-border">┆ 3. page @sre if 3+ restarts                      ┆</span>
+<span class="tf-border">┆                                                  ┆</span>
+<span class="tf-border">┆ dash: /d/tuiflow-library  theme=matrix          </span><span class="tf-cursor">█</span><span class="tf-border">┆</span>
+<span class="tf-border">└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘</span></pre></section>
+<section class="panel" id="k-news"><h2>News</h2><p>Date, source, and title, newest first.</p><pre class="tf"><span class="tf-edge">▸ </span><span class="tf-dim">2026-10-06</span> <span class="tf-s1">grafana   </span>  Unified alerting grouping is GA
+<span class="tf-edge">▸ </span><span class="tf-dim">2026-10-05</span> <span class="tf-s1">kubernetes</span>  1.32 changelog: in-place resize GA
+<span class="tf-edge">▸ </span><span class="tf-dim">2026-10-04</span> <span class="tf-s1">prometheus</span>  Native histograms default in 3.x
+<span class="tf-edge">▸ </span><span class="tf-dim">2026-10-03</span> <span class="tf-s1">grafana   </span>  Canvas connections: packet-style edges
+<span class="tf-edge">▸ </span><span class="tf-dim">2026-10-02</span> <span class="tf-s1">cilium    </span>  Kube-proxy-free datapath notes
+<span class="tf-edge">▸ </span><span class="tf-dim">2026-10-01</span> <span class="tf-s1">localai   </span>  Backend gallery: ds4 + Metal matrix</pre></section>
+</div>
+<script src="../src/tuiflow.js"></script>
+<script>
+  const tf = window.tuiflow;
+  (function liveSeries() {
+    const el = document.getElementById("live-ts");
+    const names = ["api-gateway", "orders-svc", "payments-svc"];
+    const bases = [320, 180, 90];
+    const n = 64;
+    let cursor = Date.now();
+    const series = names.map((name, i) => ({
+      name: name,
+      values: Array.from({ length: n }, (_, k) => bases[i] + Math.sin(k / 6 + i) * bases[i] * 0.22),
+      times: Array.from({ length: n }, (_, k) => cursor - (n - k) * 60000),
+    }));
+    let paused = false;
+    document.getElementById("live-pause").addEventListener("click", function () {
+      paused = !paused;
+      this.textContent = paused ? "resume" : "pause";
+    });
+    function draw() {
+      if (!paused) {
+        cursor += 60000;
+        series.forEach((s) => {
+          const prev = s.values[s.values.length - 1];
+          const next = Math.max(30, Math.min(580, prev + (Math.random() - 0.48) * 36));
+          s.values.push(next);
+          s.values.shift();
+          s.times.push(cursor);
+          s.times.shift();
+        });
+      }
+      el.innerHTML = tf.segmentsToHTML(tf.lineChart(series, {
+        width: 78,
+        height: 10,
+        min: 0,
+        max: 600,
+        format: function (v) { return Math.round(v) + " req/s"; },
+        formatLast: function (v) { return Math.round(v) + " req/s"; },
+      }));
+    }
+    draw();
+    tf.animate(draw, 4);
+  })();
+  document.querySelectorAll(".tf-packet").forEach((edge, i) => {
+    const n = Number(edge.dataset.width) || 16;
+    tf.animate((tick) => { edge.textContent = tf.edge(n, tick + i * 4); }, 8);
+  });
+  const flames = document.querySelectorAll(".tf-flame");
+  if (flames.length) {
+    tf.animate((tick) => {
+      const on = tick % flames.length;
+      flames.forEach((el, i) => el.classList.toggle("tf-scan", i === on));
+    }, 4);
+  }
+</script>
+</body>
+</html>
