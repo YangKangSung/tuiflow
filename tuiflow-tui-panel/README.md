@@ -19,6 +19,8 @@ npm run pack
 
 Local Grafana in `grafana/docker-compose.yml` loads the unsigned build from `dist/` when that stack is up. Open a dashboard, Add → Visualization → **tuiflow**.
 
+To install the same build on another Grafana you run yourself, follow [docs/install-grafana-plugin.md](../docs/install-grafana-plugin.md). Grafana 12 or newer is required. The plugin is unsigned, so that server has to allow `tuiflow-tui-panel`. Grafana Cloud will not load it.
+
 ## License
 
 This plugin directory is Apache-2.0, which the Grafana plugin validator accepts. Confirm that license before a real submission.
