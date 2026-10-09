@@ -37,8 +37,8 @@
 
   // --- string helpers -----------------------------------------------------
 
-  // All glyphs are assumed to occupy one cell. Pick a monospace font with
-  // box-drawing + block + braille coverage (JetBrains Mono, Cascadia, Fira Code...).
+  // All glyphs are assumed to occupy one cell. JetBrains Mono covers box
+  // drawing and blocks but not braille; Cascadia Mono does.
   function padRight(value, width, ch) {
     const s = String(value);
     ch = ch || " ";
@@ -382,17 +382,27 @@
     return out;
   }
 
+  // Panel CSS is 13px with line-height 1.25, so a line box is 16.25px.
+  // JetBrains Mono has no braille. The glyph the page actually draws
+  // (Windows fallback) is 9.8px wide, so a cell is 16.25/9.8 times as tall
+  // as it is wide — not 2. The 2×4 dots are square only after dx is scaled
+  // by 2/that ratio.
+  const BRAILLE_CELL_ASPECT = 16.25 / 9.8;
+
   /**
    * Pie / donut as a braille disc. values: number[] (one slice per value).
-   * opts: { radius (cells, default 6), donut: 0..1 inner ratio }
+   * opts: { radius (cells, default 6), donut: 0..1 inner ratio, cellAspect }
    * Returns { rows, owner } — owner = slice index per cell for colouring.
-   * Cells are 2 dots wide and 4 tall, so the disc is drawn 2:1 to look round.
+   * Empty cells are braille blanks (U+2800), same advance as the dots, so
+   * the disc stays one grid.
    */
   function braillePie(values, opts) {
     opts = opts || {};
     const radius = opts.radius || 6; // in cell rows
+    const cellAspect = opts.cellAspect > 0 ? opts.cellAspect : BRAILLE_CELL_ASPECT;
     const height = radius * 2;
-    const width = radius * 4; // monospace cells are ~half as wide as tall
+    const width = Math.max(1, Math.round(height * cellAspect));
+    const dotScaleX = 2 / cellAspect;
     const cv = new BrailleCanvas(width, height, values.length);
     const total = values.reduce((a, b) => a + (Number.isFinite(b) && b > 0 ? b : 0), 0) || 1;
     const bounds = [];
@@ -408,9 +418,7 @@
     const inner = (opts.donut || 0) * R;
     for (let py = 0; py < cv.H; py++) {
       for (let px = 0; px < cv.W; px++) {
-        // a cell is ~half as wide as it is tall, so 2x4 braille dots are square:
-        // with width = 4*radius cells the dot grid is W == H and the disc is round
-        const dx = px + 0.5 - cx;
+        const dx = (px + 0.5 - cx) * dotScaleX;
         const dy = py + 0.5 - cy;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d > R || d < inner) continue;
@@ -420,7 +428,9 @@
         if (si >= 0) cv.dot(si, px, py);
       }
     }
-    return cv.compose();
+    const out = cv.compose();
+    out.rows = out.rows.map((row) => row.replace(/ /g, "\u2800"));
+    return out;
   }
 
   /** Shade character for a 0..1 density: " ░▒▓█". */

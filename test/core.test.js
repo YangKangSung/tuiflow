@@ -71,6 +71,33 @@ test("flame indents children and keeps bar width = avail", () => {
   assert.ok(fl.rows[1].pct < fl.rows[0].pct);
 });
 
+test("braillePie disc matches the braille cell, not a 2:1 terminal cell", () => {
+  const pie = tf.braillePie([3, 1, 1], { radius: 8 });
+  const aspect = 16.25 / 9.8;
+  assert.equal(pie.rows.length, 16);
+  pie.rows.forEach((row) => {
+    assert.equal(width(row), pie.rows[0].length);
+    assert.equal(row.includes(" "), false);
+  });
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -1;
+  let maxY = -1;
+  pie.rows.forEach((row, y) => {
+    Array.from(row).forEach((ch, x) => {
+      if (ch === "\u2800") return;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x + 1);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y + 1);
+    });
+  });
+  const pixelRatio = (maxX - minX) / aspect / (maxY - minY);
+  assert.ok(Math.abs(pixelRatio - 1) < 0.08, "pixel ratio " + pixelRatio);
+  const hole = tf.braillePie([1], { radius: 8, donut: 0.55 });
+  assert.equal(hole.rows[8][Math.floor(hole.rows[8].length / 2)], "\u2800");
+});
+
 test("geoPlot places * at lat/lon and keeps a rectangular grid", () => {
   const g = tf.geoPlot(
     [
