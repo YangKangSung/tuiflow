@@ -1,0 +1,11 @@
+<pre class="tf">┌ api-gateway ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+┆ rps    {{tfBar (tfLast (lookup data 0) "rps") 600 14}} {{tfPadL (tfFixed (tfLast (lookup data 0) "rps") 0) 5}} {{tfStatus (tfLast (lookup data 0) "rps") 450 550}}             ┆
+┆ p95    {{tfBar (tfLast (lookup data 1) "p95_ms") 250 14}} {{tfPadL (tfFixed (tfLast (lookup data 1) "p95_ms") 0) 3}}ms {{tfStatus (tfLast (lookup data 1) "p95_ms") 150 200}}             ┆
+┆ err    {{tfBar (tfLast (lookup data 2) "err_pct") 5 14}} {{tfPadL (tfFixed (tfLast (lookup data 2) "err_pct") 2) 4}}% {{tfStatus (tfLast (lookup data 2) "err_pct") 1 3}}             ┆
+┆                                                ┆
+┆ rps    {{tfSpark (lookup data 0) "rps" 30}}          ┆
+┆ p95    {{tfSpark (lookup data 1) "p95_ms" 30}}          ┆
+┆ err    {{tfSpark (lookup data 2) "err_pct" 30}}          ┆
+└╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+         <span class="tf-edge"></span> <span class="tf-dim">[orders-svc]   packet speed follows rps · range {{tfPadL (tfFixed (tfAvg (lookup data 0) "rps") 0) 4}} avg / {{tfPadL (tfFixed (tfMax (lookup data 0) "rps") 0) 4}} max</span>
+</pre>

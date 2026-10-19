@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>tuiflow · Apache ECharts render path (experimental)</title>
+<style>
+  /* Same self-hosted font as demo/index.html: every glyph must come from one face
+     or the cell grid falls apart. */
+  @font-face { font-family: "JetBrains Mono"; src: url("../demo/fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../demo/fonts/JetBrainsMono-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
+  :root { --bg: #0f1218; --fg: #c9ced6; --dim: #5c6370; --border: #3a4150; }
+  [data-theme="matrix"] { --bg: #000000; --fg: #00c017; --dim: #006a0c; --border: #008910; }
+  [data-theme="amber"]  { --bg: #0a0700; --fg: #ffb000; --dim: #7a5400; --border: #a86f00; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); }
+  body { font-family: "JetBrains Mono", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; display: flex; flex-direction: column; }
+  .toolbar { display: flex; gap: 10px; align-items: center; padding: 6px 10px; font-size: 12px; color: var(--dim); border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  .toolbar select, .toolbar button, .toolbar label { font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--border); padding: 2px 6px; cursor: pointer; }
+  .toolbar .spacer { flex: 1; }
+  .toolbar a { color: var(--dim); }
+  .grid { flex: 1 1 auto; display: grid; grid-template-columns: 1.3fr 1fr 1fr; grid-template-rows: 3fr 2fr; gap: 1px; background: var(--border); min-height: 0; }
+  .panel { background: var(--bg); position: relative; min-width: 0; min-height: 0; }
+  #flow { grid-column: 1 / 4; }
+  .panel > div { position: absolute; inset: 6px; }
+  #measure { position: absolute; visibility: hidden; white-space: pre; font-size: 100px; font-family: "JetBrains Mono", monospace; }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span>tuiflow × Apache ECharts</span>
+    <select id="theme" title="theme (T)">
+      <option value="video">video palette</option>
+      <option value="matrix">matrix (green)</option>
+      <option value="amber">amber</option>
+    </select>
+    <select id="renderer" title="ECharts renderer">
+      <option value="svg" selected>svg</option>
+      <option value="canvas">canvas</option>
+    </select>
+    <select id="fps" title="frames per second">
+      <option value="4">4 fps</option>
+      <option value="8" selected>8 fps</option>
+      <option value="16">16 fps</option>
+    </select>
+    <button id="pause" title="space">pause</button>
+    <span class="spacer"></span>
+    <span>experimental · not part of the Grafana plugin · <a href="../demo/index.html">string renderer demo</a></span>
+  </div>
+  <div class="grid">
+    <div class="panel" id="flow"><div></div></div>
+    <div class="panel" id="line"><div></div></div>
+    <div class="panel" id="pie"><div></div></div>
+    <div class="panel" id="bars"><div></div></div>
+  </div>
+  <span id="measure">0000000000</span>
+
+  <!-- echarts comes from the npm devDependency (npm install), tuiflow from the core. -->
+  <script src="../node_modules/echarts/dist/echarts.min.js"></script>
+  <script src="../src/tuiflow.js"></script>
+  <script src="./tuiflow-echarts.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    const tf = window.tuiflow;
+    const tfe = window.tuiflowEcharts;
+    if (!window.echarts) {
+      document.querySelector(".grid").innerHTML = '<pre style="padding:16px">echarts not found. Run <b>npm install</b> in the repo root (it is a devDependency), then reload.</pre>';
+      return;
+    }
+    tfe.registerThemes(echarts);
+
+    // ---- simulated cluster state (subset of demo/index.html) ---------------
+    const walk = (v, step, min, max) => Math.min(max, Math.max(min, v + (Math.random() - 0.5) * step));
+    const hist = (n, base) => Array.from({ length: n }, (_, i) => base + Math.sin(i / 2) * base * 0.3);
+    const state = {
+      tick: 0,
+      ingress: { rps: 812, err: 1.2, pods: [2, 2] },
+      gateway: { p95: 48, err: 0.2, cpu: hist(12, 55) },
+      orders: { p95: 92, pods: [4, 4], cpu: hist(12, 40) },
+      payments: { p95: 130, err: 0.6, pods: [3, 3] },
+      postgres: { conns: 31, p99: 7.5, disk: 0.62 },
+      nodes: [
+        { name: "worker-1", cpu: 0.44, mem: 0.62 },
+        { name: "worker-2", cpu: 0.58, mem: 0.71 },
+        { name: "worker-3", cpu: 0.37, mem: 0.85 },
+        { name: "worker-4", cpu: 0.71, mem: 0.52 },
+      ],
+      p95: { t: [], gw: [], orders: [], payments: [] },
+    };
+    for (let i = 0; i < 40; i++) pushHistory();
+    function pushHistory() {
+      const s = state;
+      s.p95.t.push(new Date(Date.now() - (40 - s.p95.t.length) * 2000).toTimeString().slice(3, 8));
+      s.p95.gw.push(Math.round(s.gateway.p95));
+      s.p95.orders.push(Math.round(s.orders.p95));
+      s.p95.payments.push(Math.round(s.payments.p95));
+      ["t", "gw", "orders", "payments"].forEach((k) => { if (s.p95[k].length > 40) s.p95[k].shift(); });
+    }
+    function step() {
+      const s = state;
+      s.tick++;
+      s.ingress.rps = walk(s.ingress.rps, 90, 120, 1400);
+      s.ingress.err = walk(s.ingress.err, 0.3, 0, 6);
+      s.gateway.p95 = walk(s.gateway.p95, 8, 12, 240);
+      s.gateway.err = walk(s.gateway.err, 0.1, 0, 3);
+      s.orders.p95 = walk(s.orders.p95, 10, 20, 400);
+      s.payments.p95 = walk(s.payments.p95, 12, 40, 600);
+      s.payments.err = walk(s.payments.err, 0.15, 0, 4);
+      s.postgres.conns = Math.round(walk(s.postgres.conns, 6, 4, 100));
+      s.postgres.p99 = walk(s.postgres.p99, 1.2, 1, 60);
+      s.postgres.disk = walk(s.postgres.disk, 0.004, 0.3, 0.95);
+      if (s.tick % 2 === 0) {
+        s.gateway.cpu.push(walk(s.gateway.cpu[11], 18, 5, 100)); s.gateway.cpu.shift();
+        s.orders.cpu.push(walk(s.orders.cpu[11], 18, 5, 100)); s.orders.cpu.shift();
+        s.nodes.forEach((n) => { n.cpu = walk(n.cpu, 0.06, 0.05, 0.98); n.mem = walk(n.mem, 0.01, 0.2, 0.97); });
+      }
+      if (s.tick % 8 === 0) pushHistory();
+    }
+
+    // ---- specs -----------------------------------------------------------------
+    const COLS = 100, FLOW_ROWS = 19; // 17 rows of diagram + 1 gap + status bar
+    const barOf = (v, max, cls) => [tf.bar(v / max, 10), cls || "c-bar"];
+    const val = (s, w) => [tf.padLeft(s, w), "c-title"];
+    const pods = (ready, desired) => {
+      const ok = ready >= desired;
+      return [[ok ? "[ok]" : "[warn]", ok ? "c-ok" : "c-warn"], [" " + ready + "/" + desired + " ready", ""]];
+    };
+    function flowSpec() {
+      const s = state;
+      const Y1 = 2, Y2 = 12; // vertical edges: rows Y1+5 … Y1+9 (4 cells + ▼ head), row 2 boxes start at Y1+10
+      const spd = 0.5 + s.ingress.rps / 900;
+      return {
+        texts: [
+          { x: 1, y: 0, text: [["TUIFLOW", "c-title"], [" · K8S CLUSTER FLOW", "c-dim"], ["   ingress", "c-orange"], [" → ", "c-dim"], ["gateway", "c-blue"], [" → ", "c-dim"], ["services", "c-green"], [" → ", "c-dim"], ["data", "c-gray"]] },
+          { x: COLS - 22, y: 0, text: [["echarts " + echarts.version + " · " + tf.padLeft(s.tick, 5), "c-dim"]] },
+        ],
+        nodes: [
+          { id: "ingress-nginx", x: 1, y: Y1, title: "ingress-nginx", titleCls: "c-orange", tooltip: "ingress-nginx<br/>rps " + Math.round(s.ingress.rps), rows: [
+            [["rps  ", "c-dim"], barOf(s.ingress.rps, 1400), val(Math.round(s.ingress.rps), 6)],
+            [["4xx  ", "c-dim"], barOf(s.ingress.err, 6, s.ingress.err > 3 ? "c-warn" : "c-bar"), val(s.ingress.err.toFixed(1) + "%", 6)],
+            [["pods ", "c-dim"]].concat(pods(s.ingress.pods[0], s.ingress.pods[1])),
+          ] },
+          { id: "api-gateway", x: 37, y: Y1, title: "api-gateway", titleCls: "c-blue", tooltip: "api-gateway<br/>p95 " + Math.round(s.gateway.p95) + "ms", rows: [
+            [["p95  ", "c-dim"], barOf(s.gateway.p95, 240), val(Math.round(s.gateway.p95) + "ms", 6)],
+            [["err  ", "c-dim"], barOf(s.gateway.err, 3, s.gateway.err > 1.5 ? "c-warn" : "c-bar"), val(s.gateway.err.toFixed(2) + "%", 6)],
+            [["cpu  ", "c-dim"], [tf.sparkline(s.gateway.cpu, { min: 0, max: 100 }), "c-green"], val(Math.round(s.gateway.cpu[11]) + "%", 5)],
+          ] },
+          { id: "orders-svc", x: 73, y: Y1, title: "orders-svc", titleCls: "c-green", tooltip: "orders-svc<br/>p95 " + Math.round(s.orders.p95) + "ms", rows: [
+            [["p95  ", "c-dim"], barOf(s.orders.p95, 400), val(Math.round(s.orders.p95) + "ms", 6)],
+            [["pods ", "c-dim"]].concat(pods(s.orders.pods[0], s.orders.pods[1])),
+            [["cpu  ", "c-dim"], [tf.sparkline(s.orders.cpu, { min: 0, max: 100 }), "c-green"], val(Math.round(s.orders.cpu[11]) + "%", 5)],
+          ] },
+          { id: "payments-svc", x: 37, y: Y2, title: "payments-svc", titleCls: "c-green", tooltip: "payments-svc<br/>p95 " + Math.round(s.payments.p95) + "ms", rows: [
+            [["p95  ", "c-dim"], barOf(s.payments.p95, 600), val(Math.round(s.payments.p95) + "ms", 6)],
+            [["err  ", "c-dim"], barOf(s.payments.err, 4, s.payments.err > 2 ? "c-warn" : "c-bar"), val(s.payments.err.toFixed(2) + "%", 6)],
+            [["pods ", "c-dim"]].concat(pods(s.payments.pods[0], s.payments.pods[1])),
+          ] },
+          { id: "postgres", x: 73, y: Y2, title: "postgres", titleCls: "c-gray", tooltip: "postgres<br/>conn " + s.postgres.conns, rows: [
+            [["conn ", "c-dim"], barOf(s.postgres.conns, 100), val(s.postgres.conns + "/100", 7)],
+            [["p99  ", "c-dim"], barOf(s.postgres.p99, 60), val(s.postgres.p99.toFixed(1) + "ms", 7)],
+            [["disk ", "c-dim"], barOf(s.postgres.disk, 1, s.postgres.disk > 0.85 ? "c-warn" : "c-bar"), val(Math.round(s.postgres.disk * 100) + "%", 7)],
+          ] },
+          { id: "how", x: 1, y: Y2, width: 34, style: "single", title: "how it's drawn", titleCls: "c-gray", rows: [
+            [["box   ", "c-dim"], ["tf.box → rich text label", ""]],
+            [["edge  ", "c-dim"], ["tf.edge → custom series", ""]],
+            [["chart ", "c-dim"], ["line · pie · theme", ""]],
+          ] },
+        ],
+        edges: [
+          { x: 28, y: Y1 + 1, length: 8, speed: spd },
+          { x: 64, y: Y1 + 1, length: 8, speed: spd * 0.8, offset: 3 },
+          { x: 50, y: Y1 + 5, length: 4, dir: "v", speed: 0.6 },
+          { x: 86, y: Y1 + 5, length: 4, dir: "v", speed: 0.6, offset: 2 },
+          { x: 64, y: Y2 + 1, length: 8, speed: 0.7, offset: 5 },
+        ],
+        status: [
+          { label: "cluster", value: "demo" },
+          { label: "ns", value: "shop" },
+          { label: "theme", value: themeSel.value },
+          { label: "renderer", value: rendererSel.value },
+          { label: "fps", value: fps },
+          { label: "render", value: "echarts " + echarts.version + " · tuiflow " + tf.VERSION },
+          paused ? "[paused]" : "[live]",
+        ],
+      };
+    }
+    function lineSpec() {
+      return { title: "p95 latency", unit: "ms", x: state.p95.t, series: [
+        { name: "api-gateway", values: state.p95.gw, color: tfe.palette(themeSel.value).blue },
+        { name: "orders-svc", values: state.p95.orders, color: tfe.palette(themeSel.value).green },
+        { name: "payments-svc", values: state.p95.payments, color: tfe.palette(themeSel.value).orange },
+      ] };
+    }
+    function pieSpec() {
+      return { title: "pods by ns", items: [
+        { name: "shop", value: 22 },
+        { name: "kube-system", value: 18 },
+        { name: "monitoring", value: 8 },
+        { name: "ingress", value: 2 },
+      ] };
+    }
+    function barSpec(cols) {
+      const items = [];
+      state.nodes.forEach((n) => {
+        items.push({ label: n.name + " cpu", value: n.cpu, max: 1, text: Math.round(n.cpu * 100) + "%", warn: n.cpu > 0.85 });
+        items.push({ label: n.name + " mem", value: n.mem, max: 1, text: Math.round(n.mem * 100) + "%", warn: n.mem > 0.9 });
+      });
+      return { title: "nodes", items: items, labelWidth: 13, valueWidth: 5, barWidth: Math.max(6, cols - 13 - 5 - 5) };
+    }
+
+    // ---- charts ------------------------------------------------------------------
+    const els = { flow: document.querySelector("#flow > div"), line: document.querySelector("#line > div"), pie: document.querySelector("#pie > div"), bars: document.querySelector("#bars > div") };
+    const charts = {};
+    let ratio = 0.6;
+    function measureRatio() {
+      const m = document.getElementById("measure");
+      const w = m.getBoundingClientRect().width / 10 / 100;
+      if (w > 0.3 && w < 1) ratio = w;
+    }
+    function initCharts() {
+      Object.keys(charts).forEach((k) => charts[k].dispose());
+      const themeName = tfe.themeName(themeSel.value);
+      const renderer = rendererSel.value;
+      Object.keys(els).forEach((k) => { charts[k] = echarts.init(els[k], themeName, { renderer: renderer }); });
+      document.documentElement.dataset.theme = themeSel.value;
+      draw();
+    }
+    function draw() {
+      const p = themeSel.value;
+      const fm = tfe.metrics(charts.flow.getWidth(), charts.flow.getHeight(), { cols: COLS, rows: FLOW_ROWS, ratio: ratio });
+      charts.flow.setOption(tfe.flowOption(flowSpec(), fm, p, state.tick));
+      const lm = tfe.metrics(charts.line.getWidth(), charts.line.getHeight(), { fontSize: Math.max(10, fm.fontSize), ratio: ratio });
+      charts.line.setOption(tfe.lineOption(lineSpec(), lm, p));
+      const pm = tfe.metrics(charts.pie.getWidth(), charts.pie.getHeight(), { fontSize: Math.max(10, fm.fontSize), ratio: ratio });
+      charts.pie.setOption(tfe.pieOption(pieSpec(), pm, p));
+      const bm = tfe.metrics(charts.bars.getWidth(), charts.bars.getHeight(), { fontSize: Math.max(10, fm.fontSize), ratio: ratio });
+      charts.bars.setOption(tfe.barOption(barSpec(bm.cols - 2), bm, p));
+    }
+
+    // ---- controls ----------------------------------------------------------------
+    let fps = 8, paused = false, stop = null;
+    const themeSel = document.getElementById("theme");
+    const rendererSel = document.getElementById("renderer");
+    const fpsSel = document.getElementById("fps");
+    const pauseBtn = document.getElementById("pause");
+    function start() {
+      if (stop) stop();
+      // Unlike the string demo, nothing is redrawn while paused: every setOption
+      // rebuilds the text elements and would dismiss an open tooltip.
+      stop = tf.animate(() => { if (!paused) { step(); draw(); } }, fps);
+    }
+    themeSel.addEventListener("change", initCharts);
+    rendererSel.addEventListener("change", initCharts);
+    fpsSel.addEventListener("change", () => { fps = Number(fpsSel.value); start(); });
+    pauseBtn.addEventListener("click", () => { paused = !paused; pauseBtn.textContent = paused ? "resume" : "pause"; draw(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
+      if (e.key === " ") { e.preventDefault(); pauseBtn.click(); }
+      if (e.key === "t" || e.key === "T") { const all = ["video", "matrix", "amber"]; themeSel.value = all[(all.indexOf(themeSel.value) + 1) % all.length]; initCharts(); }
+    });
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { Object.keys(charts).forEach((k) => charts[k].resize()); draw(); }, 80);
+    });
+
+    // Fonts first: the cell ratio and every glyph width depend on JetBrains Mono being loaded.
+    const ready = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('13px "JetBrains Mono"'), document.fonts.load('bold 13px "JetBrains Mono"')]).then(() => document.fonts.ready) : Promise.resolve();
+    ready.then(() => { measureRatio(); initCharts(); start(); });
+  })();
+  </script>
+</body>
+</html>
