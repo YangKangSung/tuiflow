@@ -1,4 +1,4 @@
-// The catalog panel reuses the Business Text helpers. This checks that the
+// The panel plugin bundles the tuiflow modules from src/. This checks that the
 // vendored copies have not drifted and that the panel runner draws a chart.
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -6,6 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const hb = require("handlebars");
 const tf = require("../src/tuiflow.js");
+const helpers = require("../src/tuiflow-helpers.js");
 const { renderTuiflow } = require("../yangkangsung-tuiflow-panel/src/renderTuiflow.js");
 
 const root = path.join(__dirname, "..");
@@ -14,14 +15,16 @@ const read = (p) => fs.readFileSync(p, "utf8");
 
 test("plugin vendor copies match the sources they bundle", () => {
   const pairs = [
-    ["grafana/business-text/before.js", "vendor/before.js.txt"],
-    ["grafana/business-text/after.js", "vendor/after.js.txt"],
-    ["grafana/business-text/styles.css", "vendor/styles.css.txt"],
     ["src/tuiflow.js", "vendor/tuiflow.js"],
+    ["src/tuiflow-helpers.js", "vendor/tuiflow-helpers.js"],
+    ["src/tuiflow-dom.js", "vendor/tuiflow-dom.js"],
+    ["src/tuiflow.css", "vendor/tuiflow.css.txt"],
   ];
   pairs.forEach(([src, dest]) => {
     assert.equal(read(path.join(plugin, dest)), read(path.join(root, src)), dest);
   });
+  const vendored = fs.readdirSync(path.join(plugin, "vendor")).filter((f) => !f.endsWith(".d.ts"));
+  assert.deepEqual(vendored.sort(), pairs.map(([, dest]) => path.basename(dest)).sort(), "nothing else is vendored");
 });
 
 test("panel runner draws a braille time series from data frames", async () => {
@@ -43,10 +46,10 @@ test("panel runner draws a braille time series from data frames", async () => {
       ],
     },
   ];
-  const html = await renderTuiflow({
+  const html = renderTuiflow({
     tf,
+    helpers,
     Handlebars: hb,
-    beforeSource: read(path.join(root, "grafana/business-text/before.js")),
     series,
     kind: "timeseries",
     cols: 40,

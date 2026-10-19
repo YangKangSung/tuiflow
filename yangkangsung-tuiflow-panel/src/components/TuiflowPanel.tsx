@@ -2,11 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { PanelProps } from '@grafana/data';
 import Handlebars from 'handlebars';
 import { TuiflowOptions } from 'types';
-// Vendored UMD build. The sibling tuiflow.d.ts describes the default export.
+// Vendored UMD builds of the tuiflow modules (scripts/sync-vendor.js copies
+// them from the monorepo's src/). The sibling .d.ts files describe them.
 import tf from '../../vendor/tuiflow.js';
-import beforeSource from '../../vendor/before.js.txt';
-import afterSource from '../../vendor/after.js.txt';
-import cssSource from '../../vendor/styles.css.txt';
+import helpers from '../../vendor/tuiflow-helpers.js';
+import dom from '../../vendor/tuiflow-dom.js';
+import cssSource from '../../vendor/tuiflow.css.txt';
 import { renderTuiflow, startAfter } from '../renderTuiflow';
 
 interface Props extends PanelProps<TuiflowOptions> {}
@@ -24,27 +25,17 @@ export const TuiflowPanel: React.FC<Props> = ({ options, data, width, height }) 
     if (!root) {
       return;
     }
-    let stop = () => {};
-    let alive = true;
-    renderTuiflow({
+    const html = renderTuiflow({
       tf,
+      helpers,
       Handlebars,
-      beforeSource,
       series: data.series,
       kind: options.kind,
       cols,
       rows,
-    }).then((html) => {
-      if (!alive || !ref.current) {
-        return;
-      }
-      ref.current.innerHTML = '<style>' + cssSource + '</style>' + html;
-      stop = startAfter(afterSource, ref.current);
     });
-    return () => {
-      alive = false;
-      stop();
-    };
+    root.innerHTML = '<style>' + cssSource + '</style>' + html;
+    return startAfter(dom, tf, root);
   }, [cols, data.series, options.kind, rows]);
 
   return <div ref={ref} data-testid="tuiflow-panel" style={{ width, height, overflow: 'auto' }} />;

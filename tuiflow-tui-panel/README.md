@@ -1,8 +1,15 @@
 # tuiflow panel plugin
 
-Grafana panel plugin `tuiflow-tui-panel`. One visualization-list entry, with a View option for each tuiflow drawing. It renders the same helpers as the Business Text dashboards (`grafana/business-text/before.js`).
+Grafana panel plugin `tuiflow-tui-panel`. One visualization-list entry, with a View option for each tuiflow drawing.
+
+The plugin bundles only the tuiflow modules from the repo's `src/`: `tuiflow.js` (core), `tuiflow-helpers.js` (the `tf*` Handlebars helpers), `tuiflow-dom.js` (packet animation, async lists), `tuiflow.css`, `flow.hbs`. Handlebars is its one runtime dependency.
 
 Not submitted to grafana.com. Signing and the catalog form stay manual.
+
+Two things are kept out of the package, and `npm run pack` refuses a `dist/` that references either:
+
+- the Apache ECharts render path (`echarts/`), a separate experiment;
+- the Business Text adapter (`grafana/business-text/`), which wires the same `src/` modules into Volkov Labs' Business Text panel for the provisioned dashboards. That is a different delivery and has no place in this plugin.
 
 ## Build
 

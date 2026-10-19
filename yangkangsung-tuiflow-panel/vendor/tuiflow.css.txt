@@ -1,4 +1,4 @@
-/* Business Text panel → "Styles"
+/* tuiflow styles — the `.tf` block every tuiflow panel renders into.
  * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)
  * and block elements (U+2580–259F); mixed fonts break the grid. */
 .tf {
@@ -35,6 +35,13 @@
 .tf .tf-s3 { color: #c792ea; }
 .tf .tf-s4 { color: #e06c75; }
 .tf .tf-s5 { color: #9aa0a6; }
+/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */
+.tf .tf-bg0 { background: #e8a06a; }
+.tf .tf-bg1 { background: #8fb3ff; }
+.tf .tf-bg2 { background: #86d28a; }
+.tf .tf-bg3 { background: #c792ea; }
+.tf .tf-bg4 { background: #e06c75; }
+.tf .tf-bg5 { background: #9aa0a6; }
 
 /* flame scan, geomap ping, CRT cursor */
 .tf .tf-scan { color: #ffd27a; }

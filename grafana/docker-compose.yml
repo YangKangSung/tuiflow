@@ -40,8 +40,11 @@ services:
       - ./provisioning:/etc/grafana/provisioning:ro
       - ./plugins:/var/lib/grafana/plugins
       - ./../tuiflow-tui-panel/dist:/var/lib/grafana/plugins/tuiflow-tui-panel:ro
-      # Served at /public/tuiflow.js so Business Text can `import()` it.
+      # Served at /public/tuiflow*.js so the Business Text adapter
+      # (business-text/before.js) can `import()` the tuiflow modules.
       - ../src/tuiflow.js:/usr/share/grafana/public/tuiflow.js:ro
+      - ../src/tuiflow-helpers.js:/usr/share/grafana/public/tuiflow-helpers.js:ro
+      - ../src/tuiflow-dom.js:/usr/share/grafana/public/tuiflow-dom.js:ro
       - grafana-data:/var/lib/grafana
 
 volumes:

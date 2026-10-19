@@ -9,6 +9,9 @@
  *   tuiflow-before-after.json  stock Grafana panel on the left, same query +
  *                              same fieldConfig rendered by tuiflow on the right
  *   tuiflow-plugin.json        every catalogue example on the panel plugin
+ *   tuiflow-k8s.json           grafana.com dashboard 15661 in tuiflow helpers
+ *   tuiflow-k8s-cluster.json   grafana.com dashboard 6417 in tuiflow helpers
+ *   tuiflow-canvas-flow.json   Canvas panel as text (dashed boxes, travelling packets)
  *
  *   node grafana/build-dashboard.js
  *
@@ -20,10 +23,13 @@ const fs = require("fs");
 const path = require("path");
 const { CATALOG, TESTDATA, PODS_CSV, walk, csv } = require("./catalog");
 const { tuiPanelModel } = require("./build-library");
+const { k8sDashboard } = require("./k8s-15661");
+const { k8sClusterDashboard } = require("./k8s-6417");
+const { canvasFlowDashboard } = require("./canvas-flow");
+
+const { read } = require("./business-text/sources");
 
 const here = __dirname;
-const version = require("../package.json").version;
-const read = (f) => fs.readFileSync(path.join(here, "business-text", f), "utf8").replace(/__TF_VERSION__/g, version);
 
 const helpers = read("before.js");
 const afterRender = read("after.js");
@@ -104,7 +110,7 @@ const demo = base(
       "**tuiflow** — every panel above is plain text: box drawing, `█▓░` bars, `▁▂▃▅▇` sparklines and a `.o@` packet travelling on a dashed edge, rendered by a Business Text panel.",
       "",
       "- Full terminal look: reopen this dashboard with [`?theme=matrix`](/d/tuiflow-demo/?theme=matrix) (hidden built-in Grafana theme: monospace font, no rounded corners).",
-      "- Every panel on one page: [gallery](/d/tuiflow-gallery/?theme=matrix) · [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix).",
+      "- Every panel on one page: [gallery](/d/tuiflow-gallery/?theme=matrix) · [library panels](/d/tuiflow-library/?theme=matrix) · [before / after](/d/tuiflow-before-after/?theme=matrix) · [K8S dashboard](/d/tuiflow-k8s/?theme=matrix) · [Kubernetes cluster](/d/tuiflow-k8s-cluster/?theme=matrix).",
       "- Sources: `grafana/business-text/*.{js,hbs,css}` → `npm run build` regenerates this JSON. Core library: `/public/tuiflow.js`.",
     ]),
   ]
@@ -289,6 +295,9 @@ fs.mkdirSync(outDir, { recursive: true });
   ["tuiflow-library.json", library],
   ["tuiflow-before-after.json", beforeAfter],
   ["tuiflow-plugin.json", pluginDash],
+  ["tuiflow-k8s.json", k8sDashboard()],
+  ["tuiflow-k8s-cluster.json", k8sClusterDashboard()],
+  ["tuiflow-canvas-flow.json", canvasFlowDashboard()],
 ].forEach(([name, json]) => {
   const outFile = path.join(outDir, name);
   fs.writeFileSync(outFile, JSON.stringify(json, null, 2) + "\n");

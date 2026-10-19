@@ -1,6 +1,5 @@
-// Runs the Business Text helper source against Grafana data frames and
-// returns the same HTML the library panels render. The source is the
-// vendored before.js (a function body, not a module).
+// Runs the tuiflow helpers (vendor/tuiflow-helpers.js) against Grafana data
+// frames and returns the HTML for one drawing kind.
 
 const KINDS = [
   { value: 'timeseries', label: 'Time series' },
@@ -98,29 +97,15 @@ function callKind(helpers, kind, cols, rows) {
   }
 }
 
-function stubCoreImport(source) {
-  return source.replace(/return import\([\s\S]*?\)\.then\(\(\) => \{/, 'return Promise.resolve().then(() => {');
-}
-
-async function renderTuiflow({ tf, Handlebars, beforeSource, series, kind, cols, rows }) {
-  const root = globalThis;
-  if (!root.window) {
-    root.window = root;
-  }
-  root.tuiflow = tf;
-  root.window.tuiflow = tf;
-
+function renderTuiflow({ tf, helpers, Handlebars, series, kind, cols, rows }) {
   const hb = Handlebars.create();
-  // before.js is the Business Text function body. It reads window.tuiflow.
-  const run = new Function('context', stubCoreImport(beforeSource));
-  await run({ handlebars: hb, panelData: { series: series || [] } });
+  helpers.register(hb, tf, { panelData: { series: series || [] } });
   return '<pre class="tf">' + htmlOf(callKind(hb.helpers, kind, cols, rows)) + '</pre>';
 }
 
-function startAfter(afterSource, element) {
-  // after.js animates packets and fills alert/dashboard placeholders.
-  const run = new Function('context', afterSource);
-  const cleanup = run.call({}, { element, data: [] });
+function startAfter(dom, tf, element) {
+  // Packet animation, flame scan, async alert / dashboard / annotation lists.
+  const cleanup = dom.animate(element, [], tf);
   return typeof cleanup === 'function' ? cleanup : function noop() {};
 }
 

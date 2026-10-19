@@ -5,8 +5,8 @@
  * ("Screen") that renders to plain text or colour-classed HTML.
  *
  * Zero dependencies. UMD: usable as <script src>, CommonJS require(), or
- * dynamic import() (then it registers itself as globalThis.tuiflow so it can
- * be loaded from a Grafana Business Text panel).
+ * dynamic import() (then it registers itself as globalThis.tuiflow so a
+ * panel script can load it from a static URL).
  *
  * Every public function works on strings only, so the same code runs in a
  * browser, Node, a Grafana panel, a VS Code webview or a slide deck.
@@ -20,7 +20,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const VERSION = "0.4.0";
+  const VERSION = "0.4.1";
 
   // Eight vertical block levels, used by sparklines.
   const BLOCKS = "▁▂▃▄▅▆▇█";
@@ -382,28 +382,67 @@
     return out;
   }
 
-  // Panel CSS is 13px with line-height 1.25, so a line box is 16.25px.
-  // JetBrains Mono has no braille. The glyph the page actually draws
-  // (Windows fallback) is 9.8px wide, so a cell is 16.25/9.8 times as tall
-  // as it is wide — not 2. The 2×4 dots are square only after dx is scaled
-  // by 2/that ratio.
-  const BRAILLE_CELL_ASPECT = 16.25 / 9.8;
+  // Panel line box (13px × 1.25) over a JetBrains Mono advance (0.6em).
+  // Callers that can measure the real cell pass opts.cellAspect instead.
+  const TERMINAL_CELL_ASPECT = 16.25 / 7.8;
+
+  // Block Elements as 8×8 coverage masks (bit set = glyph ink). Index i runs
+  // left→right, j top→bottom. Full / half / eighth / quadrant blocks only;
+  // shades are left out because they read as texture, not as an edge.
+  const PIE_GLYPHS = (function () {
+    const list = [];
+    const add = (ch, fn) => {
+      const mask = new Uint8Array(64);
+      for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) mask[j * 8 + i] = fn(i, j) ? 1 : 0;
+      list.push({ ch: ch, mask: mask });
+    };
+    add("█", () => true);
+    add("▀", (i, j) => j < 4);
+    add("▄", (i, j) => j >= 4);
+    add("▌", (i) => i < 4);
+    add("▐", (i) => i >= 4);
+    add("▘", (i, j) => i < 4 && j < 4);
+    add("▝", (i, j) => i >= 4 && j < 4);
+    add("▖", (i, j) => i < 4 && j >= 4);
+    add("▗", (i, j) => i >= 4 && j >= 4);
+    add("▚", (i, j) => (i < 4) === (j < 4));
+    add("▞", (i, j) => (i < 4) !== (j < 4));
+    add("▛", (i, j) => !(i >= 4 && j >= 4));
+    add("▜", (i, j) => !(i < 4 && j >= 4));
+    add("▙", (i, j) => !(i >= 4 && j < 4));
+    add("▟", (i, j) => !(i < 4 && j < 4));
+    const lower = "▁▂▃▄▅▆▇";
+    const left = "▏▎▍▌▋▊▉";
+    for (let k = 1; k <= 7; k++) {
+      if (k !== 4) add(lower[k - 1], (i, j) => j >= 8 - k);
+      if (k !== 4) add(left[k - 1], (i) => i < k);
+    }
+    add("▔", (i, j) => j < 1);
+    add("▕", (i) => i >= 7);
+    return list;
+  })();
 
   /**
-   * Pie / donut as a braille disc. values: number[] (one slice per value).
-   * opts: { radius (cells, default 6), donut: 0..1 inner ratio, cellAspect }
-   * Returns { rows, owner } — owner = slice index per cell for colouring.
-   * Empty cells are braille blanks (U+2800), same advance as the dots, so
-   * the disc stays one grid.
+   * Pie / donut on the cell grid. values: number[] (one slice per value).
+   * opts: { radius (cell rows, default 6), donut: 0..1 inner ratio, cellAspect }
+   * Returns { rows, owner, bg }: owner is the slice in the glyph colour, bg the
+   * slice behind it (-1 none).
+   * Every cell is supersampled 8×8 and gets the block glyph whose ink best
+   * matches the slice inside it, with the other slice as background. The disc
+   * edge therefore uses eighth blocks and quadrants (sub-cell steps), and a cut
+   * through a cell becomes ▌ ▀ ▚ … instead of a whole-cell step.
    */
   function braillePie(values, opts) {
     opts = opts || {};
-    const radius = opts.radius || 6; // in cell rows
-    const cellAspect = opts.cellAspect > 0 ? opts.cellAspect : BRAILLE_CELL_ASPECT;
+    const radius = opts.radius || 6;
+    const cellAspect = opts.cellAspect > 0 ? opts.cellAspect : TERMINAL_CELL_ASPECT;
     const height = radius * 2;
     const width = Math.max(1, Math.round(height * cellAspect));
-    const dotScaleX = 2 / cellAspect;
-    const cv = new BrailleCanvas(width, height, values.length);
+    // geometry in cell-width units: a cell is 1 wide and cellAspect tall
+    const cx = width / 2;
+    const cy = (height * cellAspect) / 2;
+    const R = cy;
+    const inner = Math.max(0, Math.min(1, opts.donut || 0)) * R;
     const total = values.reduce((a, b) => a + (Number.isFinite(b) && b > 0 ? b : 0), 0) || 1;
     const bounds = [];
     let acc = 0;
@@ -412,25 +451,81 @@
       bounds.push([acc, acc + frac]);
       acc += frac;
     });
-    const cx = cv.W / 2;
-    const cy = cv.H / 2;
-    const R = cv.H / 2;
-    const inner = (opts.donut || 0) * R;
-    for (let py = 0; py < cv.H; py++) {
-      for (let px = 0; px < cv.W; px++) {
-        const dx = (px + 0.5 - cx) * dotScaleX;
-        const dy = py + 0.5 - cy;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d > R || d < inner) continue;
-        let a = Math.atan2(dx, -dy) / (2 * Math.PI); // 0 at 12 o'clock, clockwise
-        if (a < 0) a += 1;
-        const si = bounds.findIndex((b) => a >= b[0] && a < b[1]);
-        if (si >= 0) cv.dot(si, px, py);
+    const sliceAt = (X, Y) => {
+      const dx = X - cx;
+      const dy = Y - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > R || d < inner) return -1;
+      let a = Math.atan2(dx + 1e-9, -dy) / (2 * Math.PI); // 0 at 12 o'clock, clockwise
+      if (a < 0) a += 1;
+      for (let i = 0; i < bounds.length; i++) if (a >= bounds[i][0] && a < bounds[i][1]) return i;
+      return -1;
+    };
+    const ids = new Int16Array(64);
+    const count = {};
+    const rows = [];
+    const owner = [];
+    const bg = [];
+    for (let y = 0; y < height; y++) {
+      let line = "";
+      const own = [];
+      const back = [];
+      for (let x = 0; x < width; x++) {
+        for (const k in count) delete count[k];
+        let inside = 0;
+        for (let j = 0; j < 8; j++) {
+          for (let i = 0; i < 8; i++) {
+            const id = sliceAt(x + (i + 0.5) / 8, (y + (j + 0.5) / 8) * cellAspect);
+            ids[j * 8 + i] = id;
+            if (id >= 0) {
+              inside++;
+              count[id] = (count[id] || 0) + 1;
+            }
+          }
+        }
+        if (!inside) {
+          line += " ";
+          own.push(-1);
+          back.push(-1);
+          continue;
+        }
+        const ranked = Object.keys(count)
+          .map(Number)
+          .sort((p, q) => count[q] - count[p]);
+        const A = ranked[0];
+        // second colour: the runner-up slice, unless more of the cell is outside the disc
+        const B = ranked.length > 1 && count[ranked[1]] > 64 - inside ? ranked[1] : -1;
+        let best = null;
+        const tryFit = (fg, bk) => {
+          PIE_GLYPHS.forEach((g) => {
+            let score = 0;
+            for (let s = 0; s < 64; s++) {
+              if (g.mask[s]) {
+                if (ids[s] === fg) score++;
+              } else if (ids[s] === bk) score++;
+            }
+            if (!best || score > best.score) best = { score: score, ch: g.ch, fg: fg, bg: bk };
+          });
+          // blank cell: everything that is not ink must be the background
+          let blank = 0;
+          for (let s = 0; s < 64; s++) if (ids[s] === bk) blank++;
+          if (!best || blank > best.score) best = { score: blank, ch: " ", fg: -1, bg: bk };
+        };
+        tryFit(A, B);
+        if (B >= 0) tryFit(B, A);
+        if (best.ch === " " && best.bg >= 0) {
+          // a background-only cell is just a full block of that slice
+          best = { score: best.score, ch: "█", fg: best.bg, bg: -1 };
+        }
+        line += best.ch;
+        own.push(best.fg);
+        back.push(best.ch === "█" ? -1 : best.bg);
       }
+      rows.push(line);
+      owner.push(own);
+      bg.push(back);
     }
-    const out = cv.compose();
-    out.rows = out.rows.map((row) => row.replace(/ /g, "\u2800"));
-    return out;
+    return { rows: rows, owner: owner, bg: bg };
   }
 
   /** Shade character for a 0..1 density: " ░▒▓█". */
@@ -525,6 +620,39 @@
         run += row[x];
       }
       if (run) segs.push([run, runOwner >= 0 ? clsFn(runOwner) : ""]);
+      return segs;
+    });
+  }
+
+  /**
+   * Like ownedSegments for half-block pixel art: runs break when either the
+   * glyph owner or the background owner changes. clsFn(i) colours the glyph,
+   * bgClsFn(i) the cell behind it; both classes go on the same run.
+   */
+  function pixelSegments(rows, owner, bg, clsFn, bgClsFn) {
+    return rows.map((row, y) => {
+      const segs = [];
+      let run = "";
+      let key = null;
+      let cls = "";
+      for (let x = 0; x < row.length; x++) {
+        const o = owner[y][x];
+        // a full block also paints its background so the hairline seams some
+        // fonts leave between adjacent █ glyphs take the slice colour
+        const b = bg[y][x] >= 0 ? bg[y][x] : row[x] === "\u2588" ? o : -1;
+        const k = o + "/" + b;
+        if (k !== key && run) {
+          segs.push([run, cls]);
+          run = "";
+        }
+        if (k !== key) {
+          key = k;
+          cls = (o >= 0 ? clsFn(o) : "") + (b >= 0 ? " " + bgClsFn(b) : "");
+          cls = cls.trim();
+        }
+        run += row[x];
+      }
+      if (run) segs.push([run, cls]);
       return segs;
     });
   }
@@ -749,8 +877,7 @@
 
   /**
    * Call `fn(tick)` at `fps` frames per second. Returns a stop() function,
-   * which is also the shape Grafana Business Text expects as an
-   * "unsubscribe" return value from its after-render code.
+   * the same shape panel hosts expect as a cleanup return value.
    */
   function animate(fn, fps) {
     let tick = 0;
@@ -845,8 +972,10 @@
     BrailleCanvas: BrailleCanvas,
     braillePlot: braillePlot,
     brailleScatter: brailleScatter,
-    braillePie: braillePie,
+    pie: braillePie,
+    braillePie: braillePie, // old name, kept for callers of 0.3.x
     ownedSegments: ownedSegments,
+    pixelSegments: pixelSegments,
     lineChart: lineChart,
     segmentsToText: segmentsToText,
     segmentsToHTML: segmentsToHTML,

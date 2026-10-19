@@ -82,12 +82,12 @@ const config = async (env: Env): Promise<Configuration> => {
           ],
         },
         {
-          // tuiflow helpers are scripts, not modules. Bundle them as source text.
-          test: /[\\/]grafana[\\/]business-text[\\/].+\.(js|hbs)$/,
+          // Handlebars templates (../src/flow.hbs) are compiled at runtime; bundle as text.
+          test: /\.hbs$/,
           type: 'asset/source',
         },
         {
-          exclude: /(node_modules|[\\/]grafana[\\/]business-text[\\/])/,
+          exclude: /node_modules/,
           test: /\.[tj]sx?$/,
           use: {
             loader: 'swc-loader',
@@ -225,8 +225,13 @@ const config = async (env: Env): Promise<Configuration> => {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       // handle resolving "rootDir" paths
       modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
+      // The tuiflow modules come from the monorepo's src/ only; nothing under
+      // grafana/ (the dashboard-side adapter) is part of this plugin.
       alias: {
         'tuiflow-core': path.resolve(process.cwd(), '../src/tuiflow.js'),
+        'tuiflow-helpers': path.resolve(process.cwd(), '../src/tuiflow-helpers.js'),
+        'tuiflow-dom': path.resolve(process.cwd(), '../src/tuiflow-dom.js'),
+        'tuiflow-flow.hbs': path.resolve(process.cwd(), '../src/flow.hbs'),
       },
       unsafeCache: true,
     },

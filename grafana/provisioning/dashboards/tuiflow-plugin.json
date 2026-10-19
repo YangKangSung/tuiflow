@@ -562,7 +562,7 @@
       "id": 10,
       "type": "tuiflow-tui-panel",
       "title": "Pie chart",
-      "description": "Braille disc coloured per slice + legend with percentages. Second argument > 0 makes a donut.",
+      "description": "Block-glyph disc (eighth/quadrant blocks, two colours per cell) + legend with percentages. First argument is the radius in rows (4 small … 12 large); second > 0 makes a donut.",
       "gridPos": {
         "x": 0,
         "y": 35,

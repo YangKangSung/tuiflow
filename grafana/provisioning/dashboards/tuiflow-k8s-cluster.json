@@ -1,0 +1,2335 @@
+{
+  "uid": "tuiflow-k8s-cluster",
+  "title": "tuiflow · Kubernetes Cluster (Prometheus)",
+  "description": "TUI migration of Grafana.com dashboard 6417 (Kubernetes Cluster, Prometheus). Library helpers on TestData stand-ins of kube-state-metrics.",
+  "tags": [
+    "tuiflow",
+    "k8s",
+    "demo"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "type": "custom",
+        "label": "node",
+        "query": "node-a,node-b,node-c",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "node-a",
+            "value": "node-a"
+          },
+          {
+            "selected": false,
+            "text": "node-b",
+            "value": "node-b"
+          },
+          {
+            "selected": false,
+            "text": "node-c",
+            "value": "node-c"
+          }
+        ],
+        "includeAll": true,
+        "multi": true,
+        "hide": 0,
+        "skipUrlSync": false
+      },
+      {
+        "name": "namespace",
+        "type": "custom",
+        "label": "namespace",
+        "query": "shop,kube-system,monitoring,ingress-nginx",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "shop",
+            "value": "shop"
+          },
+          {
+            "selected": false,
+            "text": "kube-system",
+            "value": "kube-system"
+          },
+          {
+            "selected": false,
+            "text": "monitoring",
+            "value": "monitoring"
+          },
+          {
+            "selected": false,
+            "text": "ingress-nginx",
+            "value": "ingress-nginx"
+          }
+        ],
+        "includeAll": true,
+        "multi": true,
+        "hide": 0,
+        "skipUrlSync": false
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "open with matrix theme",
+      "type": "link",
+      "url": "/d/tuiflow-k8s-cluster/?theme=matrix",
+      "icon": "external link"
+    },
+    {
+      "title": "kiosk + matrix",
+      "type": "link",
+      "url": "/d/tuiflow-k8s-cluster/?theme=matrix&kiosk",
+      "targetBlank": true,
+      "icon": "external link"
+    },
+    {
+      "title": "source dashboard 6417",
+      "type": "link",
+      "url": "https://grafana.com/grafana/dashboards/6417-kubernetes-cluster-prometheus/",
+      "targetBlank": true,
+      "icon": "external link"
+    },
+    {
+      "title": "K8S dashboard 15661",
+      "type": "link",
+      "url": "/d/tuiflow-k8s/?theme=matrix",
+      "icon": "external link"
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Kubernetes Cluster (Prometheus)** — TUI migration of [grafana.com/dashboards/6417](https://grafana.com/grafana/dashboards/6417-kubernetes-cluster-prometheus/). Cluster health, deployments, nodes, pods, containers, jobs. singlestat → `tfStat`, graph → `tfTimeseries`, table → `tfTable`.\n\nData is synthetic TestData shaped like kube-state-metrics (pod capacity, CPU, memory, disk). This Grafana has no cluster, so Node and Namespace label the view and do not re-query. Open with [`?theme=matrix`](/d/tuiflow-k8s-cluster/?theme=matrix)."
+      },
+      "id": 1
+    },
+    {
+      "type": "row",
+      "title": "Cluster Health",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "panels": [],
+      "id": 2
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Pod Usage",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "usage",
+          "startValue": 0.44,
+          "spread": 0.03,
+          "noise": 0.015,
+          "min": 0,
+          "max": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 3
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster CPU Usage",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 6,
+        "y": 4,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "usage",
+          "startValue": 0.45,
+          "spread": 0.04,
+          "noise": 0.02,
+          "min": 0,
+          "max": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 4
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Memory Usage",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "usage",
+          "startValue": 0.5,
+          "spread": 0.03,
+          "noise": 0.015,
+          "min": 0,
+          "max": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 5
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Disk Usage",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 18,
+        "y": 4,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "usage",
+          "startValue": 0.44,
+          "spread": 0.02,
+          "noise": 0.01,
+          "min": 0,
+          "max": 1
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.8
+              },
+              {
+                "color": "red",
+                "value": 0.9
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 6
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Pod Capacity",
+      "description": "tuiflow timeseries · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "allocatable",
+          "startValue": 110,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 160
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "capacity",
+          "startValue": 110,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 160
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "requested",
+          "startValue": 48,
+          "spread": 2,
+          "noise": 1,
+          "min": 0,
+          "max": 160
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfTimeseries 30 7}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 7
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster CPU Capacity",
+      "description": "tuiflow timeseries · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 6,
+        "y": 9,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "allocatable",
+          "startValue": 38,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 48
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "capacity",
+          "startValue": 40,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 48
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "requested",
+          "startValue": 18,
+          "spread": 0.6,
+          "noise": 0.3,
+          "min": 0,
+          "max": 48
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfTimeseries 30 7}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 8
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Mem Capacity",
+      "description": "tuiflow timeseries · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "allocatable",
+          "startValue": 85899345920,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 103079215104
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "capacity",
+          "startValue": 85899345920,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 103079215104
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "requested",
+          "startValue": 42949672960,
+          "spread": 858993459.2,
+          "noise": 429496729.6,
+          "min": 0,
+          "max": 103079215104
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "decimals": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfTimeseries 30 7}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 9
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Cluster Disk Capacity",
+      "description": "tuiflow timeseries · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 18,
+        "y": 9,
+        "w": 6,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "usage",
+          "startValue": 1209462790553.6,
+          "spread": 43980465111.04,
+          "noise": 21990232555.52,
+          "min": 0,
+          "max": 3298534883328
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "limit",
+          "startValue": 2748779069440,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 3298534883328
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "decimals": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfTimeseries 30 7}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 10
+    },
+    {
+      "type": "row",
+      "title": "Deployments",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "panels": [],
+      "id": 11
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Deployment Replicas - Up To Date",
+      "description": "tuiflow table · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "csv_content",
+          "csvContent": "deployment,namespace,replicas,updated,unavailable\napi-gateway,shop,2,2,0\norders,shop,4,4,0\npayments,shop,2,1,1\ncoredns,kube-system,2,2,0\nprometheus,monitoring,1,1,0"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfTable 20}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 12
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Deployment Replicas",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 4,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "replicas",
+          "startValue": 11,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 40
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 8}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 13
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Deployment Replicas - Updated",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 16,
+        "y": 18,
+        "w": 4,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "updated",
+          "startValue": 10,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 40
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 8}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 14
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Deployment Replicas - Unavailable",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 20,
+        "y": 18,
+        "w": 4,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "unavailable",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 40
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 8}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 15
+    },
+    {
+      "type": "row",
+      "title": "Node",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "panels": [],
+      "id": 16
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Number Of Nodes",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "nodes",
+          "startValue": 3,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 20
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 17
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Nodes Out of Disk",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 8,
+        "y": 27,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "outOfDisk",
+          "startValue": 0,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 10
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 18
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Nodes Unavailable",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 16,
+        "y": 27,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "unschedulable",
+          "startValue": 0,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 10
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 19
+    },
+    {
+      "type": "row",
+      "title": "Pods",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "panels": [],
+      "id": 20
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Pods Running",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 12,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "running",
+          "startValue": 46,
+          "spread": 1,
+          "noise": 0.5,
+          "min": 0,
+          "max": 200
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 24}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 21
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Pods Pending",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 33,
+        "w": 12,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "pending",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 24}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 22
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Pods Failed",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "failed",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 23
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Pods Succeeded",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 8,
+        "y": 38,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "succeeded",
+          "startValue": 4,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 24
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Pods Unknown",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 16,
+        "y": 38,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "unknown",
+          "startValue": 0,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 25
+    },
+    {
+      "type": "row",
+      "title": "Containers",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 43
+      },
+      "panels": [],
+      "id": 26
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Containers Running",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 44,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "running",
+          "startValue": 52,
+          "spread": 1,
+          "noise": 0.5,
+          "min": 0,
+          "max": 200
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 27
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Containers Waiting",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 6,
+        "y": 44,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "waiting",
+          "startValue": 2,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 28
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Containers Terminated",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 44,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "terminated",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 29
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Containers Restarts (Last 30 Minutes)",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 18,
+        "y": 44,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "restarts",
+          "startValue": 3,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 12}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 30
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "CPU Cores Requested by Containers",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 49,
+        "w": 12,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "cores",
+          "startValue": 18.4,
+          "spread": 0.4,
+          "noise": 0.2,
+          "min": 0,
+          "max": 40
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 24}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 31
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Memory Requested By Containers",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 12,
+        "y": 49,
+        "w": 12,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "memory",
+          "startValue": 42949672960,
+          "spread": 429496729.6,
+          "noise": 214748364.8,
+          "min": 0,
+          "max": 103079215104
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "decimals": 1,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 24}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 32
+    },
+    {
+      "type": "row",
+      "title": "Jobs",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "panels": [],
+      "id": 33
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Jobs Succeeded",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 0,
+        "y": 55,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "succeeded",
+          "startValue": 6,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 30
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 34
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Jobs Active",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Source panel id 48 is titled Jobs Succeeded; its query is kube_job_status_active.",
+      "gridPos": {
+        "x": 8,
+        "y": 55,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "active",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 30
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 35
+    },
+    {
+      "type": "marcusolsson-dynamictext-panel",
+      "title": "Jobs Failed",
+      "description": "tuiflow stat · migrated from grafana.com dashboard 6417. Sample series stand in for the Prometheus queries.",
+      "gridPos": {
+        "x": 16,
+        "y": 55,
+        "w": 8,
+        "h": 5
+      },
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "testdata"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-testdata-datasource",
+            "uid": "testdata"
+          },
+          "scenarioId": "random_walk",
+          "alias": "failed",
+          "startValue": 1,
+          "spread": 0,
+          "noise": 0,
+          "min": 0,
+          "max": 30
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "renderMode": "data",
+        "content": "<pre class=\"tf\">{{{tfStat 16}}}</pre>",
+        "defaultContent": "The query didn't return any results.",
+        "helpers": "// Business Text panel → \"JavaScript code before content rendering\"\n//\n// Business Text adapter only. The drawing code lives in src/ (tuiflow.js,\n// tuiflow-helpers.js, tuiflow-dom.js) and is served from Grafana's static\n// folder (mounted there by grafana/docker-compose.yml). This file just loads\n// those modules and registers the tf* Handlebars helpers on the panel.\n//\n// The panel wraps this code in a plain `new Function('context', code)`, so\n// top-level `await` is not available; returning a Promise is fine because the\n// panel awaits the return value before compiling the template.\n\n// 0.4.1 is replaced by the build scripts with package.json's version so\n// browsers refetch the modules after an upgrade instead of using a cached copy.\nreturn Promise.all([\n  import(\"/public/tuiflow.js?v=0.4.1\"),\n  import(\"/public/tuiflow-helpers.js?v=0.4.1\"),\n  import(\"/public/tuiflow-dom.js?v=0.4.1\"),\n]).then(() => {\n  window.tuiflowHelpers.register(context.handlebars, window.tuiflow, context);\n});\n",
+        "afterRender": "// Business Text panel → \"JavaScript code after content ready\"\n//\n// Business Text adapter only. before.js already loaded /public/tuiflow-dom.js;\n// this hands the rendered element to it (packet animation, flame scan, async\n// alert / dashboard / annotation lists) and returns its cleanup. The panel\n// calls that cleanup before the next render, so timers never leak.\n\nif (!window.tuiflow || !window.tuiflowDom || !context.element) {\n  return;\n}\nreturn window.tuiflowDom.animate(context.element, context.data, window.tuiflow);\n",
+        "styles": "/* tuiflow styles — the `.tf` block every tuiflow panel renders into.\n * Keep every glyph in ONE monospace font that covers box drawing (U+2500–257F)\n * and block elements (U+2580–259F); mixed fonts break the grid. */\n.tf {\n  font-family: \"JetBrains Mono\", \"Cascadia Mono\", \"Fira Code\", \"DejaVu Sans Mono\", Consolas, monospace;\n  font-size: 13px;\n  line-height: 1.25;\n  margin: 0;\n  padding: 8px 10px;\n  white-space: pre;\n  /* Inherit the Grafana theme so ?theme=matrix turns the whole box green;\n     only semantic accents below get fixed colours. */\n  color: inherit;\n  background: transparent;\n}\n.tf .tf-edge { color: #e8a06a; font-weight: 700; }\n.tf .tf-dim { opacity: 0.55; }\n.tf .tf-axis { opacity: 0.45; }\n.tf .tf-value { font-weight: 700; }\n.tf .tf-ok { color: #86d28a; }\n.tf .tf-warn { color: #e8a06a; }\n.tf .tf-crit { color: #e06c75; }\n.tf .tf-border { opacity: 0.6; }\n.tf .tf-up { color: #86d28a; }\n.tf .tf-down { color: #e06c75; }\n/* heatmap density levels */\n.tf .tf-h1 { color: #4b5563; }\n.tf .tf-h2 { color: #8fb3ff; }\n.tf .tf-h3 { color: #e8a06a; }\n.tf .tf-h4 { color: #ffd27a; }\n/* series colours for tfTimeseries / tfStat (cycle of 6) */\n.tf .tf-s0 { color: #e8a06a; }\n.tf .tf-s1 { color: #8fb3ff; }\n.tf .tf-s2 { color: #86d28a; }\n.tf .tf-s3 { color: #c792ea; }\n.tf .tf-s4 { color: #e06c75; }\n.tf .tf-s5 { color: #9aa0a6; }\n/* same palette as background, for half-block pixels (tfPie: ▀ = fg over bg) */\n.tf .tf-bg0 { background: #e8a06a; }\n.tf .tf-bg1 { background: #8fb3ff; }\n.tf .tf-bg2 { background: #86d28a; }\n.tf .tf-bg3 { background: #c792ea; }\n.tf .tf-bg4 { background: #e06c75; }\n.tf .tf-bg5 { background: #9aa0a6; }\n\n/* flame scan, geomap ping, CRT cursor */\n.tf .tf-scan { color: #ffd27a; }\n.tf .tf-ping { animation: tf-ping 1.2s ease-in-out infinite; }\n.tf .tf-cursor { animation: tf-blink 1s step-end infinite; color: #86d28a; }\n@keyframes tf-ping {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0.25; }\n}\n@keyframes tf-blink {\n  50% { opacity: 0; }\n}\n\n/* Opt-in \"video palette\" regardless of Grafana theme: class=\"tf tf-video\" */\n.tf-video { color: #c9ced6; background: #0f1218; }\n",
+        "externalStyles": [],
+        "contentPartials": [],
+        "editors": [
+          "helpers",
+          "afterRender",
+          "styles"
+        ],
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "wrap": true,
+        "status": ""
+      },
+      "id": 36
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 import Handlebars from 'handlebars';
 import tf from 'tuiflow-core';
-import beforeSource from '../../grafana/business-text/before.js';
-import afterSource from '../../grafana/business-text/after.js';
-import flowSource from '../../grafana/business-text/content.hbs';
+import helpers from 'tuiflow-helpers';
+import dom from 'tuiflow-dom';
+import flowSource from 'tuiflow-flow.hbs';
 import { TuiflowView } from './types';
 
 const CELL_W = 7.8;
@@ -38,17 +38,11 @@ function helperCall(view: TuiflowView, cols: number, rows: number): string {
   }
 }
 
-/** The Business Text script is a `return import().then(() => { ... })` wrapper. */
-function helperBody(source: string): string {
-  const marker = '.then(() => {';
-  const start = source.indexOf(marker);
-  if (start < 0) {
-    throw new Error('tuiflow before.js wrapper not found');
-  }
-  return source.slice(start + marker.length).replace(/\}\);\s*$/, '');
+interface FrameLike {
+  fields?: Array<{ name: string; values?: unknown; config?: { displayName?: string } }>;
 }
 
-function valuesOf(field: { values?: { toArray?: () => unknown[] } | unknown[] }): unknown[] {
+function valuesOf(field: { values?: unknown }): unknown[] {
   const v = field.values;
   if (v && typeof (v as { toArray?: () => unknown[] }).toArray === 'function') {
     return (v as { toArray: () => unknown[] }).toArray();
@@ -56,8 +50,8 @@ function valuesOf(field: { values?: { toArray?: () => unknown[] } | unknown[] })
   return Array.isArray(v) ? v : [];
 }
 
-function framesToRows(series: Array<{ fields?: Array<{ name: string; values?: unknown; config?: { displayName?: string } }> }>) {
-  return (series || []).map((frame) => {
+function framesToRows(series: unknown[]) {
+  return (series as FrameLike[]).map((frame) => {
     const fields = frame.fields || [];
     const n = fields.reduce((m, f) => Math.max(m, valuesOf(f).length), 0);
     const rows = [];
@@ -84,9 +78,7 @@ export function renderTuiflow(
   height: number
 ): string {
   const hb = Handlebars.create();
-  const body = helperBody(beforeSource);
-  const fakeWindow = { tuiflow: tf };
-  new Function('context', 'window', body)({ handlebars: hb, panelData }, fakeWindow);
+  helpers.register(hb, tf, { panelData });
   const { cols, rows } = cellSize(width, height);
   if (view.dims === 'flow') {
     return hb.compile(flowSource)({ data: framesToRows((panelData && panelData.series) || []) });
@@ -96,7 +88,5 @@ export function renderTuiflow(
 }
 
 export function startAnimation(root: HTMLElement, series: unknown[]): () => void {
-  const fakeWindow = { tuiflow: tf };
-  const stop = new Function('context', 'window', afterSource).call({}, { element: root, data: series }, fakeWindow);
-  return typeof stop === 'function' ? stop : () => undefined;
+  return dom.animate(root, series, tf);
 }

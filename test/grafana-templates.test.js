@@ -1,26 +1,30 @@
-// Renders the Business Text sources (grafana/business-text/*) the way the
-// panel does: helpers via `new Function('context', code)`, then Handlebars
-// compile with `{ data }`. Catches template typos and width drift without a
-// running Grafana. Requires the `handlebars` devDependency (npm install).
+// Renders the Business Text adapter (grafana/business-text/*) the way the
+// panel does: before.js via `new Function('context', code)`, which registers
+// the src/tuiflow-helpers.js helpers, then Handlebars compile with `{ data }`.
+// Catches template typos and width drift without a running Grafana. Requires
+// the `handlebars` devDependency (npm install).
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 const hb = require("handlebars");
 
+// What the three /public/tuiflow*.js modules leave on window in a browser.
 globalThis.window = globalThis;
 globalThis.tuiflow = require("../src/tuiflow.js");
+globalThis.tuiflowHelpers = require("../src/tuiflow-helpers.js");
+globalThis.tuiflowDom = require("../src/tuiflow-dom.js");
 
-const version = require("../package.json").version;
 // Same substitution the build scripts apply, so "in sync" checks compare like with like.
-const src = (f) => fs.readFileSync(path.join(__dirname, "..", "grafana", "business-text", f), "utf8").replace(/__TF_VERSION__/g, version);
+const { read: src } = require("../grafana/business-text/sources");
 const width = (s) => Array.from(s).length;
 const strip = (html) => html.replace(/<[^>]+>/g, "");
 
-// The panel loads /public/tuiflow.js with a dynamic import; here the UMD is
-// already required above, so the import becomes a resolved promise.
-const helpers = src("before.js").replace(/import\("\/public\/tuiflow\.js[^"]*"\)/, "Promise.resolve()");
-assert.notEqual(helpers, src("before.js"), "import() statement was found and stubbed");
+// The adapter loads the modules with dynamic imports; they are already
+// required above, so each import becomes a resolved promise.
+const helpers = src("before.js").replace(/import\("\/public\/tuiflow[^"]*"\)/g, "Promise.resolve()");
+assert.notEqual(helpers, src("before.js"), "import() statements were found and stubbed");
+assert.equal((src("before.js").match(/import\(/g) || []).length, 3, "adapter loads core, helpers and dom");
 
 const series = (alias, base, n = 120) =>
   Array.from({ length: n }, (_, i) => ({ time: i, [alias]: base + Math.sin(i / 9) * base * 0.4 }));
@@ -149,7 +153,9 @@ test("tfBarChart / tfColumns / tfPie render a categorical frame", async () => {
   assert.equal(cols.length, 7);
   assert.match(cols[cols.length - 1], /api-/);
   const pie = await renderWith([catFrame], "{{{tfPie 4 0}}}");
-  assert.match(pie, /[\u2800-\u28ff]/);
+  assert.match(pie, /[▀▄█]/);
+  assert.equal(/[\u2800-\u28ff]/.test(strip(pie)), false);
+  assert.match(pie, /class="tf-s\d tf-bg\d">[\u2580-\u259f]/);
   assert.match(strip(pie), /■ api-gateway\s+54%\s+812/);
 });
 
@@ -227,7 +233,9 @@ test("tfLogs / tfNodeGraph / tfTraces understand their Grafana frame shapes", as
     { name: "source", type: "string", values: ["a", "b"], config: {} },
     { name: "target", type: "string", values: ["b", "c"], config: {} },
   ] };
-  const ng = strip(await renderWith([nodes, edges], "{{{tfNodeGraph}}}"));
+  const ngHtml = await renderWith([nodes, edges], "{{{tfNodeGraph}}}");
+  assert.doesNotMatch(ngHtml, /<span class="tf-edge">\s*<\/span>/, "no blank .tf-edge: tuiflow-dom would animate it as the flow edge");
+  const ng = strip(ngHtml);
   assert.match(ng, /┌ ingress|ingress/);
   assert.match(ng, /ingress ──▶ api/);
   assert.match(ng, /api ──▶ db/);
@@ -253,6 +261,33 @@ test("tfAlertList / tfDashboardList emit async placeholders", async () => {
   const html = await renderWith([], "{{{tfAlertList 5}}}{{{tfDashboardList 7}}}");
   assert.match(html, /class="tf-async" data-tf="alerts" data-max="5"/);
   assert.match(html, /data-tf="dashboards" data-max="7"/);
+});
+
+test("tfServiceFlow draws the canvas diagram as boxes and packets", async () => {
+  const flowFrame = {
+    name: "flow",
+    length: 6,
+    fields: [
+      { name: "service", type: "string", values: ["ingress", "api-gateway", "orders", "payments", "shop", "postgres"], config: {} },
+      { name: "rps", type: "number", values: [128, 340, 96, 74, 41, 55], config: {} },
+      { name: "err", type: "number", values: [1.2, 0.4, 0.2, 1.8, 0.1, 0.3], config: {} },
+    ],
+  };
+  await new Function("context", helpers)({ handlebars: hb, panelData: { series: [flowFrame] } });
+  const html = hb.compile("{{{tfServiceFlow}}}")({ data: [] });
+  const text = strip(html);
+  ["ingress", "api-gateway", "orders", "payments", "shop", "postgres"].forEach((name) => assert.match(text, new RegExp(name)));
+  assert.match(text, /┌/);
+  assert.match(text, /┆/);
+  assert.match(text, /\.o@/);
+  assert.equal((html.match(/class="tf-packet/g) || []).length, 9, "3 horizontal links + 2 vertical links of 3 cells");
+  assert.match(html, /data-dir="up"/);
+  assert.match(html, /data-dir="v"/);
+  // the orders box sits in column 24; its indentation must survive the
+  // panel's markdown step, which trims bare leading spaces on later lines
+  const lines = html.split("\n");
+  assert.match(lines[1], /^<span> {24}<\/span><span class="tf-border">┆<\/span> rps/);
+  assert.equal(width(strip(lines[1]).replace(/\s+$/, "")), width(strip(lines[0]).replace(/\s+$/, "")), "box side under box top");
 });
 
 test("tfFlame / tfCanvas / tfGeomap / tfText / tfNews / tfAnnotations cover the remaining official panels", async () => {
@@ -413,4 +448,46 @@ test("library panels match the catalogue and both dashboards cover all of them",
   assert.equal(stock.length, tuis.length);
   assert.equal(stock.length, CATALOG.filter((e) => e.stock !== null).length);
   stock.forEach((s, i) => assert.deepEqual(s.targets, tuis[i].targets, s.title + " shares targets with its TUI twin"));
+
+  const k8s = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-k8s.json"), "utf8"));
+  assert.equal(k8s.uid, "tuiflow-k8s");
+  assert.deepEqual(
+    k8s.panels.filter((p) => p.type === "row").map((p) => p.title),
+    [
+      "Node Resource Overview：Selected Nodes:【$Node】",
+      "Pod Resource Overview：SelectedPod:【$Pod】",
+      "Microservices (Container Name) Resource Overview：Selected Microservices:【$Container】",
+    ]
+  );
+  assert.deepEqual(k8s.templating.list.map((v) => v.name), ["Node", "NameSpace", "Container", "Pod"]);
+  const k8sViz = k8s.panels.filter((p) => p.type === "marcusolsson-dynamictext-panel");
+  assert.equal(k8sViz.length, 33);
+  const helperFor = (title) => k8sViz.find((p) => p.title === title).options.content;
+  assert.match(helperFor("Node Memory Ratio"), /tfBarGauge/);
+  assert.match(helperFor("Cluster summary"), /tfStat/);
+  assert.match(helperFor("Namespace Resource Statistics"), /tfTable/);
+  assert.match(helperFor("Memory Usage【$Node】"), /tfTimeseries/);
+  k8sViz.forEach((p) => {
+    assert.equal(p.options.helpers, src("before.js"), p.title);
+    assert.equal(p.datasource.uid, "testdata", p.title);
+  });
+
+  const cluster = JSON.parse(fs.readFileSync(path.join(dashDir, "tuiflow-k8s-cluster.json"), "utf8"));
+  assert.equal(cluster.uid, "tuiflow-k8s-cluster");
+  assert.deepEqual(
+    cluster.panels.filter((p) => p.type === "row").map((p) => p.title),
+    ["Cluster Health", "Deployments", "Node", "Pods", "Containers", "Jobs"]
+  );
+  assert.deepEqual(cluster.templating.list.map((v) => v.name), ["node", "namespace"]);
+  const clusterViz = cluster.panels.filter((p) => p.type === "marcusolsson-dynamictext-panel");
+  assert.equal(clusterViz.length, 29);
+  const clusterHelper = (title) => clusterViz.find((p) => p.title === title).options.content;
+  assert.match(clusterHelper("Cluster Pod Usage"), /tfStat/);
+  assert.match(clusterHelper("Cluster CPU Capacity"), /tfTimeseries/);
+  assert.match(clusterHelper("Deployment Replicas - Up To Date"), /tfTable/);
+  assert.equal(clusterViz.find((p) => p.title === "Jobs Active").description.includes("kube_job_status_active"), true);
+  clusterViz.forEach((p) => {
+    assert.equal(p.options.helpers, src("before.js"), p.title);
+    assert.equal(p.datasource.uid, "testdata", p.title);
+  });
 });

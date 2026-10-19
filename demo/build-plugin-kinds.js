@@ -4,11 +4,11 @@ const fs = require("fs");
 const path = require("path");
 const hb = require("handlebars");
 const tf = require("../src/tuiflow.js");
+const helpers = require("../src/tuiflow-helpers.js");
 const { KINDS, renderTuiflow } = require("../yangkangsung-tuiflow-panel/src/renderTuiflow.js");
 const catalog = require("../grafana/catalog.js");
 
 const root = path.join(__dirname, "..");
-const before = fs.readFileSync(path.join(root, "grafana/business-text/before.js"), "utf8");
 
 const t0 = Date.UTC(2026, 9, 6, 9, 0, 0);
 const num = (text) => (v) => ({ text: typeof text === "function" ? text(v) : text });
@@ -217,7 +217,7 @@ const blurb = {
   gauge: "Meter against the field min and max.",
   bargauge: "Block bar and last value.",
   table: "First frame as a monospace table.",
-  pie: "Braille disc and a percent legend.",
+  pie: "Block-glyph disc and a percent legend.",
   stateTimeline: "One row of threshold-coloured runs per series.",
   statusHistory: "One block per sample.",
   heatmap: "Value buckets over time, shaded by density.",
@@ -292,25 +292,24 @@ function fillAsync(html, kind) {
   return html;
 }
 
-(async () => {
-  const cards = [];
-  for (const kind of KINDS) {
-    const [cols, rows] = size[kind.value];
-    if (!frames[kind.value]) throw new Error("missing frames for " + kind.value);
-    let html = await renderTuiflow({
-      tf,
-      Handlebars: hb,
-      beforeSource: before,
-      series: frames[kind.value],
-      kind: kind.value,
-      cols,
-      rows,
-    });
-    html = fillAsync(html, kind.value);
-    const text = html.replace(/<[^>]+>/g, "");
-    if (/no data|loading /.test(text)) throw new Error(kind.value + " rendered empty: " + text.slice(0, 120));
-    cards.push({ kind, html, wide: wide.has(kind.value) });
-  }
+/** One kind drawn from its sample frames at the demo size: { html, text }. */
+function renderKind(kind) {
+  const [cols, rows] = size[kind];
+  if (!frames[kind]) throw new Error("missing frames for " + kind);
+  const html = fillAsync(renderTuiflow({ tf, helpers, Handlebars: hb, series: frames[kind], kind, cols, rows }), kind);
+  const text = html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+  if (/no data|loading /.test(text)) throw new Error(kind + " rendered empty: " + text.slice(0, 120));
+  return { html, text };
+}
+
+function main() {
+  const cards = KINDS.map((kind) => ({ kind, html: renderKind(kind.value).html, wide: wide.has(kind.value) }));
 
   const nav = KINDS.map((k) => '<a href="#k-' + k.value + '">' + tf.escapeHtml(k.label) + "</a>").join("");
   const body = cards
@@ -337,7 +336,7 @@ function fillAsync(html, kind) {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>tuiflow · all panels</title>
-<link rel="stylesheet" href="../grafana/business-text/styles.css" />
+<link rel="stylesheet" href="../src/tuiflow.css" />
 <style>
   @font-face { font-family: "JetBrains Mono"; src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
   html, body { margin: 0; background: #111217; color: #c9ced6; }
@@ -433,7 +432,15 @@ ${body}
 `;
   fs.writeFileSync(path.join(__dirname, "plugin-kinds.html"), page);
   console.log("wrote demo/plugin-kinds.html", cards.length, "panels", page.length, "bytes");
-})().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+}
+
+module.exports = { KINDS, blurb, renderKind };
+
+if (require.main === module) {
+  try {
+    main();
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+}

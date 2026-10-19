@@ -1,21 +1,22 @@
 # grafana/ — TUI look from a Business Text panel
 
-Dashboards that run on synthetic data (Grafana's built-in TestData), and the editable sources of those panels.
+Dashboards that run on synthetic data (Grafana's built-in TestData), and the Business Text adapter that puts the tuiflow modules into those panels.
+
+This folder is the **Business Text delivery** of tuiflow. The drawing code is not here: `src/tuiflow.js` (core), `src/tuiflow-helpers.js` (the `tf*` helpers), `src/tuiflow-dom.js` (animation), `src/tuiflow.css`, `src/flow.hbs`. The panel plugins (`tuiflow-tui-panel/`, `yangkangsung-tuiflow-panel/`) bundle those `src/` modules and nothing from this folder.
 
 ```
 grafana/
-├─ docker-compose.yml            Grafana 12 + provisioning + ./plugins, mounts ../src/tuiflow.js
+├─ docker-compose.yml            Grafana 12 + provisioning + ./plugins, mounts ../src/tuiflow*.js at /public/
 ├─ up.ps1                        Windows: start/stop on the WSL Docker Engine (+ WSL keep-alive)
 ├─ fetch-plugins.ps1 / .sh       Download the Business Text plugin onto the host, into ./plugins
-├─ build-dashboard.js            business-text/* → provisioning/dashboards/*.json (demo, library)
-├─ build-library.js              business-text/* → library/*.json (25 official visualizations + Flow/Columns)
+├─ build-dashboard.js            business-text/* + src/* → provisioning/dashboards/*.json (demo, gallery, k8s, canvas …)
+├─ build-library.js              business-text/* + src/* → library/*.json (25 official visualizations + Flow/Columns)
 ├─ publish-library.js            Upsert library/*.json through Grafana /api/library-elements
-├─ business-text/
-│  ├─ before.js                  Handlebars helpers: field helpers (tfBar…) + query-agnostic generics (tfTimeseries…)
-│  ├─ content.hbs                api-gateway box (All data mode, three random_walk queries)
+├─ business-text/                Business Text adapter — thin, no drawing code
+│  ├─ before.js                  "JavaScript code before content rendering": import()s /public/tuiflow*.js, calls tuiflowHelpers.register
+│  ├─ after.js                   "JavaScript code after content ready": hands the element to tuiflowDom.animate
 │  ├─ pods.hbs                   Pod table (All rows mode, csv_content query)
-│  ├─ after.js                   "JavaScript code after content ready": packet animation on the dashed edge
-│  └─ styles.css                 "Styles": font, palette, series colors (tf-s0..5)
+│  └─ sources.js                 read("before.js" | "after.js" | "pods.hbs" | "styles.css" | "content.hbs") for the build scripts
 ├─ catalog.js                    1:1 catalogue of the official visualizations (helper, sample query, stock options)
 ├─ library/                      Generated library-panel JSON (25 official + Columns + Flow)
 └─ provisioning/
@@ -42,7 +43,7 @@ npm run publish:library    # upsert the catalogue into local Grafana (admin/admi
 | TUI Bar chart / Columns | Bar chart | `{{{tfBarChart 36}}}` / `{{{tfColumns 9 6}}}` |
 | TUI Stat / Gauge / Bar gauge | Stat / Gauge / Bar gauge | `{{{tfStat}}}` `{{{tfGauge}}}` `{{{tfBarGauge}}}` |
 | TUI Table | Table | `{{{tfTable 40}}}` |
-| TUI Pie chart | Pie chart | `{{{tfPie 6 0}}}` — braille disc |
+| TUI Pie chart | Pie chart | `{{{tfPie 6 0}}}` — block-glyph disc; radius in rows (4 small, 6 default, 12 large), second arg > 0 = donut |
 | TUI State timeline / Status history | State timeline / Status history | `{{{tfStateTimeline}}}` `{{{tfStatusHistory}}}` |
 | TUI Heatmap / Histogram | Heatmap / Histogram | `{{{tfHeatmap}}}` `{{{tfHistogram}}}` |
 | TUI Candlestick / XY | Candlestick / XY chart | `{{{tfCandlestick}}}` `{{{tfXY}}}` |
@@ -57,12 +58,12 @@ npm run publish:library    # upsert the catalogue into local Grafana (admin/admi
 Two ways to use them:
 
 1. On any dashboard: *Add → Import from library → TUI …* → (*Unlink* if you want) → replace the TestData query with yours.
-2. Convert a panel in place: set Visualization to *Business Text* → one line of content, `{{{tfTimeseries 90 14}}}` → paste `before.js` / `styles.css` into "JavaScript code before content rendering" and "Styles". Query, variables, and time range stay as they are.
+2. Convert a panel in place: set Visualization to *Business Text* → one line of content, `{{{tfTimeseries 90 14}}}` → paste `business-text/before.js` / `business-text/after.js` / `src/tuiflow.css` into "JavaScript code before content rendering", "JavaScript code after content ready" and "Styles". Query, variables, and time range stay as they are.
 
 Numbers in parentheses are width and height in cells (tune them to the panel size). Auto-fit belongs to the custom panel plugin (see the roadmap).
 Grafana has no file provisioning for library panels, so they go in through the API (`publish-library.js`: POST when missing, PATCH with the version when present). The `tuiflow-library` dashboard only references uids, so open it after `publish:library`.
 
-`before.js` loads `import("/public/tuiflow.js?v=<package.json version>")`. The build writes the version query. After a core change that is still cached, bump the `package.json` version and run `npm run build && npm run publish:library`.
+`before.js` loads `/public/tuiflow.js`, `/public/tuiflow-helpers.js` and `/public/tuiflow-dom.js` with `?v=<package.json version>`. The build writes the version query. After a change to `src/` that is still cached, bump the `package.json` version and run `npm run build && npm run publish:library`.
 
 ## Run
 
@@ -94,7 +95,7 @@ cd grafana && docker compose up -d
 ### Attach to an existing Grafana, without Docker
 
 1. Install `marcusolsson-dynamictext-panel` (Business Text 6.x, Grafana 11+).
-2. Copy `src/tuiflow.js` into Grafana's `public/` folder so it is served at `/public/tuiflow.js` (`before.js` `import()`s it).
+2. Copy `src/tuiflow.js`, `src/tuiflow-helpers.js` and `src/tuiflow-dom.js` into Grafana's `public/` folder so they are served at `/public/tuiflow*.js` (`before.js` `import()`s them).
 3. Import `provisioning/dashboards/tuiflow-demo.json`. The datasource points at TestData (uid `testdata`), so remap it on the import screen or replace the queries with Prometheus.
 
 ## Switch to Prometheus

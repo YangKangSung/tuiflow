@@ -1,20 +1,23 @@
 {
   "name": "tuiflow",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "TUI-style animated dashboards (box drawing, block bars, flowing packets) for Grafana, VS Code and presentations",
   "main": "src/tuiflow.js",
   "scripts": {
     "serve": "python -m http.server 8787",
     "demo:kinds": "node demo/build-plugin-kinds.js",
+    "gallery": "node docs/build-gallery.js",
+    "gallery:shots": "node docs/capture-gallery.js",
     "build:dashboard": "node grafana/build-dashboard.js",
     "build:library": "node grafana/build-library.js",
     "build": "npm run build:dashboard && npm run build:library",
     "plugin:pack": "npm --prefix tuiflow-tui-panel run pack",
     "publish:library": "node grafana/publish-library.js",
-    "test": "node test/core.test.js && node test/grafana-templates.test.js && node test/plugin-render.test.js"
+    "test": "node test/core.test.js && node test/grafana-templates.test.js && node test/plugin-render.test.js && node test/echarts-adapter.test.js && node test/plugin-boundary.test.js"
   },
   "devDependencies": {
+    "echarts": "^6.1.0",
     "handlebars": "^4.7.8"
   },
   "engines": {

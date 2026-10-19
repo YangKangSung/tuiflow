@@ -4,7 +4,7 @@ import { css } from '@emotion/css';
 import { TuiflowOptions, VIEWS } from '../types';
 import { applyTuiflowFieldConfig } from '../applyFieldConfig';
 import { renderTuiflow, startAnimation } from '../renderTuiflow';
-import '../../../grafana/business-text/styles.css';
+import '../../../src/tuiflow.css';
 
 interface Props extends PanelProps<TuiflowOptions> {}
 

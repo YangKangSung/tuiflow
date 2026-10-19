@@ -13,9 +13,9 @@ const fs = require("fs");
 const path = require("path");
 const { CATALOG, TESTDATA, usage } = require("./catalog");
 
+const { read } = require("./business-text/sources");
+
 const here = __dirname;
-const version = require("../package.json").version;
-const read = (f) => fs.readFileSync(path.join(here, "business-text", f), "utf8").replace(/__TF_VERSION__/g, version);
 
 const helpers = read("before.js");
 const afterRender = read("after.js");
