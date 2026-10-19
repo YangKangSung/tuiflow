@@ -77,13 +77,16 @@
     "@grafana/runtime": "13.1.0",
     "@grafana/ui": "13.1.0",
     "@grafana/schema": "13.1.0",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.10",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
   },
   "packageManager": "npm@10.9.7",
   "overrides": {
     "basic-ftp": "6.2.1",
-    "braces": "file:third_party/braces"
+    "braces": "file:third_party/braces",
+    "dompurify": "^3.4.17",
+    "js-cookie": "^3.0.8",
+    "moment": "^2.31.0"
   }
 }
