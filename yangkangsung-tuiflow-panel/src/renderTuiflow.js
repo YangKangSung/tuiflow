@@ -103,9 +103,10 @@ function renderTuiflow({ tf, helpers, Handlebars, series, kind, cols, rows }) {
   return '<pre class="tf">' + htmlOf(callKind(hb.helpers, kind, cols, rows)) + '</pre>';
 }
 
-function startAfter(dom, tf, element) {
+function startAfter(dom, tf, element, opts) {
   // Packet animation, flame scan, async alert / dashboard / annotation lists.
-  const cleanup = dom.animate(element, [], tf);
+  // opts.request: how to call the Grafana HTTP API (the panel passes backendSrv).
+  const cleanup = dom.animate(element, [], tf, opts || {});
   return typeof cleanup === 'function' ? cleanup : function noop() {};
 }
 

@@ -7,11 +7,13 @@
  * 2. Walks .tf-flame rows so the hottest stack is scanned.
  * 3. Fills async placeholders (alerts / dashboards / annotations) from the
  *    Grafana HTTP API. Only panels that emit those placeholders make requests.
+ *    Pass opts.request (getBackendSrv().get in a plugin) to route them
+ *    through Grafana's backend service instead of a bare fetch.
  *
  * UMD: CommonJS require(), bundler import, or dynamic import() (then it
  * registers itself as globalThis.tuiflowDom).
  *
- *   const stop = tuiflowDom.animate(element, rows, tuiflow);  // call stop() before re-render
+ *   const stop = tuiflowDom.animate(element, rows, tuiflow, { request, linkBase });  // call stop() before re-render
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) {
@@ -26,15 +28,22 @@
    * root: the element that contains the rendered <pre class="tf">
    * data: the panel's rows (packet speed follows the last `rps`), may be []
    * tf:   the tuiflow core module
+   * opts: {
+   *   request(path) → Promise<json>   how to call the Grafana HTTP API. A panel
+   *                                   plugin passes getBackendSrv().get; without
+   *                                   it, same-origin fetch is used.
+   *   linkBase                        prefix for dashboard links (appSubUrl)
+   * }
    * Returns a cleanup function that stops every timer and pending fill.
    */
-  function animate(root, data, tf) {
+  function animate(root, data, tf, opts) {
     if (!tf || !root) {
       return function noop() {};
     }
+    opts = opts || {};
     const cleanups = [];
     const esc = tf.escapeHtml;
-    const span = (text, cls, style) => "<span" + (cls ? ' class="' + cls + '"' : "") + (style ? ' style="' + style + '"' : "") + ">" + esc(text) + "</span>";
+    const span = (text, cls) => "<span" + (cls ? ' class="' + cls + '"' : "") + ">" + esc(text) + "</span>";
 
     // ---- packet animation ------------------------------------------------------
     const frames = Array.isArray(data) ? data : [];
@@ -72,8 +81,10 @@
 
     // ---- async lists -----------------------------------------------------------
     const win = typeof window !== "undefined" ? window : {};
-    const base = (win.grafanaBootData && win.grafanaBootData.settings && win.grafanaBootData.settings.appSubUrl) || "";
-    const api = (p) => fetch(base + p, { headers: { Accept: "application/json" }, credentials: "same-origin" }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status + " " + r.statusText))));
+    const bootBase = (win.grafanaBootData && win.grafanaBootData.settings && win.grafanaBootData.settings.appSubUrl) || "";
+    const base = opts.linkBase !== undefined ? opts.linkBase : bootBase;
+    const fetchApi = (p) => fetch(bootBase + p, { headers: { Accept: "application/json" }, credentials: "same-origin" }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status + " " + r.statusText))));
+    const api = (p) => Promise.resolve().then(() => (typeof opts.request === "function" ? opts.request(p) : fetchApi(p)));
     let alive = true;
     cleanups.push(() => { alive = false; });
 
@@ -101,7 +112,7 @@
           if (!items.length) return render(span("no dashboards", "tf-dim"));
           const w = Math.min(40, Math.max(...items.map((d) => d.title.length)));
           render(items.map((d) =>
-            '<a href="' + esc(base + d.url) + '" style="color:inherit;text-decoration:none">' + span("▸ ", "tf-edge") + esc(tf.padRight(d.title, w)) + "</a>  " +
+            '<a class="tf-link" href="' + esc(base + d.url) + '">' + span("▸ ", "tf-edge") + esc(tf.padRight(d.title, w)) + "</a>  " +
             span(tf.padRight(d.folderTitle || "General", 16), "tf-dim") + " " + span((d.tags || []).map((t) => "#" + t).join(" "), "tf-s1")
           ).join("\n"));
         }).catch(fail);

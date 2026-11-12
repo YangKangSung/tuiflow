@@ -115,6 +115,22 @@ test("tfStat / tfBarGauge / tfGauge render one coloured line per series", async 
   const stat = await renderGeneric("{{{tfStat 20}}}");
   assert.equal(strip(stat).split("\n").length, 3);
   assert.match(stat, /style="color:(red|orange|green)"/, "threshold colour from field display");
+  const injected = {
+    name: "bad",
+    length: 1,
+    fields: [{ name: "Value", type: "number", values: [1], config: {}, display: () => ({ text: "1", color: 'red" onmouseover="alert(1)' }) }],
+  };
+  const hostile = await renderWith([injected], "{{{tfStat 8}}}");
+  assert.doesNotMatch(hostile, /onmouseover/);
+  assert.doesNotMatch(hostile, /style="/); // a colour that is not a colour drops the attribute
+  const quoted = {
+    name: "q",
+    length: 1,
+    fields: [{ name: "Value", type: "number", values: [1], config: {}, display: () => ({ text: '1"2', color: "rgb(1, 2, 3)" }) }],
+  };
+  const ok = await renderWith([quoted], "{{{tfStat 8}}}");
+  assert.match(ok, /style="color:rgb\(1, 2, 3\)"/);
+  assert.match(ok, /1&quot;2/);
   const bar = await renderGeneric("{{{tfBarGauge 20}}}");
   const barLines = strip(bar).split("\n");
   assert.equal(barLines.length, 3);
@@ -349,6 +365,9 @@ test("tfFlame / tfCanvas / tfGeomap / tfText / tfNews / tfAnnotations cover the 
   const nw = strip(await renderWith([news], "{{{tfNews 10}}}"));
   assert.match(nw, /Alerting GA/);
   assert.ok(nw.indexOf("Alerting GA") < nw.indexOf("1.32 notes"), "newest first");
+  const noQuery = strip(await renderWith([], "{{{tfNews 10}}}"));
+  assert.match(noQuery, /no news frame/);
+  assert.doesNotMatch(noQuery, /tf-async|loading/);
 
   const anno = {
     name: "anno",

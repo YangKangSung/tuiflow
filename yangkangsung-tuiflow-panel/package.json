@@ -1,6 +1,6 @@
 {
   "name": "yangkangsung-tuiflow-panel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "sync-vendor": "node scripts/sync-vendor.js",
     "prebuild": "node scripts/sync-vendor.js",

@@ -4,8 +4,13 @@ export interface TuiflowHelpers {
   register: (hb: unknown, tf: object, context: { panelData?: { series?: unknown[] } }) => void;
 }
 
+export interface TuiflowDomOptions {
+  request?: (path: string) => Promise<unknown>;
+  linkBase?: string;
+}
+
 export interface TuiflowDom {
-  animate: (root: HTMLElement, data: unknown[], tf: object) => () => void;
+  animate: (root: HTMLElement, data: unknown[], tf: object, opts?: TuiflowDomOptions) => () => void;
 }
 
 export function renderTuiflow(opts: {
@@ -18,4 +23,4 @@ export function renderTuiflow(opts: {
   rows: number;
 }): string;
 
-export function startAfter(dom: TuiflowDom, tf: object, element: HTMLElement): () => void;
+export function startAfter(dom: TuiflowDom, tf: object, element: HTMLElement, opts?: TuiflowDomOptions): () => void;

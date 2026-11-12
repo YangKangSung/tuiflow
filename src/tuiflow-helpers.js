@@ -115,8 +115,13 @@
       });
       return out;
     };
-    const colorSpan = (text, color, cls) =>
-      '<span' + (cls ? ' class="' + cls + '"' : "") + (color ? ' style="color:' + color + '"' : "") + ">" + tf.escapeHtml(text) + "</span>";
+    // `color` is a field display colour (threshold / override / colour scheme).
+    // It is reduced to a plain CSS colour and attribute-escaped before it goes
+    // into the style attribute; anything else drops the inline colour.
+    const colorSpan = (text, color, cls) => {
+      const c = tf.safeColor(color);
+      return "<span" + (cls ? ' class="' + cls + '"' : "") + (c ? ' style="color:' + tf.escapeHtml(c) + '"' : "") + ">" + tf.escapeHtml(text) + "</span>";
+    };
     const nameWidth = (series, cap) => Math.min(cap || 24, Math.max(4, ...series.map((s) => s.name.length)));
     const rangeOf = (series) => {
       const cfgMin = series.map((s) => (s.field.config || {}).min).find((v) => v !== undefined && v !== null);
@@ -833,11 +838,13 @@
       );
     });
 
-    // {{{tfNews max}}} — time · source · title, newest first
+    // {{{tfNews max}}} — time · source · title, newest first. Draws the panel
+    // query only (an RSS → frame datasource such as Infinity); there is no
+    // network fallback, so without a frame it says what it needs.
     hb.registerHelper("tfNews", (max) => {
       const frame = firstFrame();
       const limit = num(max, 12);
-      if (!frame) return safe('<span class="tf-async" data-tf="news" data-max="' + limit + '">loading news…</span>');
+      if (!frame) return safe('<span class="tf-dim">no news frame — attach a query with title (and optionally time, source) fields</span>');
       const titlef = frame.fields.find((f) => /^(title|headline|name)$/i.test(f.name)) || fieldsOfType(frame, "string")[0];
       if (!titlef) return noData();
       const srcf = frame.fields.find((f) => /^(source|feed|site)$/i.test(f.name));

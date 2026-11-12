@@ -54,6 +54,19 @@ test("Screen renders text and colour-classed HTML with escaping", () => {
   assert.equal(s.toHTML().split("\n")[0], '<span class="c-x">&lt;b&gt;</span>&amp;ok      ');
 });
 
+test("escapeHtml covers attribute delimiters and safeColor rejects anything that is not a colour", () => {
+  assert.equal(tf.escapeHtml('a"b\'c'), "a&quot;b&#39;c");
+  assert.equal(tf.safeColor("#e06c75"), "#e06c75");
+  assert.equal(tf.safeColor("rgb(1, 2, 3)"), "rgb(1, 2, 3)");
+  assert.equal(tf.safeColor("hsla(120, 50%, 50%, 0.5)"), "hsla(120, 50%, 50%, 0.5)");
+  assert.equal(tf.safeColor("darkred"), "darkred");
+  assert.equal(tf.safeColor('red" onmouseover="alert(1)'), "");
+  assert.equal(tf.safeColor("red;background:url(//x)"), "");
+  assert.equal(tf.safeColor("var(--x)"), "");
+  assert.equal(tf.safeColor(""), "");
+  assert.equal(tf.safeColor(undefined), "");
+});
+
 test("flame indents children and keeps bar width = avail", () => {
   const fl = tf.flame(
     [

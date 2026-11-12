@@ -63,8 +63,26 @@
     return x < 0 || !Number.isFinite(x) ? 0 : x > 1 ? 1 : x;
   }
 
+  /** Escapes for text nodes AND double/single-quoted attribute values. */
   function escapeHtml(s) {
-    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  /**
+   * A CSS colour that is safe to place in a style attribute, or "" if the
+   * value is not a plain colour (hex, rgb()/rgba()/hsl()/hsla() with numeric
+   * arguments, or a bare colour keyword). Field display colours come from
+   * dashboard JSON, so they are treated as untrusted input.
+   */
+  const SAFE_COLOR = /^(#[0-9a-f]{3,8}|(rgb|hsl)a?\(\s*[\d.%\s,/-]+\s*\)|[a-z]{1,30})$/i;
+  function safeColor(c) {
+    const s = String(c === undefined || c === null ? "" : c).trim();
+    return SAFE_COLOR.test(s) ? s : "";
   }
 
   /** Compact number: 1234 → "1.2k", 0.123 → "0.12". */
@@ -961,6 +979,7 @@
     padRight: padRight,
     center: center,
     escapeHtml: escapeHtml,
+    safeColor: safeColor,
     formatNumber: formatNumber,
     formatTime: formatTime,
     bar: bar,
